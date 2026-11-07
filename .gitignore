@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+dist-ssr/
+
+# Vite
+.vite/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Testing
+coverage/
+
+# Editor directories and files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+.cache/

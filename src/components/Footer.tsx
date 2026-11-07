@@ -1,0 +1,5 @@
+import { Coffee, Instagram, Linkedin, Send } from "lucide-react";
+
+export default function Footer() {
+  return <footer className="footer"><div className="container"><div className="footer-main"><div className="footer-brand"><a className="brand brand-light" href="#"><span className="brand-mark"><Coffee size={19} /></span><span>نام برند</span></a><p>راهکاری یکپارچه برای تأمین مواد اولیه و مدیریت حرفه‌ای کافه‌ها.</p><div className="socials"><a href="#" aria-label="اینستاگرام"><Instagram size={17} /></a><a href="#" aria-label="لینکدین"><Linkedin size={17} /></a><a href="#" aria-label="تلگرام"><Send size={17} /></a></div></div><div><b>محصول</b><a href="#marketplace">بازار تأمین</a><a href="#management">مدیریت کافه</a><a href="#instant-cost">مدیریت هزینه</a></div><div><b>همکاری</b><a href="#contact">برای کافه‌ها</a><a href="#suppliers">برای تأمین‌کنندگان</a><a href="#faq">سؤالات متداول</a></div><div><b>درباره ما</b><a href="#contact">تماس با ما</a><a href="#faq">حریم خصوصی</a><a href="#faq">قوانین استفاده</a></div></div><div className="footer-bottom"><span>© تمامی حقوق محفوظ است.</span><span>ساخته‌شده برای مدیریت بهتر کافه‌ها</span></div></div></footer>;
+}
