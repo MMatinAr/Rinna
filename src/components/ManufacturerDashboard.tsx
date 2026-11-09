@@ -184,7 +184,7 @@ export default function ManufacturerDashboard() {
 
           {section === "distributors" && <section className="manufacturer-panel">
             <div className="panel-heading"><div><h2>اعضای شبکه توزیع</h2><p>هر پخش‌کننده می‌تواند در چند منطقه و چند شبکه مجاز فعالیت کند.</p></div><label className="manufacturer-search"><Search size={16} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="جست‌وجوی پخش‌کننده..." /></label></div>
-            <DistributorTable rows={data.distributors} />
+            <DistributorTable rows={filteredDistributors} />
           </section>}
 
           {section === "regions" && <section className="manufacturer-panel">
