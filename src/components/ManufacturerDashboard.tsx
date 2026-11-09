@@ -33,6 +33,11 @@ export default function ManufacturerDashboard() {
     [data.products, query],
   );
 
+  const filteredDistributors = useMemo(
+    () => data.distributors.filter((d) => d.name.includes(query) || d.area.includes(query)),
+    [data.distributors, query],
+  );
+
   const announce = (message: string) => {
     setNotice(message);
     window.setTimeout(() => setNotice(""), 3200);
