@@ -290,3 +290,26 @@ p { color: var(--muted); line-height: 2.15; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
+
+
+/* Marketplace product carousel */
+.product-carousel { position: relative; }
+.product-carousel .product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.carousel-controls { display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 27px; }
+.carousel-arrow { width: 38px; height: 38px; display: grid; place-items: center; border: 1px solid #ded3c4; border-radius: 50%; background: #fffdfa; color: var(--forest); transition: .2s ease; }
+.carousel-arrow:hover { color: white; background: var(--forest); border-color: var(--forest); }
+.carousel-dots { display: flex; align-items: center; gap: 7px; }
+.carousel-dot { width: 7px; height: 7px; padding: 0; border: 0; border-radius: 20px; background: #d6cabb; transition: width .25s ease, background .25s ease; }
+.carousel-dot.active { width: 23px; background: var(--copper); }
+.carousel-count { min-width: 32px; color: var(--muted); font-size: 10px; text-align: center; font-variant-numeric: tabular-nums; }
+.product-empty { min-height: 180px; display: grid; place-items: center; border: 1px dashed #d9cdbd; border-radius: 13px; color: var(--muted); font-size: 13px; }
+@media (max-width: 980px) {
+  .product-carousel .product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 720px) {
+  .product-carousel .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .carousel-controls { margin-top: 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .carousel-arrow, .carousel-dot { transition: none; }
+}
