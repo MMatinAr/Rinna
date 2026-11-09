@@ -2,14 +2,14 @@
 
 This document is the frontend/backend integration contract for the RINNA manufacturer workspace.
 
-Base URL: `/api/v1` (configurable in the frontend with `VITE_API_BASE_URL`).
+Base URL: `/api/v1` (configurable in the frontend with `VITE_API_BASE_URL`).\n\nThe manufacturer dashboard uses a switchable data adapter. By default it runs on local mock data. Set `VITE_MANUFACTURER_DATA_MODE=api` to enable the RTK Query endpoints; set it to `mock` (or omit it) to keep using mock data. See `.env.example`.
 
 All endpoints are authenticated and scoped to the signed-in manufacturer's permitted brands and distribution network. The frontend does not send a manufacturer ID to select another tenant.
 
 ## General conventions
 
 - JSON request and response bodies.
-- Timestamps use ISO 8601 with timezone.
+- Timestamps use ISO 8601 with timezone. Price-list effective dates use the calendar-date format `YYYY-MM-DD`.
 - List endpoints return: `{ "count": number, "next": string | null, "previous": string | null, "results": [] }`.
 - List endpoints support `search`, `page`, and `page_size`; apply `status` where relevant.
 - Prices are integer minor units and include an explicit currency (`IRR` or `IRT`). The backend and frontend must agree on the unit before production.
@@ -55,7 +55,7 @@ All endpoints are authenticated and scoped to the signed-in manufacturer's permi
 
 ```json
 {
-  "effective_from": "2026-12-01T00:00:00+03:30",
+  "effective_from": "2026-12-01",
   "effective_until": null,
   "product_ids": [101, 102, 103]
 }
