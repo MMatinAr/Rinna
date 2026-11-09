@@ -30,3 +30,12 @@
 @media(max-width:1050px){.manufacturer-sidebar{width:210px;flex-basis:210px}.manufacturer-content{padding-inline:22px}.manufacturer-topbar{padding-inline:22px}.manufacturer-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){.manufacturer-shell{display:block}.manufacturer-sidebar{width:100%;min-height:auto;padding:12px 15px}.manufacturer-brand{padding:0;border:0}.manufacturer-company,.manufacturer-nav-label,.manufacturer-sidebar-bottom{display:none}.manufacturer-nav{display:flex;overflow-x:auto;margin-top:12px}.manufacturer-nav button{flex:0 0 auto;height:36px;padding:0 10px;font-size:10px}.manufacturer-topbar{height:55px;padding-inline:15px}.topbar-date{display:none}.manufacturer-content{padding:22px 14px 40px}.manufacturer-page-heading{align-items:start;gap:12px;flex-direction:column}.manufacturer-page-heading h1{font-size:20px}.manufacturer-overview-grid,.manufacturer-price-layout{grid-template-columns:1fr}.manufacturer-panel{padding:15px}.region-list{grid-template-columns:1fr}.catalog-toolbar{align-items:start;flex-direction:column}.manufacturer-search{width:100%}}
 @media(max-width:420px){.manufacturer-metrics{grid-template-columns:1fr 1fr;gap:8px}.manufacturer-metric{padding:12px;min-height:132px}.manufacturer-metric>strong{font-size:21px}.manufacturer-metric em{top:12px;left:10px}.heading-buttons{width:100%}.manufacturer-button{height:36px}}
+
+/* Manufacturer data-source states */
+.manufacturer-data-note,.manufacturer-data-error{padding:11px 14px;border-radius:7px;margin:0 0 15px;font-size:10px;line-height:1.9}
+.manufacturer-data-note{background:#eef3ff;border:1px solid #dce6ff;color:#3c5c9d}
+.manufacturer-data-note code{font-size:10px;background:#dfe8ff;padding:2px 5px;border-radius:4px;direction:ltr;display:inline-block}
+.manufacturer-data-error{background:#fff2ed;border:1px solid #f4d8cd;color:#a34e35}
+.manufacturer-chart-placeholder{font-size:10px;color:#8b97a3;padding:26px 10px;text-align:center;background:#f7f9fb;border-radius:7px;margin-top:15px}
+.manufacturer-button:disabled{opacity:.55;cursor:not-allowed}
+.table-empty{padding:22px;text-align:center;color:#8b97a3;font-size:11px}
