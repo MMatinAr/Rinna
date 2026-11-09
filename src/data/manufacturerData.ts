@@ -38,7 +38,19 @@ export type ManufacturerRegionView = {
   distributorCount: number;
 };
 
-const emptyOverview: ManufacturerOverview = {\n  active_distributors: 0,\n  approved_distributors: 0,\n  orders_today: 0,\n  active_products: 0,\n  products_needing_review: 0,\n  covered_regions: 0,\n  uncovered_regions: 0,\n  on_time_delivery_rate: 0,\n  on_time_delivery_change: 0,\n};\n\nconst mockOverview: ManufacturerOverview = {
+const emptyOverview: ManufacturerOverview = {
+  active_distributors: 0,
+  approved_distributors: 0,
+  orders_today: 0,
+  active_products: 0,
+  products_needing_review: 0,
+  covered_regions: 0,
+  uncovered_regions: 0,
+  on_time_delivery_rate: 0,
+  on_time_delivery_change: 0,
+};
+
+const mockOverview: ManufacturerOverview = {
   active_distributors: 12,
   approved_distributors: 14,
   orders_today: 298,
