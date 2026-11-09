@@ -38,7 +38,7 @@ export type ManufacturerRegionView = {
   distributorCount: number;
 };
 
-const mockOverview: ManufacturerOverview = {
+const emptyOverview: ManufacturerOverview = {\n  active_distributors: 0,\n  approved_distributors: 0,\n  orders_today: 0,\n  active_products: 0,\n  products_needing_review: 0,\n  covered_regions: 0,\n  uncovered_regions: 0,\n  on_time_delivery_rate: 0,\n  on_time_delivery_change: 0,\n};\n\nconst mockOverview: ManufacturerOverview = {
   active_distributors: 12,
   approved_distributors: 14,
   orders_today: 298,
@@ -111,7 +111,7 @@ export function useManufacturerData(search: string) {
   const [createProduct, createProductState] = useCreateCatalogProductMutation();
   const [publishPrices, publishPricesState] = usePublishPriceListMutation();
 
-  const overview = (isMock ? mockOverview : overviewQuery.data) ?? mockOverview;
+  const overview = isMock ? mockOverview : overviewQuery.data ?? emptyOverview;
   const products = (isMock ? mockProducts : productsQuery.data?.results ?? []).map(toProductView);
   const distributors = (isMock ? mockDistributors : distributorsQuery.data?.results ?? []).map(toDistributorView);
   const regions = (isMock ? mockRegions : regionsQuery.data?.results ?? []).map((region) => ({
