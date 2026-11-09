@@ -8,8 +8,13 @@ import Suppliers from "./components/Suppliers";
 import FAQ from "./components/FAQ";
 import ContactCTA from "./components/ContactCTA";
 import Footer from "./components/Footer";
+import ManufacturerDashboard from "./components/ManufacturerDashboard";
 
 export default function App() {
+  if (window.location.pathname.startsWith("/manufacturer")) {
+    return <ManufacturerDashboard />;
+  }
+
   return <>
     <Navbar />
     <main>
