@@ -10,13 +10,13 @@ The manufacturer and distributor dashboards share a browser-based demo network t
 4. In the manufacturer catalog, add a product with a name, SKU/barcode, package, and official base price. It appears in the distributor catalog automatically.
 5. Change an existing product's official base price from the manufacturer catalog. The distributor receives the updated official price while its regional overrides remain separate.
 6. In the manufacturer network section, add a distributor or remove one from the network.
-7. In the distributor inventory, set a regional offer price for an active delivery area. The official manufacturer base price remains unchanged.
+7. In the distributor workspace, select the demo distributor account, then set a regional offer price for an active delivery area. Regional prices are isolated per distributor and area; the official manufacturer base price remains unchanged.
 
 ## MVP scope shown in the UI
 
 - Manufacturer: overview, official catalog and base prices, distributor network.
 - Distributor: daily workspace, order flow, factory catalog and stock, delivery coverage.
-- Distributor may set a local selling price per delivery area. This does not edit the manufacturer's official base price.
+- Each distributor may set its own selling price per delivery area. This does not edit the manufacturer's official base price.
 - Manufacturer-created products are read-only catalog entries for the distributor; the distributor manages its own stock and regional offer price.
 
 ## Demo limitations
