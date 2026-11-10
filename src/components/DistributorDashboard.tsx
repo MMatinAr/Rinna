@@ -1,0 +1,323 @@
+import { useEffect, useMemo, useState } from "react";
+import {
+  Activity, AlertTriangle, ArrowDownLeft, ArrowLeft, ArrowUpLeft, BarChart3,
+  Bell, Boxes, Building2, Check, CheckCircle2, ChevronDown, ChevronLeft,
+  CircleHelp, Clock3, Coffee, Download, Ellipsis, FileText, Filter, Gauge,
+  LayoutDashboard, MapPin, Menu, Package, PackageCheck, Plus, Search,
+  Settings2, ShoppingBag, Truck, Users, Wallet, X, RefreshCw, ClipboardList,
+  SlidersHorizontal, CalendarDays, CircleDot, RotateCcw, TrendingUp
+} from "lucide-react";
+import "./distributor.css";
+
+type Section = "home" | "orders" | "inventory" | "coverage" | "customers" | "reports" | "settings";
+type OrderStatus = "تأییدشده" | "در حال آماده‌سازی" | "آماده ارسال" | "ارسال‌شده" | "تحویل‌شده" | "لغوشده";
+type Product = { id: string; name: string; sku: string; unit: string; price: number; stock: number; reserved: number; lowAt: number; category: string; updated: string };
+type Order = { id: string; customer: string; area: string; date: string; items: number; total: number; status: OrderStatus; address: string; note: string; history: { status: string; at: string; by: string }[] };
+type Zone = { id: string; name: string; fee: number; min: number; days: string; eta: string; active: boolean };
+type Customer = { id: string; name: string; cafe: string; area: string; orders: number; total: number; phone: string };
+
+const STORE_KEY = "rinna-distributor-v1";
+const initialProducts: Product[] = [
+  { id: "P-101", name: "شیر پرچرب کاله", sku: "KAL-1001", unit: "بطری ۱ لیتری", price: 38500, stock: 84, reserved: 12, lowAt: 20, category: "لبنیات", updated: "امروز، ۱۰:۴۲" },
+  { id: "P-102", name: "خامه صبحانه", sku: "KAL-1008", unit: "پاکت ۲۰۰ گرم", price: 42500, stock: 18, reserved: 4, lowAt: 15, category: "لبنیات", updated: "امروز، ۰۹:۱۸" },
+  { id: "P-103", name: "پنیر ماسکارپونه", sku: "KAL-2041", unit: "ظرف ۵۰۰ گرم", price: 168000, stock: 31, reserved: 6, lowAt: 10, category: "لبنیات", updated: "دیروز، ۱۷:۳۰" },
+  { id: "P-104", name: "کره حیوانی", sku: "KAL-3010", unit: "بسته ۱۰۰ گرم", price: 29500, stock: 9, reserved: 2, lowAt: 12, category: "لبنیات", updated: "امروز، ۰۸:۵۰" },
+  { id: "P-105", name: "شیر کم‌چرب", sku: "KAL-1002", unit: "بطری ۱ لیتری", price: 36500, stock: 120, reserved: 20, lowAt: 25, category: "لبنیات", updated: "امروز، ۱۱:۰۵" },
+  { id: "P-106", name: "ماست یونانی", sku: "KAL-4012", unit: "ظرف ۹۰۰ گرم", price: 112000, stock: 26, reserved: 3, lowAt: 10, category: "لبنیات", updated: "دیروز، ۱۵:۱۲" }
+];
+const initialOrders: Order[] = [
+  { id: "RN-2481", customer: "کافه ویونا", area: "ونک", date: "امروز، ۱۰:۲۸", items: 8, total: 2845000, status: "تأییدشده", address: "تهران، ونک، خیابان ملاصدرا", note: "تحویل قبل از ساعت ۱۴", history: [{ status: "تأییدشده", at: "۱۰:۲۸", by: "سیستم" }] },
+  { id: "RN-2480", customer: "کافه رُست", area: "جردن", date: "امروز، ۰۹:۵۲", items: 5, total: 1730000, status: "در حال آماده‌سازی", address: "تهران، جردن، خیابان نلسون ماندلا", note: "", history: [{ status: "تأییدشده", at: "۰۹:۵۲", by: "سیستم" }, { status: "در حال آماده‌سازی", at: "۱۰:۰۱", by: "مدیر فروش" }] },
+  { id: "RN-2479", customer: "بیکری آرت", area: "سعادت‌آباد", date: "امروز، ۰۹:۱۵", items: 11, total: 3960000, status: "آماده ارسال", address: "تهران، سعادت‌آباد، میدان کاج", note: "تماس قبل از رسیدن", history: [{ status: "تأییدشده", at: "۰۹:۱۵", by: "سیستم" }, { status: "در حال آماده‌سازی", at: "۰۹:۴۰", by: "انباردار" }, { status: "آماده ارسال", at: "۱۰:۲۰", by: "انباردار" }] },
+  { id: "RN-2478", customer: "کافه کُنج", area: "یوسف‌آباد", date: "دیروز، ۱۶:۴۰", items: 4, total: 1280000, status: "ارسال‌شده", address: "تهران، یوسف‌آباد، خیابان ۲۱", note: "", history: [{ status: "تأییدشده", at: "۱۶:۴۰", by: "سیستم" }, { status: "ارسال‌شده", at: "۱۷:۱۰", by: "مسئول ارسال" }] },
+  { id: "RN-2477", customer: "کافه ویونا", area: "ونک", date: "دیروز، ۱۲:۰۵", items: 7, total: 2410000, status: "تحویل‌شده", address: "تهران، ونک، خیابان ملاصدرا", note: "", history: [{ status: "تأییدشده", at: "۱۲:۰۵", by: "سیستم" }, { status: "تحویل‌شده", at: "۱۴:۰۲", by: "مسئول ارسال" }] }
+];
+const initialZones: Zone[] = [
+  { id: "Z-01", name: "ونک و میرداماد", fee: 85000, min: 1500000, days: "شنبه تا پنجشنبه", eta: "همان روز", active: true },
+  { id: "Z-02", name: "جردن و الهیه", fee: 95000, min: 2000000, days: "شنبه، دوشنبه، چهارشنبه", eta: "۱ روز کاری", active: true },
+  { id: "Z-03", name: "سعادت‌آباد و شهرک غرب", fee: 110000, min: 1800000, days: "شنبه تا پنجشنبه", eta: "همان روز", active: true },
+  { id: "Z-04", name: "یوسف‌آباد و امیرآباد", fee: 75000, min: 1200000, days: "یکشنبه، سه‌شنبه، پنجشنبه", eta: "۱ روز کاری", active: false }
+];
+const initialCustomers: Customer[] = [
+  { id: "C-01", name: "آرمان رضایی", cafe: "کافه ویونا", area: "ونک", orders: 18, total: 28400000, phone: "۰۹۱۲ *** ۴۲۱۸" },
+  { id: "C-02", name: "سارا احمدی", cafe: "کافه رُست", area: "جردن", orders: 12, total: 19750000, phone: "۰۹۳۵ *** ۱۱۰۲" },
+  { id: "C-03", name: "مهدی کریمی", cafe: "بیکری آرت", area: "سعادت‌آباد", orders: 9, total: 16200000, phone: "۰۹۱۰ *** ۸۸۲۱" },
+  { id: "C-04", name: "نیلوفر مرادی", cafe: "کافه کُنج", area: "یوسف‌آباد", orders: 7, total: 11400000, phone: "۰۹۱۹ *** ۷۰۳۴" }
+];
+const toman = (n: number) => new Intl.NumberFormat("fa-IR").format(n) + " تومان";
+const fa = (n: number) => new Intl.NumberFormat("fa-IR").format(n);
+const nowTime = () => new Intl.DateTimeFormat("fa-IR", { hour: "2-digit", minute: "2-digit" }).format(new Date());
+const loadState = () => {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch { /* use the initial workspace when stored data is unavailable */ }
+  return { products: initialProducts, orders: initialOrders, zones: initialZones, customers: initialCustomers, activity: [{ id: 1, text: "همگام‌سازی موجودی محصولات انجام شد", time: "۱۰:۴۲", type: "sync" }] };
+};
+
+const navItems: { id: Section; label: string; icon: typeof LayoutDashboard }[] = [
+  { id: "home", label: "میز کار", icon: LayoutDashboard },
+  { id: "orders", label: "سفارش‌ها", icon: ClipboardList },
+  { id: "inventory", label: "محصولات و موجودی", icon: Boxes },
+  { id: "coverage", label: "مناطق و ارسال", icon: Truck },
+  { id: "customers", label: "مشتریان من", icon: Users },
+  { id: "reports", label: "گزارش عملکرد", icon: BarChart3 },
+  { id: "settings", label: "تنظیمات", icon: Settings2 }
+];
+const nextStatus: Record<string, OrderStatus | null> = {
+  "تأییدشده": "در حال آماده‌سازی",
+  "در حال آماده‌سازی": "آماده ارسال",
+  "آماده ارسال": "ارسال‌شده",
+  "ارسال‌شده": "تحویل‌شده",
+  "تحویل‌شده": null,
+  "لغوشده": null
+};
+const actionLabel: Record<string, string> = {
+  "تأییدشده": "شروع آماده‌سازی",
+  "در حال آماده‌سازی": "ثبت آماده ارسال",
+  "آماده ارسال": "ثبت ارسال",
+  "ارسال‌شده": "ثبت تحویل",
+  "تحویل‌شده": "تکمیل شده",
+  "لغوشده": "لغو شده"
+};
+
+export default function DistributorDashboard() {
+  const [data, setData] = useState<any>(loadState);
+  const [section, setSection] = useState<Section>("home");
+  const [query, setQuery] = useState("");
+  const [orderFilter, setOrderFilter] = useState("همه");
+  const [role, setRole] = useState("مدیر مجموعه");
+  const [notice, setNotice] = useState("");
+  const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
+  const [modal, setModal] = useState<"product" | "zone" | "cancel" | null>(null);
+  const [form, setForm] = useState<any>({});
+  const [stockDraft, setStockDraft] = useState<Record<string, string>>({});
+  const [mobileNav, setMobileNav] = useState(false);
+
+  useEffect(() => { localStorage.setItem(STORE_KEY, JSON.stringify(data)); }, [data]);
+  useEffect(() => {
+    if (!notice) return;
+    const timer = window.setTimeout(() => setNotice(""), 2800);
+    return () => window.clearTimeout(timer);
+  }, [notice]);
+
+  const update = (key: string, value: any) => setData((d: any) => ({ ...d, [key]: value }));
+  const log = (text: string, type = "action") => setData((d: any) => ({ ...d, activity: [{ id: Date.now(), text, time: nowTime(), type }, ...d.activity].slice(0, 12) }));
+  const announce = (message: string) => setNotice(message);
+  const visibleOrders = useMemo(() => data.orders.filter((o: Order) => {
+    const matches = (o.id + o.customer + o.area).toLowerCase().includes(query.toLowerCase());
+    return matches && (orderFilter === "همه" || o.status === orderFilter);
+  }), [data.orders, query, orderFilter]);
+  const visibleProducts = useMemo(() => data.products.filter((p: Product) => (p.name + p.sku + p.category).toLowerCase().includes(query.toLowerCase())), [data.products, query]);
+  const selected = data.orders.find((o: Order) => o.id === selectedOrder);
+  const lowStock = data.products.filter((p: Product) => p.stock - p.reserved <= p.lowAt);
+  const activeOrders = data.orders.filter((o: Order) => !["تحویل‌شده", "لغوشده"].includes(o.status));
+  const todayRevenue = data.orders.filter((o: Order) => o.status !== "لغوشده").reduce((sum: number, o: Order) => sum + o.total, 0);
+
+  const advanceOrder = (id: string) => {
+    const order = data.orders.find((o: Order) => o.id === id);
+    if (!order || !nextStatus[order.status]) return;
+    const status = nextStatus[order.status] as OrderStatus;
+    update("orders", data.orders.map((o: Order) => o.id === id ? { ...o, status, history: [...o.history, { status, at: nowTime(), by: role }] } : o));
+    log("وضعیت سفارش " + id + " به «" + status + "» تغییر کرد");
+    announce("وضعیت سفارش به‌روزرسانی شد");
+  };
+  const cancelOrder = () => {
+    if (!selected || !String(form.reason || "").trim()) return;
+    const id = selected.id;
+    update("orders", data.orders.map((o: Order) => o.id === id ? { ...o, status: "لغوشده", note: "لغو: " + form.reason, history: [...o.history, { status: "لغوشده", at: nowTime(), by: role + " — " + form.reason }] } : o));
+    setModal(null); setSelectedOrder(null); setForm({});
+    log("سفارش " + id + " لغو شد؛ رزرو اقلام باید در دفتر موجودی آزاد شود", "warning");
+    announce("سفارش لغو شد و در تاریخچه ثبت شد");
+  };
+  const saveProduct = () => {
+    if (!String(form.name || "").trim() || !Number(form.price) || Number(form.stock) < 0) return;
+    const product: Product = { id: "P-" + Date.now().toString().slice(-5), name: form.name, sku: form.sku || "NEW-" + Date.now().toString().slice(-4), unit: form.unit || "عدد", price: Number(form.price), stock: Number(form.stock), reserved: 0, lowAt: Number(form.lowAt || 5), category: form.category || "سایر", updated: "همین الان" };
+    update("products", [product, ...data.products]); setModal(null); setForm({});
+    log("محصول «" + product.name + "» به فهرست عرضه اضافه شد"); announce("محصول جدید ثبت شد");
+  };
+  const saveZone = () => {
+    if (!String(form.name || "").trim() || Number(form.fee) < 0) return;
+    const zone: Zone = { id: "Z-" + Date.now().toString().slice(-4), name: form.name, fee: Number(form.fee), min: Number(form.min || 0), days: form.days || "شنبه تا پنجشنبه", eta: form.eta || "۱ روز کاری", active: true };
+    update("zones", [zone, ...data.zones]); setModal(null); setForm({});
+    log("محدوده ارسال «" + zone.name + "» اضافه شد"); announce("محدوده ارسال ثبت شد");
+  };
+  const saveStock = (id: string) => {
+    const value = Number(stockDraft[id]);
+    if (!Number.isFinite(value) || value < 0) return announce("موجودی باید عددی نامنفی باشد");
+    const product = data.products.find((p: Product) => p.id === id);
+    update("products", data.products.map((p: Product) => p.id === id ? { ...p, stock: value, updated: "همین الان" } : p));
+    setStockDraft((d) => ({ ...d, [id]: "" }));
+    log("موجودی «" + product.name + "» به " + fa(value) + " " + product.unit + " تغییر کرد", "sync");
+    announce("موجودی ذخیره شد");
+  };
+  const toggleZone = (id: string) => {
+    const zone = data.zones.find((z: Zone) => z.id === id);
+    update("zones", data.zones.map((z: Zone) => z.id === id ? { ...z, active: !z.active } : z));
+    log("وضعیت پوشش «" + zone.name + "» تغییر کرد"); announce("وضعیت محدوده تغییر کرد");
+  };
+  const exportOrders = () => {
+    const rows = [["کد سفارش", "مشتری", "منطقه", "وضعیت", "مبلغ"], ...data.orders.map((o: Order) => [o.id, o.customer, o.area, o.status, o.total])];
+    const csv = "\uFEFF" + rows.map((r: any[]) => r.join(",")).join("\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
+    const a = document.createElement("a"); a.href = url; a.download = "rinna-orders.csv"; a.click(); URL.revokeObjectURL(url);
+    announce("گزارش سفارش‌ها دانلود شد");
+  };
+
+  const title = navItems.find((n) => n.id === section)?.label || "میز کار";
+  const searchPlaceholder = section === "orders" ? "جست‌وجوی کد سفارش یا مشتری..." : "جست‌وجوی محصول، شناسه یا دسته...";
+
+  return (
+    <div className="distributor-shell" dir="rtl">
+      <aside className={"dist-sidebar " + (mobileNav ? "is-open" : "")}>
+        <div className="dist-brand">
+          <span className="dist-brand-mark"><Coffee size={20} /></span>
+          <span><b>RINNA</b><small>PARTNER WORKSPACE</small></span>
+          <button className="dist-mobile-close" onClick={() => setMobileNav(false)} aria-label="بستن منو"><X size={18} /></button>
+        </div>
+        <div className="dist-company"><span className="dist-company-avatar">پ</span><div><b>پخش پارس شمال</b><small>شبکه رسمی کاله</small></div><ChevronDown size={15} /></div>
+        <div className="dist-nav-label">فضای کاری</div>
+        <nav className="dist-nav">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            return <button key={item.id} className={section === item.id ? "active" : ""} onClick={() => { setSection(item.id); setQuery(""); setMobileNav(false); }}>
+              <Icon size={17} strokeWidth={1.8} /><span>{item.label}</span>{item.id === "orders" && activeOrders.length > 0 && <i>{fa(activeOrders.length)}</i>}
+            </button>;
+          })}
+        </nav>
+        <div className="dist-sidebar-bottom">
+          <div className="dist-network-state"><span></span><div><b>اتصال شبکه برقرار است</b><small>آخرین همگام‌سازی: ۱۰:۴۲</small></div></div>
+          <button onClick={() => { setSection("settings"); setMobileNav(false); }}><CircleHelp size={16} /> راهنما و پشتیبانی</button>
+          <div className="dist-user"><span className="dist-user-avatar">م</span><div><b>مدیر مجموعه</b><small>دسترسی کامل</small></div><Ellipsis size={18} /></div>
+        </div>
+      </aside>
+
+      <main className="dist-main">
+        <header className="dist-topbar">
+          <button className="dist-mobile-menu" onClick={() => setMobileNav(true)} aria-label="باز کردن منو"><Menu size={20} /></button>
+          <div className="dist-breadcrumb"><span>فضای همکاران</span><ChevronLeft size={14} /><b>{title}</b></div>
+          <div className="dist-top-actions">
+            <span className="dist-date"><CalendarDays size={15} /> سه‌شنبه، ۱۹ آبان ۱۴۰۵</span>
+            <button className="dist-icon-btn" onClick={() => announce("اعلان جدیدی برای نمایش وجود ندارد")} aria-label="اعلان‌ها"><Bell size={18} /><i></i></button>
+            <span className="dist-top-avatar">پ</span>
+          </div>
+        </header>
+
+        <div className="dist-content">
+          <div className="dist-page-head">
+            <div><div className="dist-kicker">DISTRIBUTOR WORKSPACE <span></span> LOCAL DATA</div><h1>{section === "home" ? "روز بخیر، وقت مدیریت رسیده." : title}</h1><p>{section === "home" ? "وضعیت عملیات امروزت را یک‌جا ببین و کارهای مهم را جلو ببر." : section === "orders" ? "سفارش‌های شبکه خودت را آماده‌سازی، ارسال و پیگیری کن." : section === "inventory" ? "عرضه محصولات، موجودی قابل فروش و هشدار کمبود را مدیریت کن." : section === "coverage" ? "محدوده‌های سرویس‌دهی و شرایط ارسال را کنترل کن." : section === "customers" ? "مشتری‌های فعال و سابقه خرید آن‌ها در شبکه توزیع." : section === "reports" ? "نمایی از فروش، سفارش‌ها و کیفیت اجرای عملیات." : "تنظیمات فضای کاری و رفتارهای عملیاتی مجموعه."}</p></div>
+            <div className="dist-head-actions">
+              {section === "inventory" && <button className="dist-btn dist-btn-primary" onClick={() => { setForm({}); setModal("product"); }}><Plus size={16} /> افزودن محصول</button>}
+              {section === "coverage" && <button className="dist-btn dist-btn-primary" onClick={() => { setForm({}); setModal("zone"); }}><Plus size={16} /> محدوده جدید</button>}
+              {(section === "orders" || section === "reports") && <button className="dist-btn dist-btn-outline" onClick={exportOrders}><Download size={15} /> خروجی سفارش‌ها</button>}
+            </div>
+          </div>
+
+          {section === "home" && <>
+            <div className="dist-summary-strip">
+              <div className="dist-summary-main"><span className="dist-summary-icon"><Gauge size={19} /></span><div><small>عملیات امروز</small><strong>{fa(activeOrders.length)} سفارش در جریان</strong><p>اولویت امروزت را از سفارش‌های آماده ارسال شروع کن.</p></div><button onClick={() => setSection("orders")}>مشاهده سفارش‌ها <ArrowLeft size={15} /></button></div>
+              <div className="dist-summary-side"><span className="dist-live-dot"></span><div><b>وضعیت شبکه</b><small>همگام و آماده دریافت سفارش</small></div></div>
+            </div>
+            <div className="dist-metrics">
+              <Metric icon={<ShoppingBag size={18}/>} label="سفارش‌های فعال" value={fa(activeOrders.length)} note="در انتظار تکمیل" tone="copper" />
+              <Metric icon={<Wallet size={18}/>} label="ارزش سفارش‌ها" value={fa(Math.round(todayRevenue / 1000000 * 10) / 10) + " م"} note="مجموع سفارش‌های ثبت‌شده" tone="olive" />
+              <Metric icon={<Package size={18}/>} label="محصولات کم‌موجود" value={fa(lowStock.length)} note="نیازمند بررسی موجودی" tone="clay" />
+              <Metric icon={<Truck size={18}/>} label="آماده ارسال" value={fa(data.orders.filter((o: Order) => o.status === "آماده ارسال").length)} note="منتظر تحویل به راننده" tone="ink" />
+            </div>
+            <div className="dist-home-grid">
+              <section className="dist-panel dist-orders-panel">
+                <div className="dist-panel-head"><div><span className="dist-eyebrow">ORDER FLOW</span><h2>سفارش‌هایی که باید پیگیری شوند</h2></div><button className="dist-text-btn" onClick={() => setSection("orders")}>همه سفارش‌ها <ArrowLeft size={14}/></button></div>
+                <div className="dist-order-list">
+                  {activeOrders.slice(0, 4).map((o: Order) => <OrderRow key={o.id} order={o} onOpen={() => setSelectedOrder(o.id)} onAdvance={() => advanceOrder(o.id)} />)}
+                  {activeOrders.length === 0 && <Empty title="سفارشی در جریان نیست" desc="به محض ثبت سفارش جدید، اینجا نمایش داده می‌شود." />}
+                </div>
+              </section>
+              <section className="dist-panel dist-attention-panel">
+                <div className="dist-panel-head"><div><span className="dist-eyebrow">NEEDS ATTENTION</span><h2>موارد نیازمند توجه</h2></div><span className="dist-count-badge">{fa(lowStock.length + data.orders.filter((o: Order) => o.status === "آماده ارسال").length)}</span></div>
+                {lowStock.slice(0, 3).map((p: Product) => <button className="dist-alert-row" key={p.id} onClick={() => { setSection("inventory"); setQuery(p.name); }}><span className="dist-alert-icon"><AlertTriangle size={16}/></span><span><b>{p.name}</b><small>موجودی قابل فروش: {fa(p.stock - p.reserved)} {p.unit}</small></span><ArrowUpLeft size={15}/></button>)}
+                {data.orders.filter((o: Order) => o.status === "آماده ارسال").map((o: Order) => <button className="dist-alert-row" key={o.id} onClick={() => setSelectedOrder(o.id)}><span className="dist-alert-icon delivery"><Truck size={16}/></span><span><b>{o.id} آماده ارسال</b><small>{o.customer} · {o.area}</small></span><ArrowUpLeft size={15}/></button>)}
+                {lowStock.length === 0 && !data.orders.some((o: Order) => o.status === "آماده ارسال") && <Empty title="همه‌چیز مرتب است" desc="در حال حاضر مورد فوری برای پیگیری وجود ندارد." />}
+              </section>
+            </div>
+            <section className="dist-panel dist-activity-panel">
+              <div className="dist-panel-head"><div><span className="dist-eyebrow">RECENT ACTIVITY</span><h2>آخرین تغییرات</h2></div><span className="dist-muted-label">ثبت‌شده در این فضای کاری</span></div>
+              <div className="dist-activity-list">{data.activity.slice(0, 5).map((a: any) => <div className="dist-activity-row" key={a.id}><span className={"dist-activity-dot " + a.type}></span><p>{a.text}</p><time>{a.time}</time></div>)}</div>
+            </section>
+          </>}
+
+          {section === "orders" && <>
+            <div className="dist-toolbar">
+              <label className="dist-search"><Search size={17}/><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="جست‌وجوی کد سفارش یا مشتری..." /></label>
+              <div className="dist-filter-wrap"><SlidersHorizontal size={15}/><select value={orderFilter} onChange={(e) => setOrderFilter(e.target.value)}><option>همه</option>{["تأییدشده","در حال آماده‌سازی","آماده ارسال","ارسال‌شده","تحویل‌شده","لغوشده"].map(s => <option key={s}>{s}</option>)}</select></div>
+              <span className="dist-result-count">{fa(visibleOrders.length)} سفارش</span>
+            </div>
+            <section className="dist-panel dist-table-panel">
+              <div className="dist-table-scroll"><table className="dist-table"><thead><tr><th>کد سفارش</th><th>مشتری</th><th>منطقه</th><th>تاریخ ثبت</th><th>اقلام</th><th>مبلغ کل</th><th>وضعیت</th><th></th></tr></thead><tbody>
+                {visibleOrders.map((o: Order) => <tr key={o.id}><td><b className="dist-order-code">{o.id}</b></td><td><b>{o.customer}</b></td><td>{o.area}</td><td>{o.date}</td><td>{fa(o.items)} قلم</td><td className="dist-price-cell">{toman(o.total)}</td><td><Status status={o.status}/></td><td><button className="dist-row-action" onClick={() => setSelectedOrder(o.id)}>جزئیات <ArrowLeft size={13}/></button></td></tr>)}
+              </tbody></table>{visibleOrders.length === 0 && <Empty title="سفارشی پیدا نشد" desc="عبارت جست‌وجو یا فیلتر وضعیت را تغییر بده."/>}</div>
+            </section>
+            <p className="dist-footnote"><CircleDot size={13}/> سفارش‌های دارای موجودی معتبر به‌صورت خودکار تأیید می‌شوند؛ اینجا فقط مراحل اجرای سفارش را مدیریت می‌کنی.</p>
+          </>}
+
+          {section === "inventory" && <>
+            <div className="dist-inventory-stats"><div><small>کل محصولات</small><b>{fa(data.products.length)}</b></div><div><small>موجودی قابل فروش</small><b>{fa(data.products.reduce((s: number,p: Product)=>s+p.stock-p.reserved,0))} <small>واحد</small></b></div><div><small>هشدار موجودی</small><b className="dist-warn-number">{fa(lowStock.length)}</b></div><div><small>منبع موجودی</small><b>ثبت دستی</b></div></div>
+            <div className="dist-toolbar"><label className="dist-search"><Search size={17}/><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={searchPlaceholder}/></label><button className="dist-btn dist-btn-outline" onClick={() => { update("products", data.products.map((p: Product) => ({...p, updated:"همین الان"}))); log("بازبینی دستی فهرست موجودی انجام شد","sync"); announce("فهرست موجودی بازبینی شد"); }}><RefreshCw size={14}/> بازبینی فهرست</button><span className="dist-result-count">{fa(visibleProducts.length)} محصول</span></div>
+            <section className="dist-panel dist-table-panel"><div className="dist-table-scroll"><table className="dist-table"><thead><tr><th>محصول</th><th>شناسه کالا</th><th>قیمت پایه رسمی</th><th>موجودی فیزیکی</th><th>رزرو</th><th>قابل فروش</th><th>وضعیت</th><th>ثبت موجودی</th></tr></thead><tbody>
+              {visibleProducts.map((p: Product) => <tr key={p.id}><td><b>{p.name}</b><small className="dist-subcell">{p.unit}</small></td><td>{p.sku}</td><td>{toman(p.price)}</td><td>{fa(p.stock)}</td><td>{fa(p.reserved)}</td><td><b>{fa(p.stock-p.reserved)}</b></td><td><Status status={p.stock-p.reserved <= p.lowAt ? "کم‌موجود" : "موجود"}/></td><td><div className="dist-stock-edit"><input aria-label={"موجودی " + p.name} type="number" min="0" value={stockDraft[p.id] ?? ""} placeholder={String(p.stock)} onChange={(e)=>setStockDraft(d=>({...d,[p.id]:e.target.value}))}/><button disabled={stockDraft[p.id] === undefined || stockDraft[p.id] === ""} onClick={()=>saveStock(p.id)}><Check size={14}/></button></div></td></tr>)}
+            </tbody></table>{visibleProducts.length === 0 && <Empty title="محصولی پیدا نشد" desc="نام یا شناسه محصول را بررسی کن."/>}</div></section>
+            <div className="dist-info-note"><AlertTriangle size={16}/><span>قیمت پایه رسمی از کاتالوگ تولیدکننده می‌آید و در این پنل قابل تغییر نیست. موجودی ثبت‌شده در این نسخه در مرورگر ذخیره می‌شود.</span></div>
+          </>}
+
+          {section === "coverage" && <>
+            <div className="dist-coverage-intro"><div><span className="dist-eyebrow">DELIVERY NETWORK</span><h2>محدوده‌های فعال سرویس‌دهی</h2><p>هزینه و برنامه ارسال برای هر محدوده مستقل است. غیرفعال‌کردن محدوده، سفارش جدید را متوقف می‌کند و سفارش‌های قبلی را تغییر نمی‌دهد.</p></div><div className="dist-coverage-number"><b>{fa(data.zones.filter((z: Zone)=>z.active).length)}</b><small>از {fa(data.zones.length)} محدوده فعال</small></div></div>
+            <div className="dist-zone-grid">{data.zones.map((z: Zone)=><article className={"dist-zone-card "+(!z.active?"inactive":"")} key={z.id}><div className="dist-zone-top"><span className="dist-zone-icon"><MapPin size={18}/></span><span className={z.active?"dist-zone-state active":"dist-zone-state"}>{z.active?"فعال":"غیرفعال"}</span></div><h3>{z.name}</h3><div className="dist-zone-details"><div><small>هزینه ارسال</small><b>{toman(z.fee)}</b></div><div><small>حداقل سفارش</small><b>{toman(z.min)}</b></div><div><small>زمان تحویل</small><b>{z.eta}</b></div><div><small>روزهای ارسال</small><b>{z.days}</b></div></div><button className={z.active?"dist-zone-toggle":"dist-zone-toggle muted"} onClick={()=>toggleZone(z.id)}>{z.active?"غیرفعال‌کردن محدوده":"فعال‌سازی محدوده"}</button></article>)}</div>
+          </>}
+
+          {section === "customers" && <>
+            <div className="dist-toolbar"><label className="dist-search"><Search size={17}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="جست‌وجوی مشتری یا کافه..."/></label><span className="dist-result-count">{fa(data.customers.filter((c: Customer)=>(c.cafe+c.name+c.area).includes(query)).length)} مشتری</span></div>
+            <section className="dist-panel dist-table-panel"><div className="dist-table-scroll"><table className="dist-table"><thead><tr><th>مشتری</th><th>نام کافه</th><th>محدوده</th><th>تعداد سفارش</th><th>خرید تجمعی</th><th>شماره تماس</th><th></th></tr></thead><tbody>{data.customers.filter((c: Customer)=>(c.cafe+c.name+c.area).toLowerCase().includes(query.toLowerCase())).map((c: Customer)=><tr key={c.id}><td><b>{c.name}</b></td><td>{c.cafe}</td><td>{c.area}</td><td>{fa(c.orders)}</td><td>{toman(c.total)}</td><td>{c.phone}</td><td><button className="dist-row-action" onClick={()=>announce("اطلاعات تماس مشتری به‌صورت محدود نمایش داده می‌شود")}>اطلاعات <ArrowLeft size={13}/></button></td></tr>)}</tbody></table></div></section>
+            <div className="dist-info-note"><Users size={16}/><span>اطلاعات تماس کامل مشتری فقط در حد نیاز عملیاتی سفارش در اختیار اعضای مجاز قرار می‌گیرد.</span></div>
+          </>}
+
+          {section === "reports" && <>
+            <div className="dist-report-grid"><div className="dist-report-card large"><span className="dist-eyebrow">ORDER PERFORMANCE</span><h2>عملکرد سفارش‌ها</h2><div className="dist-report-bars">{[42,65,52,78,58,92,72].map((v,i)=><div key={i}><span style={{height:v+"%"}}></span><small>{["ش","ی","د","س","چ","پ","ج"][i]}</small></div>)}</div><div className="dist-report-legend"><span><i></i> سفارش‌های تکمیل‌شده</span><b>۷ روز اخیر</b></div></div><div className="dist-report-card"><span className="dist-eyebrow">SERVICE QUALITY</span><h2>کیفیت اجرا</h2><div className="dist-quality-score">۹۴<span>/۱۰۰</span></div><p>امتیاز نمونه برای نمایش ساختار گزارش</p><div className="dist-quality-line"><span style={{width:"94%"}}/></div><small>تحویل به‌موقع · داده نمونه</small></div></div>
+            <div className="dist-metrics report-metrics"><Metric icon={<CheckCircle2 size={18}/>} label="نرخ تکمیل سفارش" value="۹۲٪" note="داده نمونه نمایشی" tone="olive"/><Metric icon={<Clock3 size={18}/>} label="میانگین آماده‌سازی" value="۴۸ دقیقه" note="داده نمونه نمایشی" tone="copper"/><Metric icon={<AlertTriangle size={18}/>} label="مغایرت موجودی" value="۲ مورد" note="نیازمند بررسی" tone="clay"/><Metric icon={<TrendingUp size={18}/>} label="فروش ثبت‌شده" value={fa(Math.round(todayRevenue/1000000*10)/10)+" م"} note="از داده سفارش‌های فعلی" tone="ink"/></div>
+            <div className="dist-info-note"><Activity size={16}/><span>شاخص‌های درصدی و نمودار این صفحه نمونه طراحی هستند؛ مبلغ فروش از سفارش‌های ذخیره‌شده در همین مرورگر محاسبه می‌شود.</span></div>
+          </>}
+
+          {section === "settings" && <>
+            <section className="dist-panel dist-settings-panel"><div className="dist-panel-head"><div><span className="dist-eyebrow">WORKSPACE PREFERENCES</span><h2>تنظیمات فضای کاری</h2></div></div><div className="dist-setting-row"><span className="dist-setting-icon"><Users size={18}/></span><div><b>نقش فعال در محیط</b><small>برای بررسی تجربه نقش‌های مختلف، نقش را تغییر بده.</small></div><select value={role} onChange={e=>{setRole(e.target.value);log("نقش محیط به "+e.target.value+" تغییر کرد");}}><option>مدیر مجموعه</option><option>مدیر فروش</option><option>انباردار</option><option>مسئول ارسال</option></select></div><div className="dist-setting-row"><span className="dist-setting-icon"><DatabaseIcon/></span><div><b>حالت ذخیره‌سازی</b><small>اطلاعات فعلی فقط در حافظه مرورگر این دستگاه ذخیره می‌شود.</small></div><span className="dist-local-tag">Local workspace</span></div><div className="dist-setting-row"><span className="dist-setting-icon"><RotateCcw size={18}/></span><div><b>بازنشانی داده‌های نمونه</b><small>محصولات، سفارش‌ها، محدوده‌ها و فعالیت‌ها به وضعیت اولیه برمی‌گردند.</small></div><button className="dist-btn dist-btn-outline" onClick={()=>{if(window.confirm("تمام تغییرات محلی پاک و داده‌های نمونه جایگزین شوند؟")){localStorage.removeItem(STORE_KEY);setData(loadState());setRole("مدیر مجموعه");announce("داده‌های نمونه بازنشانی شدند");}}}>بازنشانی داده‌ها</button></div></section>
+            <div className="dist-info-note"><AlertTriangle size={16}/><span>انتخاب نقش در این نسخه برای تست تجربه کاربری است و مرز امنیتی محسوب نمی‌شود. کنترل دسترسی واقعی باید در API و بک‌اند اعمال شود.</span></div>
+          </>}
+        </div>
+      </main>
+
+      {mobileNav && <button className="dist-backdrop" onClick={()=>setMobileNav(false)} aria-label="بستن منو"/>}
+      {selected && <div className="dist-drawer-backdrop" onClick={()=>setSelectedOrder(null)}><aside className="dist-order-drawer" onClick={e=>e.stopPropagation()}><div className="dist-drawer-head"><div><span className="dist-eyebrow">ORDER DETAILS</span><h2>{selected.id}</h2></div><button onClick={()=>setSelectedOrder(null)} aria-label="بستن"><X size={19}/></button></div><div className="dist-drawer-customer"><span className="dist-customer-avatar"><Coffee size={19}/></span><div><b>{selected.customer}</b><small>{selected.area} · ثبت {selected.date}</small></div><Status status={selected.status}/></div><div className="dist-drawer-total"><small>مبلغ سفارش</small><b>{toman(selected.total)}</b><span>{fa(selected.items)} قلم کالا</span></div><div className="dist-drawer-block"><h3>اطلاعات تحویل</h3><p><MapPin size={15}/>{selected.address}</p>{selected.note && <p><FileText size={15}/>{selected.note}</p>}</div><div className="dist-drawer-block"><h3>تاریخچه وضعیت</h3><div className="dist-timeline">{selected.history.map((h:any,i:number)=><div className="dist-timeline-item" key={i}><i></i><div><b>{h.status}</b><small>{h.at} · {h.by}</small></div></div>)}</div></div><div className="dist-drawer-actions">{nextStatus[selected.status] && <button className="dist-btn dist-btn-primary" onClick={()=>advanceOrder(selected.id)}>{actionLabel[selected.status]} <ArrowLeft size={15}/></button>}{!["تحویل‌شده","لغوشده"].includes(selected.status) && <button className="dist-btn dist-btn-danger" onClick={()=>{setForm({});setModal("cancel");}}>لغو سفارش</button>}</div></aside></div>}
+      {modal && <div className="dist-modal-backdrop" onClick={()=>setModal(null)}><div className="dist-modal" onClick={e=>e.stopPropagation()}><button className="dist-modal-close" onClick={()=>setModal(null)}><X size={18}/></button>
+        {modal === "product" && <><span className="dist-eyebrow">NEW OFFER</span><h2>افزودن محصول به عرضه</h2><p>محصول جدید به فهرست محلی این پخش‌کننده اضافه می‌شود.</p><FormField label="نام محصول" value={form.name||""} onChange={(v:string)=>setForm((f:any)=>({...f,name:v}))} placeholder="مثلاً شیر پرچرب"/><FormField label="شناسه کالا" value={form.sku||""} onChange={(v:string)=>setForm((f:any)=>({...f,sku:v}))} placeholder="شناسه داخلی"/><div className="dist-form-grid"><FormField label="قیمت پایه (تومان)" type="number" value={form.price||""} onChange={(v:string)=>setForm((f:any)=>({...f,price:v}))}/><FormField label="موجودی فیزیکی" type="number" value={form.stock||""} onChange={(v:string)=>setForm((f:any)=>({...f,stock:v}))}/></div><div className="dist-form-grid"><FormField label="واحد" value={form.unit||""} onChange={(v:string)=>setForm((f:any)=>({...f,unit:v}))} placeholder="بطری ۱ لیتری"/><FormField label="هشدار در موجودی کمتر از" type="number" value={form.lowAt||""} onChange={(v:string)=>setForm((f:any)=>({...f,lowAt:v}))}/></div><button className="dist-btn dist-btn-primary dist-btn-full" onClick={saveProduct}>ثبت محصول</button></>}
+        {modal === "zone" && <><span className="dist-eyebrow">DELIVERY AREA</span><h2>افزودن محدوده ارسال</h2><p>شرایط سرویس‌دهی این محدوده را مشخص کن.</p><FormField label="نام محدوده" value={form.name||""} onChange={(v:string)=>setForm((f:any)=>({...f,name:v}))} placeholder="مثلاً ونک و میرداماد"/><div className="dist-form-grid"><FormField label="هزینه ارسال (تومان)" type="number" value={form.fee||""} onChange={(v:string)=>setForm((f:any)=>({...f,fee:v}))}/><FormField label="حداقل سفارش (تومان)" type="number" value={form.min||""} onChange={(v:string)=>setForm((f:any)=>({...f,min:v}))}/></div><FormField label="روزهای ارسال" value={form.days||""} onChange={(v:string)=>setForm((f:any)=>({...f,days:v}))} placeholder="شنبه تا پنجشنبه"/><FormField label="زمان تحویل" value={form.eta||""} onChange={(v:string)=>setForm((f:any)=>({...f,eta:v}))} placeholder="همان روز"/><button className="dist-btn dist-btn-primary dist-btn-full" onClick={saveZone}>ثبت محدوده</button></>}
+        {modal === "cancel" && <><span className="dist-eyebrow">CANCEL ORDER</span><h2>لغو سفارش {selected?.id}</h2><p>دلیل لغو را ثبت کن تا در تاریخچه سفارش باقی بماند.</p><label className="dist-form-label">دلیل لغو<select value={form.reason||""} onChange={e=>setForm((f:any)=>({...f,reason:e.target.value}))}><option value="">انتخاب دلیل</option><option>درخواست مشتری</option><option>مغایرت موجودی</option><option>مشکل در ارسال</option><option>سایر موارد</option></select></label><button className="dist-btn dist-btn-danger dist-btn-full" disabled={!form.reason} onClick={cancelOrder}>تأیید لغو سفارش</button></>}
+      </div></div>}
+      {notice && <div className="dist-toast"><CheckCircle2 size={17}/>{notice}<button onClick={()=>setNotice("")}><X size={14}/></button></div>}
+    </div>
+  );
+}
+
+function Metric({ icon, label, value, note, tone }: { icon: React.ReactNode; label: string; value: string; note: string; tone: string }) {
+  return <div className="dist-metric"><span className={"dist-metric-icon "+tone}>{icon}</span><small>{label}</small><b>{value}</b><p>{note}</p></div>;
+}
+function Status({ status }: { status: string }) {
+  const cls = status === "تحویل‌شده" || status === "موجود" ? "success" : status === "لغوشده" || status === "کم‌موجود" ? "danger" : status === "آماده ارسال" ? "copper" : "neutral";
+  return <span className={"dist-status "+cls}><i/>{status}</span>;
+}
+function OrderRow({ order, onOpen, onAdvance }: { order: Order; onOpen:()=>void; onAdvance:()=>void }) {
+  return <div className="dist-order-row"><button className="dist-order-info" onClick={onOpen}><span className="dist-order-symbol"><PackageCheck size={17}/></span><span><b>{order.customer}</b><small>{order.id} · {order.area}</small></span></button><div className="dist-order-meta"><Status status={order.status}/><b>{toman(order.total)}</b></div><button className="dist-order-next" disabled={!nextStatus[order.status]} onClick={onAdvance}>{actionLabel[order.status]} <ArrowLeft size={13}/></button></div>;
+}
+function Empty({ title, desc }: { title:string; desc:string }) {
+  return <div className="dist-empty"><span><ClipboardList size={21}/></span><b>{title}</b><p>{desc}</p></div>;
+}
+function FormField({ label, value, onChange, placeholder, type="text" }: { label:string; value:string; onChange:(v:string)=>void; placeholder?:string; type?:string }) {
+  return <label className="dist-form-label">{label}<input type={type} value={value} placeholder={placeholder} onChange={e=>onChange(e.target.value)}/></label>;
+}
+function DatabaseIcon() { return <Boxes size={18}/>; }
