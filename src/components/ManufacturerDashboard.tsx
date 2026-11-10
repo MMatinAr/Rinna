@@ -275,7 +275,7 @@ export default function ManufacturerDashboard() {
                 </select>
               </label>
               <label>محصول
-                <select value={regionalProductId} onChange={(e) => { const id = e.target.value; setRegionalProductId(id); const p = network.products.find((x) => x.id === id); const area = regionalArea || network.distributors.find((x) => x.id === regionalDistributorId)?.areas[0] || ""; setRegionalPriceDraft(String(p?.regionalPrices?.[regionalDistributorId + "::" + area] ?? p?.basePrice ?? "")); }}>
+                <select value={regionalProductId} onChange={(e) => { const id = e.target.value; setRegionalProductId(id); const p = network.products.find((x) => x.id === id); const selectedDistributor = network.distributors.find((x) => x.id === regionalDistributorId); const area = regionalArea || (selectedDistributor ? getDistributorAreas(selectedDistributor)[0] || "" : ""); setRegionalPriceDraft(String(p?.regionalPrices?.[regionalDistributorId + "::" + area] ?? p?.basePrice ?? "")); }}>
                   <option value="">انتخاب محصول</option>
                   {network.products.filter((p) => p.active).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
                 </select>
@@ -283,7 +283,7 @@ export default function ManufacturerDashboard() {
               <label>محدوده تحویل
                 <select value={regionalArea} onChange={(e) => { const area = e.target.value; setRegionalArea(area); const p = network.products.find((x) => x.id === regionalProductId); setRegionalPriceDraft(String(p?.regionalPrices?.[regionalDistributorId + "::" + area] ?? p?.basePrice ?? "")); }}>
                   <option value="">انتخاب محدوده</option>
-                  {(network.distributors.find((d) => d.id === regionalDistributorId) ? getDistributorAreas(network.distributors.find((d) => d.id === regionalDistributorId)!) : []).map((area) => <option key={area} value={area}>{area}</option>)}
+                  {network.distributors.flatMap((d) => d.id === regionalDistributorId ? getDistributorAreas(d).map((area) => <option key={area} value={area}>{area}</option>) : [])}
                 </select>
               </label>
               <label>قیمت این محدوده (تومان)<input type="number" min="1" value={regionalPriceDraft} onChange={(e) => setRegionalPriceDraft(e.target.value)} placeholder="قیمت نهایی منطقه" /></label>
