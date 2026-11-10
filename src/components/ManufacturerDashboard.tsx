@@ -231,27 +231,33 @@ export default function ManufacturerDashboard() {
           {section === "catalog" && <section className="manufacturer-panel">
             <div className="panel-heading catalog-toolbar"><div><h2>کاتالوگ رسمی محصولات</h2><p>مشخصات و شناسه مرجع محصولات برند را مدیریت کنید.</p></div><label className="manufacturer-search"><Search size={16} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="نام محصول یا بارکد..." /></label></div>
             <ProductTable products={filteredProducts} onPriceChange={(sku, price) => {
-              const currentProduct = network.products.find((p) => p.sku === sku);
-              if (!currentProduct || currentProduct.basePrice === price) return;
-              const next = {
-                ...network,
-                products: network.products.map((p) => p.sku === sku ? { ...p, basePrice: price } : p),
+              const latest = readDemoNetwork();
+              const currentProduct = latest.products.find((p) => p.sku === sku);
+              if (!currentProduct) { announce("محصول در کاتالوگ فعلی پیدا نشد؛ صفحه را تازه‌سازی کن."); return; }
+              if (!Number.isFinite(price) || price <= 0) { announce("قیمت واردشده معتبر نیست."); return; }
+              if (currentProduct.basePrice === price) { announce("قیمت جدید با قیمت فعلی یکسان است."); return; }
+              const changedAt = new Date().toISOString();
+              const next: DemoNetwork = {
+                ...latest,
+                products: latest.products.map((p) => p.id === currentProduct.id ? { ...p, basePrice: price } : p),
                 notifications: [
-                  ...(network.notifications || []),
-                  ...network.distributors.filter((d) => d.active).map((d) => ({
-                    id: "PRICE-" + Date.now() + "-" + d.id,
+                  ...(latest.notifications || []),
+                  ...latest.distributors.filter((d) => d.active).map((d) => ({
+                    id: "PRICE-BASE-" + changedAt + "-" + d.id,
                     distributorId: d.id,
                     productId: currentProduct.id,
                     productName: currentProduct.name,
                     oldPrice: currentProduct.basePrice,
                     newPrice: price,
-                    createdAt: new Date().toISOString(),
+                    scope: "قیمت پایه",
+                    createdAt: changedAt,
                     read: false,
                   })),
                 ],
               };
-              setNetwork(next); writeDemoNetwork(next);
-              announce("قیمت رسمی تغییر کرد و اعلان آن برای پخش‌کنندگان فعال ارسال شد.");
+              writeDemoNetwork(next);
+              setNetwork(next);
+              announce("قیمت پایه کارخانه تغییر کرد و برای " + fa(next.distributors.filter((d) => d.active).length) + " پخش‌کننده اعلان ارسال شد.");
             }} onEditPrice={(product) => setPriceEdit({ sku: product.sku, name: product.name, price: String(product.price) })} />
           </section>}
 
