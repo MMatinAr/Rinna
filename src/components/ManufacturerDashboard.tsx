@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import {
   Activity, ArrowDownLeft, ArrowUpLeft, Bell, Boxes, Check, ChevronDown,
   CircleHelp, ClipboardList, Command, LayoutDashboard, MapPinned, Package,
-  Plus, Search, Settings2, Truck, Wallet, X,
+  Menu, Plus, Search, Settings2, Truck, Wallet, X,
 } from "lucide-react";
 import { useManufacturerData, type ManufacturerDistributorView, type ManufacturerProductView } from "../data/manufacturerData";
 import { readDemoNetwork, writeDemoNetwork, type DemoDistributor, type DemoNetwork } from "../data/demoNetwork";
@@ -29,6 +29,7 @@ const getDistributorAreas = (distributor: DemoDistributor) => {
 
 export default function ManufacturerDashboard() {
   const [section, setSection] = useState<Section>("overview");
+  const [mobileNav, setMobileNav] = useState(false);
   const [query, setQuery] = useState("");
   const [notice, setNotice] = useState("");
   const [showAdd, setShowAdd] = useState(false);
@@ -189,10 +190,11 @@ export default function ManufacturerDashboard() {
 
   return (
     <div className="manufacturer-shell" dir="rtl">
-      <aside className="manufacturer-sidebar">
+      <aside className={"manufacturer-sidebar " + (mobileNav ? "is-open" : "")}>
         <a className="manufacturer-brand" href="/">
           <span className="manufacturer-brand-symbol"><Command size={19} /></span>
           <span><b>RINNA</b><small>MANUFACTURER PORTAL</small></span>
+          <button className="manufacturer-mobile-close" onClick={() => setMobileNav(false)} aria-label="بستن منو"><X size={19} /></button>
         </a>
         <div className="manufacturer-company">
           <span className="company-avatar">ک</span>
@@ -202,7 +204,7 @@ export default function ManufacturerDashboard() {
         <div className="manufacturer-nav-label">مدیریت شبکه</div>
         <nav className="manufacturer-nav">
           {navItems.map(({ id, label, icon: Icon }) => (
-            <button key={id} className={section === id ? "selected" : ""} onClick={() => setSection(id)}>
+            <button key={id} className={section === id ? "selected" : ""} onClick={() => { setSection(id); setMobileNav(false); }}>
               <Icon size={17} /><span>{label}</span>{id === "distributors" && <i>{fa(network.distributors.length)}</i>}
             </button>
           ))}
@@ -213,9 +215,11 @@ export default function ManufacturerDashboard() {
           <button onClick={() => announce("راهنمای پنل در حال آماده‌سازی است.")}><CircleHelp size={17} /> راهنما و پشتیبانی</button>
         </div>
       </aside>
+      {mobileNav && <button className="manufacturer-mobile-backdrop" aria-label="بستن منو" onClick={() => setMobileNav(false)} />}
 
       <main className="manufacturer-main">
         <header className="manufacturer-topbar">
+          <button className="manufacturer-mobile-menu" onClick={() => setMobileNav(true)} aria-label="باز کردن منو"><Menu size={20} /></button>
           <div className="breadcrumb"><span>پنل تولیدکننده</span><b>/</b><strong>{navItems.find((item) => item.id === section)?.label}</strong></div>
           <div className="topbar-actions">
             <span className="topbar-date">{data.isMock ? "حالت ارائه MVP" : "داده‌های سرویس"}</span>
