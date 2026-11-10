@@ -49,7 +49,7 @@ export const initialDemoNetwork: DemoNetwork = {
   distributors: [
     { id: "SUP-1", name: "پخش آریا", city: "تهران", areas: ["شمال تهران", "مرکز تهران"], active: true },
     { id: "SUP-2", name: "توزیع سپهر", city: "تهران", areas: ["غرب تهران"], active: true },
-    { id: "SUP-3", name: "پخش پارس", city: "تهران", areas: ["شرق تهران", "جنوب تهران"], active: true }
+    { id: "SUP-3", name: "پخش پارس", city: "تهران", areas: ["ونک و میرداماد", "جردن و الهیه", "سعادت‌آباد و شهرک غرب", "یوسف‌آباد و امیرآباد"], active: true }
   ]
 };
 
@@ -60,7 +60,11 @@ export function readDemoNetwork(): DemoNetwork {
       const parsed = JSON.parse(raw) as Partial<DemoNetwork>;
       return {
         products: Array.isArray(parsed.products) ? parsed.products : initialDemoNetwork.products,
-        distributors: Array.isArray(parsed.distributors) ? parsed.distributors : initialDemoNetwork.distributors,
+        distributors: Array.isArray(parsed.distributors) ? parsed.distributors.map((item) =>
+          item.id === "SUP-3" && item.areas?.join("|") === "شرق تهران|جنوب تهران"
+            ? { ...item, areas: ["ونک و میرداماد", "جردن و الهیه", "سعادت‌آباد و شهرک غرب", "یوسف‌آباد و امیرآباد"] }
+            : item
+        ) : initialDemoNetwork.distributors,
         notifications: Array.isArray(parsed.notifications) ? parsed.notifications : []
       };
     }
