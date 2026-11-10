@@ -54,9 +54,9 @@ const initialCustomers: Customer[] = [
 const toman = (n: number) => new Intl.NumberFormat("fa-IR").format(n) + " تومان";
 const fa = (n: number) => new Intl.NumberFormat("fa-IR").format(n);
 const nowTime = () => new Intl.DateTimeFormat("fa-IR", { hour: "2-digit", minute: "2-digit" }).format(new Date());
-const loadState = () => {
+const loadState = (distributorId = "") => {
   try {
-    const raw = localStorage.getItem(STORE_KEY);
+    const raw = localStorage.getItem(STORE_KEY + (distributorId ? ":" + distributorId : ""));
     if (raw) return JSON.parse(raw);
   } catch { /* use the initial workspace when stored data is unavailable */ }
   const network = readDemoNetwork();
@@ -93,7 +93,8 @@ const actionLabel: Record<string, string> = {
 };
 
 export default function DistributorDashboard() {
-  const [data, setData] = useState<any>(loadState);
+  const [activeDistributorId, setActiveDistributorId] = useState(() => readDemoNetwork().distributors.find((d) => d.id === "SUP-3")?.id || readDemoNetwork().distributors[0]?.id || "");
+  const [data, setData] = useState<any>(() => loadState(activeDistributorId));
   const [section, setSection] = useState<Section>("home");
   const [query, setQuery] = useState("");
   const [orderFilter, setOrderFilter] = useState("همه");
@@ -104,7 +105,6 @@ export default function DistributorDashboard() {
   const [form, setForm] = useState<any>({});
 
   const [mobileNav, setMobileNav] = useState(false);
-  const [activeDistributorId, setActiveDistributorId] = useState(() => readDemoNetwork().distributors.find((d) => d.id === "SUP-3")?.id || readDemoNetwork().distributors[0]?.id || "");
   const [showNotifications, setShowNotifications] = useState(false);
   const demoNetwork = readDemoNetwork();
   const priceNotifications = (demoNetwork.notifications || []).filter((item) => item.distributorId === activeDistributorId).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
@@ -116,7 +116,8 @@ export default function DistributorDashboard() {
     setShowNotifications(true);
   };
 
-  useEffect(() => { localStorage.setItem(STORE_KEY, JSON.stringify(data)); }, [data]);
+  useEffect(() => { localStorage.setItem(STORE_KEY + (activeDistributorId ? ":" + activeDistributorId : ""), JSON.stringify(data)); window.dispatchEvent(new CustomEvent("rinna-distributor-workspace-updated", { detail: { distributorId: activeDistributorId, data } })); }, [data, activeDistributorId]);
+  useEffect(() => { setData(loadState(activeDistributorId)); }, [activeDistributorId]);
   useEffect(() => {
     const syncCatalog = (event?: Event) => {
       const network = (event as CustomEvent<DemoNetwork> | undefined)?.detail || readDemoNetwork();
