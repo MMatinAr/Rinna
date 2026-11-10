@@ -9,6 +9,7 @@ import {
   SlidersHorizontal, CalendarDays, CircleDot, RotateCcw, TrendingUp
 } from "lucide-react";
 import "../distributor.css";
+import DistributorInventory from "./DistributorInventory";
 
 type Section = "home" | "orders" | "inventory" | "coverage" | "customers" | "reports" | "settings";
 type OrderStatus = "تأییدشده" | "در حال آماده‌سازی" | "آماده ارسال" | "ارسال‌شده" | "تحویل‌شده" | "لغوشده";
@@ -96,7 +97,7 @@ export default function DistributorDashboard() {
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
   const [modal, setModal] = useState<"product" | "zone" | "cancel" | null>(null);
   const [form, setForm] = useState<any>({});
-  const [stockDraft, setStockDraft] = useState<Record<string, string>>({});
+
   const [mobileNav, setMobileNav] = useState(false);
 
   useEffect(() => { localStorage.setItem(STORE_KEY, JSON.stringify(data)); }, [data]);
@@ -125,10 +126,19 @@ export default function DistributorDashboard() {
     const status = nextStatus[order.status] as OrderStatus;
     const shippedItems = status === "ارسال‌شده" ? (order.reservations || []) : [];
     update("orders", data.orders.map((o: Order) => o.id === id ? { ...o, status, reservations: status === "ارسال‌شده" ? [] : o.reservations, history: [...o.history, { status, at: nowTime(), by: role }] } : o));
-    if (shippedItems.length) update("products", data.products.map((p: Product) => {
-      const qty = shippedItems.filter((r: { productId: string; qty: number }) => r.productId === p.id).reduce((sum, r) => sum + r.qty, 0);
-      return qty ? { ...p, stock: Math.max(0, p.stock - qty), reserved: Math.max(0, p.reserved - qty), updated: "همین الان" } : p;
-    }));
+    if (shippedItems.length) {
+      const grouped = shippedItems.reduce((acc: Record<string, number>, item: { productId: string; qty: number }) => ({ ...acc, [item.productId]: (acc[item.productId] || 0) + item.qty }), {});
+      update("products", data.products.map((p: Product) => {
+        const qty = grouped[p.id] || 0;
+        return qty ? { ...p, stock: Math.max(0, p.stock - qty), reserved: Math.max(0, p.reserved - qty), updated: "همین الان" } : p;
+      }));
+      const movements = Object.entries(grouped).map(([productId, qty]) => {
+        const product = data.products.find((p: Product) => p.id === productId);
+        if (!product) return null;
+        return { id: "IM-" + Date.now() + "-" + productId, productId, productName: product.name, type: "shipment", quantity: -qty, before: product.stock, after: Math.max(0, product.stock - qty), reservedBefore: product.reserved, reservedAfter: Math.max(0, product.reserved - qty), reason: "کسر موجودی هنگام ثبت ارسال", reference: id, actor: role, at: new Date().toISOString() };
+      }).filter(Boolean);
+      update("inventoryMovements", [...(data.inventoryMovements || []), ...movements].slice(-250));
+    }
     log("وضعیت سفارش " + id + " به «" + status + "» تغییر کرد");
     announce("وضعیت سفارش به‌روزرسانی شد");
   };
@@ -137,7 +147,16 @@ export default function DistributorDashboard() {
     const id = selected.id;
     const released = selected.reservations || [];
     update("orders", data.orders.map((o: Order) => o.id === id ? { ...o, status: "لغوشده", reservations: [], note: "لغو: " + form.reason, history: [...o.history, { status: "لغوشده", at: nowTime(), by: role + " — " + form.reason }] } : o));
-    if (released.length) update("products", data.products.map((p: Product) => ({ ...p, reserved: Math.max(0, p.reserved - released.filter((r: { productId: string; qty: number }) => r.productId === p.id).reduce((sum, r) => sum + r.qty, 0)) })));
+    if (released.length) {
+      const grouped = released.reduce((acc: Record<string, number>, item: { productId: string; qty: number }) => ({ ...acc, [item.productId]: (acc[item.productId] || 0) + item.qty }), {});
+      update("products", data.products.map((p: Product) => ({ ...p, reserved: Math.max(0, p.reserved - (grouped[p.id] || 0)) })));
+      const movements = Object.entries(grouped).map(([productId, qty]) => {
+        const product = data.products.find((p: Product) => p.id === productId);
+        if (!product) return null;
+        return { id: "IM-" + Date.now() + "-" + productId, productId, productName: product.name, type: "reservation-release", quantity: 0, before: product.stock, after: product.stock, reservedBefore: product.reserved, reservedAfter: Math.max(0, product.reserved - qty), reason: "آزادسازی رزرو پس از لغو سفارش", reference: id, actor: role, at: new Date().toISOString() };
+      }).filter(Boolean);
+      update("inventoryMovements", [...(data.inventoryMovements || []), ...movements].slice(-250));
+    }
     setModal(null); setSelectedOrder(null); setForm({});
     log("سفارش " + id + " لغو شد؛ رزرو اقلام باید در دفتر موجودی آزاد شود", "warning");
     announce("سفارش لغو شد و در تاریخچه ثبت شد");
@@ -153,15 +172,6 @@ export default function DistributorDashboard() {
     const zone: Zone = { id: "Z-" + Date.now().toString().slice(-4), name: form.name, fee: Number(form.fee), min: Number(form.min || 0), days: form.days || "شنبه تا پنجشنبه", eta: form.eta || "۱ روز کاری", active: true };
     update("zones", [zone, ...data.zones]); setModal(null); setForm({});
     log("محدوده ارسال «" + zone.name + "» اضافه شد"); announce("محدوده ارسال ثبت شد");
-  };
-  const saveStock = (id: string) => {
-    const value = Number(stockDraft[id]);
-    if (!Number.isFinite(value) || value < 0) return announce("موجودی باید عددی نامنفی باشد");
-    const product = data.products.find((p: Product) => p.id === id);
-    update("products", data.products.map((p: Product) => p.id === id ? { ...p, stock: value, updated: "همین الان" } : p));
-    setStockDraft((d) => ({ ...d, [id]: "" }));
-    log("موجودی «" + product.name + "» به " + fa(value) + " " + product.unit + " تغییر کرد", "sync");
-    announce("موجودی ذخیره شد");
   };
   const toggleZone = (id: string) => {
     const zone = data.zones.find((z: Zone) => z.id === id);
@@ -271,14 +281,13 @@ export default function DistributorDashboard() {
             <p className="dist-footnote"><CircleDot size={13}/> سفارش‌های دارای موجودی معتبر به‌صورت خودکار تأیید می‌شوند؛ اینجا فقط مراحل اجرای سفارش را مدیریت می‌کنی.</p>
           </>}
 
-          {section === "inventory" && <>
-            <div className="dist-inventory-stats"><div><small>کل محصولات</small><b>{fa(data.products.length)}</b></div><div><small>موجودی قابل فروش</small><b>{fa(data.products.reduce((s: number,p: Product)=>s+p.stock-p.reserved,0))} <small>واحد</small></b></div><div><small>هشدار موجودی</small><b className="dist-warn-number">{fa(lowStock.length)}</b></div><div><small>منبع موجودی</small><b>ثبت دستی</b></div></div>
-            <div className="dist-toolbar"><label className="dist-search"><Search size={17}/><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={searchPlaceholder}/></label><button className="dist-btn dist-btn-outline" onClick={() => { update("products", data.products.map((p: Product) => ({...p, updated:"همین الان"}))); log("بازبینی دستی فهرست موجودی انجام شد","sync"); announce("فهرست موجودی بازبینی شد"); }}><RefreshCw size={14}/> بازبینی فهرست</button><span className="dist-result-count">{fa(visibleProducts.length)} محصول</span></div>
-            <section className="dist-panel dist-table-panel"><div className="dist-table-scroll"><table className="dist-table"><thead><tr><th>محصول</th><th>شناسه کالا</th><th>قیمت پایه رسمی</th><th>موجودی فیزیکی</th><th>رزرو</th><th>قابل فروش</th><th>وضعیت</th><th>ثبت موجودی</th></tr></thead><tbody>
-              {visibleProducts.map((p: Product) => <tr key={p.id}><td><b>{p.name}</b><small className="dist-subcell">{p.unit}</small></td><td>{p.sku}</td><td>{toman(p.price)}</td><td>{fa(p.stock)}</td><td>{fa(p.reserved)}</td><td><b>{fa(p.stock-p.reserved)}</b></td><td><Status status={p.stock-p.reserved <= p.lowAt ? "کم‌موجود" : "موجود"}/></td><td><div className="dist-stock-edit"><input aria-label={"موجودی " + p.name} type="number" min="0" value={stockDraft[p.id] ?? ""} placeholder={String(p.stock)} onChange={(e)=>setStockDraft(d=>({...d,[p.id]:e.target.value}))}/><button disabled={stockDraft[p.id] === undefined || stockDraft[p.id] === ""} onClick={()=>saveStock(p.id)}><Check size={14}/></button></div></td></tr>)}
-            </tbody></table>{visibleProducts.length === 0 && <Empty title="محصولی پیدا نشد" desc="نام یا شناسه محصول را بررسی کن."/>}</div></section>
-            <div className="dist-info-note"><AlertTriangle size={16}/><span>قیمت پایه رسمی از کاتالوگ تولیدکننده می‌آید و در این پنل قابل تغییر نیست. موجودی ثبت‌شده در این نسخه در مرورگر ذخیره می‌شود.</span></div>
-          </>}
+          {section === "inventory" && <DistributorInventory
+            products={data.products}
+            movements={data.inventoryMovements || []}
+            onProductsChange={(products) => update("products", products)}
+            onMovementsChange={(movements) => update("inventoryMovements", movements)}
+            onLog={log}
+          />}
 
           {section === "coverage" && <>
             <div className="dist-coverage-intro"><div><span className="dist-eyebrow">DELIVERY NETWORK</span><h2>محدوده‌های فعال سرویس‌دهی</h2><p>هزینه و برنامه ارسال برای هر محدوده مستقل است. غیرفعال‌کردن محدوده، سفارش جدید را متوقف می‌کند و سفارش‌های قبلی را تغییر نمی‌دهد.</p></div><div className="dist-coverage-number"><b>{fa(data.zones.filter((z: Zone)=>z.active).length)}</b><small>از {fa(data.zones.length)} محدوده فعال</small></div></div>
