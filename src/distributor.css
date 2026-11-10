@@ -181,3 +181,5 @@ html{max-width:100%;overflow-x:clip}
 .dist-top-actions{position:relative;z-index:61}
 .dist-notification-wrap{position:relative;z-index:62}
 .dist-notification-popover{z-index:9999;display:block}
+
+@media(max-width:850px){.dist-topbar{z-index:25}}
