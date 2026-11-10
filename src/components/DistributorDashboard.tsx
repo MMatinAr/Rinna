@@ -63,7 +63,7 @@ const loadState = () => {
   const products = network.products.filter((p) => p.active).map((p) => {
     const existing = initialProducts.find((item) => item.sku === p.sku);
     return existing
-      ? { ...existing, id: p.id, name: p.name, price: p.basePrice, category: p.category, unit: p.pack, manufacturerProductId: p.id, regionalPrices: {} }
+      ? { ...existing, name: p.name, price: p.basePrice, category: p.category, unit: p.pack, manufacturerProductId: p.id, regionalPrices: existing.regionalPrices || {} }
       : { id: p.id, name: p.name, sku: p.sku, unit: p.pack, price: p.basePrice, stock: 0, reserved: 0, lowAt: 5, category: p.category, updated: "از کاتالوگ کارخانه", manufacturerProductId: p.id, regionalPrices: {} };
   });
   return { products, orders: initialOrders, zones: initialZones, customers: initialCustomers, activity: [{ id: 1, text: "کاتالوگ رسمی کارخانه همگام‌سازی شد", time: "اکنون", type: "sync" }] };
@@ -113,7 +113,7 @@ export default function DistributorDashboard() {
         const products = network.products.filter((p) => p.active).map((p) => {
           const existing = current.products.find((item: Product) => item.manufacturerProductId === p.id || item.sku === p.sku);
           return existing
-            ? { ...existing, id: p.id, name: p.name, sku: p.sku, unit: p.pack, price: p.basePrice, category: p.category, manufacturerProductId: p.id }
+            ? { ...existing, name: p.name, sku: p.sku, unit: p.pack, price: p.basePrice, category: p.category, manufacturerProductId: p.id, regionalPrices: existing.regionalPrices || {} }
             : { id: p.id, name: p.name, sku: p.sku, unit: p.pack, price: p.basePrice, stock: 0, reserved: 0, lowAt: 5, category: p.category, updated: "از کاتالوگ کارخانه", manufacturerProductId: p.id, regionalPrices: {} };
         });
         return { ...current, products };
