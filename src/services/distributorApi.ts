@@ -63,7 +63,6 @@ export interface DistributorProduct {
 export interface CreateDistributorProductRequest {
   catalog_product_id: number;
   low_stock_threshold?: number;
-  initial_stock?: number;
   is_active?: boolean;
 }
 
