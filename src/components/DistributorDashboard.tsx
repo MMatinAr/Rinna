@@ -72,11 +72,8 @@ const loadState = () => {
 const navItems: { id: Section; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "home", label: "میز کار", icon: LayoutDashboard },
   { id: "orders", label: "سفارش‌ها", icon: ClipboardList },
-  { id: "inventory", label: "محصولات و موجودی", icon: Boxes },
+  { id: "inventory", label: "کاتالوگ کارخانه و موجودی", icon: Boxes },
   { id: "coverage", label: "مناطق و ارسال", icon: Truck },
-  { id: "customers", label: "مشتریان من", icon: Users },
-  { id: "reports", label: "گزارش عملکرد", icon: BarChart3 },
-  { id: "settings", label: "تنظیمات", icon: Settings2 }
 ];
 const nextStatus: Record<string, OrderStatus | null> = {
   "تأییدشده": "در حال آماده‌سازی",
@@ -261,7 +258,7 @@ export default function DistributorDashboard() {
           <div className="dist-page-head">
             <div><div className="dist-kicker">DISTRIBUTOR WORKSPACE <span></span> DEMO NETWORK</div><h1>{section === "home" ? "روز بخیر، وقت مدیریت رسیده." : title}</h1><p>{section === "home" ? "وضعیت عملیات امروزت را یک‌جا ببین و کارهای مهم را جلو ببر." : section === "orders" ? "سفارش‌های شبکه خودت را آماده‌سازی، ارسال و پیگیری کن." : section === "inventory" ? "عرضه محصولات، موجودی قابل فروش و هشدار کمبود را مدیریت کن." : section === "coverage" ? "محدوده‌های سرویس‌دهی و شرایط ارسال را کنترل کن." : section === "customers" ? "مشتری‌های فعال و سابقه خرید آن‌ها در شبکه توزیع." : section === "reports" ? "نمایی از فروش، سفارش‌ها و کیفیت اجرای عملیات." : "تنظیمات فضای کاری و رفتارهای عملیاتی مجموعه."}</p></div>
             <div className="dist-head-actions">
-              {section === "inventory" && <button className="dist-btn dist-btn-primary" onClick={() => { const item = officialCatalog[0]; setForm({ catalogSku: item.sku, name: item.name, sku: item.sku, price: item.price, unit: item.unit, category: item.category, stock: "", lowAt: 5 }); setModal("product"); }}><Plus size={16} /> افزودن محصول</button>}
+              {section === "inventory" && <span className="dist-local-tag">کاتالوگ رسمی کارخانه · همگام‌شده</span>}
               {section === "coverage" && <button className="dist-btn dist-btn-primary" onClick={() => { setForm({}); setModal("zone"); }}><Plus size={16} /> محدوده جدید</button>}
               {(section === "orders" || section === "reports") && <button className="dist-btn dist-btn-outline" onClick={exportOrders}><Download size={15} /> خروجی سفارش‌ها</button>}
             </div>
