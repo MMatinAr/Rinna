@@ -164,7 +164,14 @@ export default function DistributorDashboard() {
   const saveProduct = () => {
     if (!String(form.name || "").trim() || !Number(form.price) || Number(form.stock) < 0 || data.products.some((p: Product) => p.sku === form.sku)) return announce("محصول تکراری است یا اطلاعات موجودی معتبر نیست");
     const product: Product = { id: "P-" + Date.now().toString().slice(-5), name: form.name, sku: form.sku || "NEW-" + Date.now().toString().slice(-4), unit: form.unit || "عدد", price: Number(form.price), stock: Number(form.stock), reserved: 0, lowAt: Number(form.lowAt || 5), category: form.category || "سایر", updated: "همین الان" };
-    update("products", [product, ...data.products]); setModal(null); setForm({});
+    update("products", [product, ...data.products]);
+    if (product.stock > 0) update("inventoryMovements", [{
+      id: "IM-" + Date.now() + "-" + product.id, productId: product.id, productName: product.name,
+      type: "receipt", quantity: product.stock, before: 0, after: product.stock,
+      reservedBefore: 0, reservedAfter: 0, reason: "موجودی اولیه هنگام افزودن محصول",
+      actor: role, at: new Date().toISOString()
+    }, ...(data.inventoryMovements || [])].slice(0, 250));
+    setModal(null); setForm({});
     log("محصول «" + product.name + "» به فهرست عرضه اضافه شد"); announce("محصول جدید ثبت شد");
   };
   const saveZone = () => {
