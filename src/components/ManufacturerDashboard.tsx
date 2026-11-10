@@ -73,24 +73,21 @@ export default function ManufacturerDashboard() {
       announce("نام، بارکد، بسته‌بندی و قیمت پایه را کامل کنید.");
       return;
     }
-    if (data.isMock) {
-      announce("حالت نمایشی: ثبت محصول در سرور انجام نشد.");
-      setShowAdd(false);
-      return;
-    }
-    try {
-      await data.createProduct({
-        name: newProduct.name.trim(),
-        barcode: newProduct.barcode.trim(),
-        packaging: newProduct.packaging.trim(),
-        category_id: Number(newProduct.categoryId) || 1,
-      }).unwrap();
-      setShowAdd(false);
-      setNewProduct({ name: "", barcode: "", packaging: "", categoryId: "1" });
-      announce("محصول با موفقیت به کاتالوگ اضافه شد.");
-    } catch {
-      announce("ثبت محصول انجام نشد؛ اطلاعات و اتصال سرور را بررسی کنید.");
-    }
+    const nextProduct = {
+      id: "CAT-" + Date.now(),
+      name: newProduct.name.trim(),
+      sku: newProduct.barcode.trim(),
+      category: "سایر",
+      pack: newProduct.packaging.trim(),
+      basePrice: Number((newProduct as any).basePrice),
+      active: true,
+    };
+    const nextNetwork = { ...network, products: [nextProduct, ...network.products] };
+    setNetwork(nextNetwork);
+    writeDemoNetwork(nextNetwork);
+    setShowAdd(false);
+    setNewProduct({ name: "", barcode: "", packaging: "", categoryId: "1" });
+    announce("محصول به کاتالوگ کارخانه اضافه شد و در پنل پخش‌کننده قابل مشاهده است.");
   };
 
   const saveDistributor = () => {
@@ -191,7 +188,7 @@ export default function ManufacturerDashboard() {
 
           {section === "catalog" && <section className="manufacturer-panel">
             <div className="panel-heading catalog-toolbar"><div><h2>کاتالوگ رسمی محصولات</h2><p>مشخصات و شناسه مرجع محصولات برند را مدیریت کنید.</p></div><label className="manufacturer-search"><Search size={16} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="نام محصول یا بارکد..." /></label></div>
-            <ProductTable products={filteredProducts} />
+            <ProductTable products={filteredProducts} onPriceChange={(sku, price) => { const next = { ...network, products: network.products.map((p) => p.sku === sku ? { ...p, basePrice: price } : p) }; setNetwork(next); writeDemoNetwork(next); announce("قیمت پایه رسمی به‌روزرسانی و برای پخش‌کننده‌ها همگام شد."); }} />
           </section>}
 
           {section === "prices" && <div className="manufacturer-price-layout">
@@ -235,8 +232,8 @@ function Metric({ label, value, detail, icon, trend }: { label: string; value: s
 function Attention({ icon, title, desc, onClick }: { icon: ReactNode; title: string; desc: string; onClick: () => void }) {
   return <button className="attention-item" onClick={onClick}><span>{icon}</span><div><b>{title}</b><small>{desc}</small></div><ArrowDownLeft size={15} /></button>;
 }
-function ProductTable({ products }: { products: ManufacturerProductView[] }) {
-  return <div className="manufacturer-table-wrap"><table className="manufacturer-table"><thead><tr><th>محصول</th><th>شناسه کالا</th><th>بسته‌بندی</th><th>قیمت پایه</th><th>وضعیت</th></tr></thead><tbody>{products.map((p) => <tr key={p.id}><td><b>{p.name}</b><small>{p.category}</small></td><td>{p.sku}</td><td>{p.pack}</td><td>{money(p.price)}</td><td><span className={p.status === "فعال" ? "table-status good" : "table-status warn"}>{p.status}</span></td></tr>)}</tbody></table>{products.length === 0 && <div className="table-empty">محصولی پیدا نشد.</div>}</div>;
+function ProductTable({ products, onPriceChange }: { products: ManufacturerProductView[]; onPriceChange: (sku: string, price: number) => void }) {
+  return <div className="manufacturer-table-wrap"><table className="manufacturer-table"><thead><tr><th>محصول</th><th>شناسه کالا</th><th>بسته‌بندی</th><th>قیمت پایه</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody>{products.map((p) => <tr key={p.id}><td><b>{p.name}</b><small>{p.category}</small></td><td>{p.sku}</td><td>{p.pack}</td><td>{money(p.price)}</td><td><span className={p.status === "فعال" ? "table-status good" : "table-status warn"}>{p.status}</span></td><td><button className="manufacturer-button secondary" onClick={() => { const raw = window.prompt("قیمت پایه رسمی جدید (تومان)", String(p.price)); if (raw === null) return; const value = Number(raw); if (!Number.isFinite(value) || value <= 0) { window.alert("قیمت معتبر وارد کن."); return; } onPriceChange(p.sku, value); }}>تغییر قیمت</button></td></tr>)}</tbody></table>{products.length === 0 && <div className="table-empty">محصولی پیدا نشد.</div>}</div>;
 }
 function DistributorTable({ rows, compact = false, onRemove }: { rows: ManufacturerDistributorView[]; compact?: boolean; onRemove?: (name: string) => void }) {
   const visibleRows = compact ? rows.slice(0, 3) : rows;
