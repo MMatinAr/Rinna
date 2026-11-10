@@ -7,7 +7,8 @@ The distributor workspace is currently a frontend presentation prototype.
 - Daily workspace and order status flow
 - Manufacturer catalog synchronized from the shared demo network
 - Distributor stock quantities and stock movements
-- Distributor-specific selling price overrides per active delivery area
+- Read-only official prices published by the manufacturer
+- Distributor notifications when an official product price changes
 - Delivery area and delivery-condition management
 
 ## Shared demo behavior
@@ -15,9 +16,10 @@ The distributor workspace is currently a frontend presentation prototype.
 The manufacturer and distributor workspaces read and write the shared `rinna-demo-network-v1` browser storage record through `src/data/demoNetwork.ts`.
 
 - Adding a product or changing its official base price in the manufacturer workspace updates the distributor catalog.
+- A price-change notification is created for each active distributor only when the official price actually changes.
 - Adding or removing a distributor changes the manufacturer's network list.
 - Distributor stock remains distributor-owned.
-- Regional selling prices are stored separately from the official manufacturer base price.
+- Distributors cannot create or edit product prices; all product prices are controlled by the manufacturer.
 
 ## Important limitations
 
