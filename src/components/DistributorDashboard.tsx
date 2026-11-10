@@ -10,10 +10,11 @@ import {
 } from "lucide-react";
 import "../distributor.css";
 import DistributorInventory from "./DistributorInventory";
+import { readDemoNetwork, type DemoNetwork } from "../data/demoNetwork";
 
 type Section = "home" | "orders" | "inventory" | "coverage" | "customers" | "reports" | "settings";
 type OrderStatus = "تأییدشده" | "در حال آماده‌سازی" | "آماده ارسال" | "ارسال‌شده" | "تحویل‌شده" | "لغوشده";
-type Product = { id: string; name: string; sku: string; unit: string; price: number; stock: number; reserved: number; lowAt: number; category: string; updated: string };
+type Product = { id: string; name: string; sku: string; unit: string; price: number; stock: number; reserved: number; lowAt: number; category: string; updated: string; manufacturerProductId?: string; regionalPrices?: Record<string, number> };
 type Order = { id: string; customer: string; area: string; date: string; items: number; total: number; status: OrderStatus; address: string; note: string; reservations: { productId: string; qty: number }[]; history: { status: string; at: string; by: string }[] };
 type Zone = { id: string; name: string; fee: number; min: number; days: string; eta: string; active: boolean };
 type Customer = { id: string; name: string; cafe: string; area: string; orders: number; total: number; phone: string };
@@ -58,7 +59,14 @@ const loadState = () => {
     const raw = localStorage.getItem(STORE_KEY);
     if (raw) return JSON.parse(raw);
   } catch { /* use the initial workspace when stored data is unavailable */ }
-  return { products: initialProducts, orders: initialOrders, zones: initialZones, customers: initialCustomers, activity: [{ id: 1, text: "همگام‌سازی موجودی محصولات انجام شد", time: "۱۰:۴۲", type: "sync" }] };
+  const network = readDemoNetwork();
+  const products = network.products.filter((p) => p.active).map((p) => {
+    const existing = initialProducts.find((item) => item.sku === p.sku);
+    return existing
+      ? { ...existing, id: p.id, name: p.name, price: p.basePrice, category: p.category, unit: p.pack, manufacturerProductId: p.id, regionalPrices: {} }
+      : { id: p.id, name: p.name, sku: p.sku, unit: p.pack, price: p.basePrice, stock: 0, reserved: 0, lowAt: 5, category: p.category, updated: "از کاتالوگ کارخانه", manufacturerProductId: p.id, regionalPrices: {} };
+  });
+  return { products, orders: initialOrders, zones: initialZones, customers: initialCustomers, activity: [{ id: 1, text: "کاتالوگ رسمی کارخانه همگام‌سازی شد", time: "اکنون", type: "sync" }] };
 };
 
 const navItems: { id: Section; label: string; icon: typeof LayoutDashboard }[] = [
@@ -101,6 +109,23 @@ export default function DistributorDashboard() {
   const [mobileNav, setMobileNav] = useState(false);
 
   useEffect(() => { localStorage.setItem(STORE_KEY, JSON.stringify(data)); }, [data]);
+  useEffect(() => {
+    const syncCatalog = (event?: Event) => {
+      const network = (event as CustomEvent<DemoNetwork> | undefined)?.detail || readDemoNetwork();
+      setData((current: any) => {
+        const products = network.products.filter((p) => p.active).map((p) => {
+          const existing = current.products.find((item: Product) => item.manufacturerProductId === p.id || item.sku === p.sku);
+          return existing
+            ? { ...existing, id: p.id, name: p.name, sku: p.sku, unit: p.pack, price: p.basePrice, category: p.category, manufacturerProductId: p.id }
+            : { id: p.id, name: p.name, sku: p.sku, unit: p.pack, price: p.basePrice, stock: 0, reserved: 0, lowAt: 5, category: p.category, updated: "از کاتالوگ کارخانه", manufacturerProductId: p.id, regionalPrices: {} };
+        });
+        return { ...current, products };
+      });
+    };
+    window.addEventListener("rinna-demo-network-updated", syncCatalog);
+    window.addEventListener("storage", syncCatalog);
+    return () => { window.removeEventListener("rinna-demo-network-updated", syncCatalog); window.removeEventListener("storage", syncCatalog); };
+  }, []);
   useEffect(() => {
     if (!notice) return;
     const timer = window.setTimeout(() => setNotice(""), 2800);
@@ -204,7 +229,7 @@ export default function DistributorDashboard() {
           <span><b>RINNA</b><small>PARTNER WORKSPACE</small></span>
           <button className="dist-mobile-close" onClick={() => setMobileNav(false)} aria-label="بستن منو"><X size={18} /></button>
         </div>
-        <div className="dist-company"><span className="dist-company-avatar">پ</span><div><b>پخش پارس شمال</b><small>شبکه رسمی کاله</small></div><ChevronDown size={15} /></div>
+        <div className="dist-company"><span className="dist-company-avatar">پ</span><div><b>{readDemoNetwork().distributors.find((d) => d.id === "SUP-3")?.name || "پخش آزمایشی"}</b><small>شبکه رسمی کارخانه · حالت نمایشی</small></div><ChevronDown size={15} /></div>
         <div className="dist-nav-label">فضای کاری</div>
         <nav className="dist-nav">
           {navItems.map((item) => {
@@ -215,7 +240,7 @@ export default function DistributorDashboard() {
           })}
         </nav>
         <div className="dist-sidebar-bottom">
-          <div className="dist-network-state"><span></span><div><b>اتصال شبکه برقرار است</b><small>آخرین همگام‌سازی: ۱۰:۴۲</small></div></div>
+          <div className="dist-network-state"><span></span><div><b>کاتالوگ کارخانه متصل است</b><small>همگام‌سازی نمایشی در همین مرورگر</small></div></div>
           <button onClick={() => { setSection("settings"); setMobileNav(false); }}><CircleHelp size={16} /> راهنما و پشتیبانی</button>
           <div className="dist-user"><span className="dist-user-avatar">م</span><div><b>مدیر مجموعه</b><small>دسترسی کامل</small></div><Ellipsis size={18} /></div>
         </div>
@@ -234,7 +259,7 @@ export default function DistributorDashboard() {
 
         <div className="dist-content">
           <div className="dist-page-head">
-            <div><div className="dist-kicker">DISTRIBUTOR WORKSPACE <span></span> LOCAL DATA</div><h1>{section === "home" ? "روز بخیر، وقت مدیریت رسیده." : title}</h1><p>{section === "home" ? "وضعیت عملیات امروزت را یک‌جا ببین و کارهای مهم را جلو ببر." : section === "orders" ? "سفارش‌های شبکه خودت را آماده‌سازی، ارسال و پیگیری کن." : section === "inventory" ? "عرضه محصولات، موجودی قابل فروش و هشدار کمبود را مدیریت کن." : section === "coverage" ? "محدوده‌های سرویس‌دهی و شرایط ارسال را کنترل کن." : section === "customers" ? "مشتری‌های فعال و سابقه خرید آن‌ها در شبکه توزیع." : section === "reports" ? "نمایی از فروش، سفارش‌ها و کیفیت اجرای عملیات." : "تنظیمات فضای کاری و رفتارهای عملیاتی مجموعه."}</p></div>
+            <div><div className="dist-kicker">DISTRIBUTOR WORKSPACE <span></span> DEMO NETWORK</div><h1>{section === "home" ? "روز بخیر، وقت مدیریت رسیده." : title}</h1><p>{section === "home" ? "وضعیت عملیات امروزت را یک‌جا ببین و کارهای مهم را جلو ببر." : section === "orders" ? "سفارش‌های شبکه خودت را آماده‌سازی، ارسال و پیگیری کن." : section === "inventory" ? "عرضه محصولات، موجودی قابل فروش و هشدار کمبود را مدیریت کن." : section === "coverage" ? "محدوده‌های سرویس‌دهی و شرایط ارسال را کنترل کن." : section === "customers" ? "مشتری‌های فعال و سابقه خرید آن‌ها در شبکه توزیع." : section === "reports" ? "نمایی از فروش، سفارش‌ها و کیفیت اجرای عملیات." : "تنظیمات فضای کاری و رفتارهای عملیاتی مجموعه."}</p></div>
             <div className="dist-head-actions">
               {section === "inventory" && <button className="dist-btn dist-btn-primary" onClick={() => { const item = officialCatalog[0]; setForm({ catalogSku: item.sku, name: item.name, sku: item.sku, price: item.price, unit: item.unit, category: item.category, stock: "", lowAt: 5 }); setModal("product"); }}><Plus size={16} /> افزودن محصول</button>}
               {section === "coverage" && <button className="dist-btn dist-btn-primary" onClick={() => { setForm({}); setModal("zone"); }}><Plus size={16} /> محدوده جدید</button>}
@@ -291,6 +316,7 @@ export default function DistributorDashboard() {
           {section === "inventory" && <DistributorInventory
             products={data.products}
             movements={data.inventoryMovements || []}
+            zones={data.zones.filter((zone: Zone) => zone.active).map((zone: Zone) => zone.name)}
             onProductsChange={(products) => update("products", products)}
             onMovementsChange={(movements) => update("inventoryMovements", movements)}
             onLog={log}
