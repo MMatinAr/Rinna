@@ -120,6 +120,24 @@ export default function DistributorDashboard() {
 
   const [mobileNav, setMobileNav] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  useEffect(() => {
+    if (!showNotifications) return;
+    const closeOnOutsidePointer = (event: PointerEvent) => {
+      const target = event.target;
+      if (target instanceof Element && !target.closest(".dist-notification-wrap")) {
+        setShowNotifications(false);
+      }
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setShowNotifications(false);
+    };
+    document.addEventListener("pointerdown", closeOnOutsidePointer);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsidePointer);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [showNotifications]);
   const [demoNetwork, setDemoNetwork] = useState<DemoNetwork>(readDemoNetwork);
   const priceNotifications = (demoNetwork.notifications || []).filter((item) => item.distributorId === activeDistributorId).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   const unreadPriceNotifications = priceNotifications.filter((item) => !item.read).length;
