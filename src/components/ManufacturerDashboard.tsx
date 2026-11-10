@@ -194,8 +194,8 @@ export default function ManufacturerDashboard() {
         <a className="manufacturer-brand" href="/">
           <span className="manufacturer-brand-symbol"><Command size={19} /></span>
           <span><b>RINNA</b><small>MANUFACTURER PORTAL</small></span>
-          <button className="manufacturer-mobile-close" onClick={() => setMobileNav(false)} aria-label="بستن منو"><X size={19} /></button>
         </a>
+        <button className="manufacturer-mobile-close" onClick={() => setMobileNav(false)} aria-label="بستن منو"><X size={19} /></button>
         <div className="manufacturer-company">
           <span className="company-avatar">ک</span>
           <span><b>گروه تولیدی کاله</b><small>حساب تولیدکننده</small></span>
