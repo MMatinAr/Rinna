@@ -149,16 +149,16 @@ export default function DistributorInventory({ products, movements, onProductsCh
             {visibleProducts.map((product) => {
               const available = product.stock - product.reserved;
               return <tr key={product.id}>
-                <td><b>{product.name}</b><small className="dist-subcell">{product.unit}</small></td>
-                <td>{product.sku}</td>
-                <td>{toman(product.price)}</td>
-                <td><b>{fa(product.stock)}</b></td>
-                <td>{fa(product.reserved)}</td>
-                <td><b className={available <= product.lowAt ? "dist-inv-low" : "dist-inv-available"}>{fa(available)}</b></td>
-                <td><span className={"dist-status " + (available <= product.lowAt ? "warning" : "success")}><i/>{available <= product.lowAt ? "نیازمند تأمین" : "موجود"}</span></td>
-                <td><div className="dist-inv-actions">
-                  <button onClick={() => openMovement(product, "receipt")}><PackagePlus size={14}/> ورود کالا</button>
-                  <button onClick={() => openMovement(product, "adjustment")}><PencilLine size={14}/> اصلاح</button>
+                <td data-label="محصول"><b>{product.name}</b><small className="dist-subcell">{product.unit}</small></td>
+                <td data-label="شناسه کالا">{product.sku}</td>
+                <td data-label="قیمت پایه رسمی">{toman(product.price)}</td>
+                <td data-label="موجودی فیزیکی"><b>{fa(product.stock)}</b></td>
+                <td data-label="رزروشده">{fa(product.reserved)}</td>
+                <td data-label="قابل فروش"><b className={available <= product.lowAt ? "dist-inv-low" : "dist-inv-available"}>{fa(available)}</b></td>
+                <td data-label="وضعیت"><span className={"dist-status " + (available <= product.lowAt ? "warning" : "success")}><i/>{available <= product.lowAt ? "نیازمند تأمین" : "موجود"}</span></td>
+                <td data-label="عملیات انبار"><div className="dist-inv-actions">
+                  <button type="button" className="dist-inv-action dist-inv-action-receipt" onClick={() => openMovement(product, "receipt")}><PackagePlus size={14}/> ورود کالا</button>
+                  <button type="button" className="dist-inv-action dist-inv-action-adjust" onClick={() => openMovement(product, "adjustment")}><PencilLine size={14}/> اصلاح</button>
                 </div></td>
               </tr>;
             })}
