@@ -69,3 +69,68 @@
 
 .dist-inv-modal .dist-form-label textarea{width:100%;min-height:78px;resize:vertical;border:1px solid #e7e1d6;border-radius:7px;padding:10px;background:#fff;color:#383930;font:inherit;font-size:10px;outline:none}
 .dist-inv-modal .dist-form-label textarea:focus{border-color:#D96F4D;box-shadow:0 0 0 3px #D96F4D18}
+
+
+/* Responsive navigation and no-horizontal-scroll layout */
+.distributor-shell{width:100%;max-width:100%;min-width:0;overflow-x:clip}
+.distributor-shell .dist-main,.distributor-shell .dist-content,.distributor-shell .dist-inventory-workspace,
+.distributor-shell .dist-panel,.distributor-shell .dist-toolbar,.distributor-shell .dist-table-panel{min-width:0;max-width:100%}
+.dist-sidebar{min-width:0}
+@media(max-width:850px){
+  .dist-sidebar{position:fixed;inset:0 0 0 auto;width:min(300px,88vw);height:100vh;height:100dvh;min-height:0;max-height:100dvh;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;flex:0 0 auto;padding-bottom:max(18px,env(safe-area-inset-bottom));transform:translate3d(110%,0,0);visibility:hidden;transition:transform .25s ease,visibility .25s ease}
+  .dist-sidebar.is-open{transform:translate3d(0,0,0);visibility:visible}
+  .dist-sidebar .dist-nav{padding-bottom:12px}
+  .dist-sidebar-bottom{margin-top:20px}
+  .dist-backdrop{z-index:29}
+  .dist-sidebar{z-index:30}
+}
+@media(max-width:700px){
+  .dist-table-scroll{width:100%;max-width:100%;overflow-x:clip;overflow-y:visible}
+  .dist-table{display:block;width:100%;white-space:normal}
+  .dist-table thead{display:none}
+  .dist-table tbody{display:grid;gap:10px;width:100%}
+  .dist-table tbody tr{display:grid;grid-template-columns:minmax(0,1fr);width:100%;min-width:0;padding:10px 12px;border:1px solid var(--d-line);border-radius:9px;background:#fff}
+  .dist-table tbody td{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;width:100%;min-width:0;padding:8px 0;border-bottom:1px solid #f1ede6;white-space:normal;text-align:left;overflow-wrap:anywhere}
+  .dist-table tbody td:last-child{border-bottom:0}
+  .dist-table tbody td::before{content:attr(data-label);flex:0 0 38%;max-width:38%;color:#969386;font-size:9px;text-align:right;line-height:1.8}
+  .dist-table tbody td>*{max-width:62%;min-width:0}
+  .dist-table tbody td[data-label="عملیات انبار"]{display:block}
+  .dist-table tbody td[data-label="عملیات انبار"]::before{display:block;max-width:none;margin-bottom:8px}
+  .dist-table tbody td[data-label="عملیات انبار"] .dist-inv-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}
+  .dist-table tbody td[data-label="عملیات انبار"] .dist-inv-actions button{justify-content:center;width:100%;min-width:0}
+  .dist-table tbody td[data-label="عملیات"] .dist-row-action,
+  .dist-table tbody td[data-label="اطلاعات"] .dist-row-action{max-width:62%}
+}
+@media(max-width:420px){
+  .dist-content{padding-inline:12px}
+  .dist-inventory-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .dist-inventory-stats>div{min-width:0;padding:11px}
+  .dist-inventory-stats b{font-size:17px;overflow-wrap:anywhere}
+  .dist-inv-explainer{padding:13px}
+  .dist-inv-explainer>span{white-space:normal;overflow-wrap:anywhere}
+  .dist-panel-head{align-items:flex-start;flex-wrap:wrap}
+  .dist-inv-ledger-row{grid-template-columns:30px minmax(0,1fr) auto}
+  .dist-inv-ledger-row small{white-space:normal;overflow-wrap:anywhere}
+  .dist-topbar{padding-inline:12px}
+}
+
+
+/* Explicit inventory action button skins (scoped above generic table rules) */
+.distributor-shell .dist-inventory-workspace .dist-table .dist-inv-actions>.dist-inv-action{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:34px;
+  padding:7px 11px;border:1px solid transparent;border-radius:7px;
+  font-family:inherit;font-size:10px;font-weight:700;line-height:1.4;white-space:nowrap;
+  box-shadow:none;transition:background .18s ease,border-color .18s ease,color .18s ease;
+}
+.distributor-shell .dist-inventory-workspace .dist-table .dist-inv-actions>.dist-inv-action-receipt{
+  background:#D96543!important;border-color:#D96543!important;color:#fff!important;
+}
+.distributor-shell .dist-inventory-workspace .dist-table .dist-inv-actions>.dist-inv-action-receipt:hover{
+  background:#B85D43!important;border-color:#B85D43!important;color:#fff!important;
+}
+.distributor-shell .dist-inventory-workspace .dist-table .dist-inv-actions>.dist-inv-action-adjust{
+  background:#EAF0E6!important;border-color:#D6E1D0!important;color:#607957!important;
+}
+.distributor-shell .dist-inventory-workspace .dist-table .dist-inv-actions>.dist-inv-action-adjust:hover{
+  background:#DCE8D6!important;border-color:#BFCFB7!important;color:#4F6848!important;
+}
