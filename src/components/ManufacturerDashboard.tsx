@@ -306,7 +306,7 @@ export default function ManufacturerDashboard() {
           {section === "distributors" && <section className="manufacturer-panel">
             <div className="panel-heading"><div><h2>اعضای شبکه توزیع</h2><p>هر پخش‌کننده می‌تواند در چند منطقه و چند شبکه مجاز فعالیت کند.</p></div><label className="manufacturer-search"><Search size={16} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="جست‌وجوی پخش‌کننده..." /></label></div>
             {profileDistributor && <section className="manufacturer-panel distributor-profile-panel">
-              <div className="panel-heading"><div><span className="manufacturer-kicker">DISTRIBUTOR PROFILE</span><h2>{profileDistributor.name}</h2><p>{profileDistributor.city} · {profileDistributor.areas.join("، ") || "بدون محدوده ثبت‌شده"}</p></div><button className="manufacturer-button secondary" onClick={() => setProfileDistributorId(null)}>بستن پروفایل</button></div>
+              <div className="panel-heading"><div><span className="manufacturer-kicker">DISTRIBUTOR PROFILE</span><h2>{profileDistributor.name}</h2><p>{profileDistributor.city} · {getDistributorAreas(profileDistributor).join("، ") || "بدون محدوده فعال"}</p></div><button className="manufacturer-button secondary" onClick={() => setProfileDistributorId(null)}>بستن پروفایل</button></div>
               <div className="manufacturer-profile-metrics">
                 <div><small>محصولات دارای موجودی</small><b>{fa(profileProducts.length)}</b></div>
                 <div><small>کل سفارش‌ها</small><b>{fa(profileOrders.length)}</b></div>
