@@ -280,7 +280,7 @@ export default function DistributorDashboard() {
           <div className="dist-top-actions">
             <span className="dist-date"><CalendarDays size={15} /> سه‌شنبه، ۱۹ آبان ۱۴۰۵</span>
             <div className="dist-notification-wrap">
-              <button className="dist-icon-btn" onClick={() => showNotifications ? setShowNotifications(false) : markPriceNotificationsRead()} aria-expanded={showNotifications} aria-label="اعلان‌ها"><Bell size={18}/>{unreadPriceNotifications > 0 && <i>{fa(unreadPriceNotifications)}</i>}</button>
+              <button className="dist-icon-btn" onClick={() => setShowNotifications((open) => !open)} aria-expanded={showNotifications} aria-label="اعلان‌ها"><Bell size={18}/>{unreadPriceNotifications > 0 && <i>{fa(unreadPriceNotifications)}</i>}</button>
               {showNotifications && <div className="dist-notification-popover">
                 <div className="dist-notification-heading"><b>اعلان‌های کارخانه</b><span>{fa(priceNotifications.length)} اعلان</span></div>
                 {priceNotifications.length === 0 ? <div className="dist-notification-empty">هنوز تغییری در قیمت محصولات اعلام نشده است.</div> : priceNotifications.slice(0, 12).map((item) => <div className={"dist-notification-item " + (!item.read ? "unread" : "")} key={item.id}>
