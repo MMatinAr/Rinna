@@ -154,6 +154,7 @@ export default function DistributorInventory({ products, movements, onProductsCh
       <div className="dist-toolbar">
         <label className="dist-search"><Search size={17}/><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="جست‌وجوی نام، شناسه یا دسته محصول..."/></label>
         <div className="dist-filter-wrap"><select value={filter} onChange={(event) => setFilter(event.target.value)}><option>همه</option><option>کم‌موجود</option><option>موجود</option></select></div>
+        <label className="dist-filter-wrap"><span>منطقه قیمت</span><select value={priceZone} onChange={(event) => setPriceZone(event.target.value)}>{zones.map((zone) => <option key={zone}>{zone}</option>)}</select></label>
         <span className="dist-result-count">{fa(visibleProducts.length)} محصول</span>
       </div>
 
