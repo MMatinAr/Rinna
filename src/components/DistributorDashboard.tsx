@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import {
   Activity, AlertTriangle, ArrowDownLeft, ArrowLeft, ArrowUpLeft, BarChart3,
-  Bell, Boxes, Building2, Check, CheckCircle2, ChevronDown, ChevronLeft,
+  Bell, Boxes, Building2, Check, CheckCheck, CheckCircle2, ChevronDown, ChevronLeft,
   CircleHelp, Clock3, Coffee, Download, Ellipsis, FileText, Filter, Gauge,
   LayoutDashboard, MapPin, Menu, Package, PackageCheck, Plus, Search,
   Settings2, ShoppingBag, Truck, Users, Wallet, X, RefreshCw, ClipboardList,
@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import "../distributor.css";
 import DistributorInventory from "./DistributorInventory";
-import { readDemoNetwork, type DemoNetwork } from "../data/demoNetwork";
+import { readDemoNetwork, writeDemoNetwork, type DemoNetwork } from "../data/demoNetwork";
 
 type Section = "home" | "orders" | "inventory" | "coverage" | "customers" | "reports" | "settings";
 type OrderStatus = "تأییدشده" | "در حال آماده‌سازی" | "آماده ارسال" | "ارسال‌شده" | "تحویل‌شده" | "لغوشده";
@@ -123,6 +123,26 @@ export default function DistributorDashboard() {
   const [demoNetwork, setDemoNetwork] = useState<DemoNetwork>(readDemoNetwork);
   const priceNotifications = (demoNetwork.notifications || []).filter((item) => item.distributorId === activeDistributorId).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   const unreadPriceNotifications = priceNotifications.filter((item) => !item.read).length;
+  const markPriceNotificationRead = (notificationId: string) => {
+    const network = readDemoNetwork();
+    const notifications = (network.notifications || []).map((item) =>
+      item.distributorId === activeDistributorId && item.id === notificationId ? { ...item, read: true } : item
+    );
+    const nextNetwork = { ...network, notifications };
+    writeDemoNetwork(nextNetwork);
+    setDemoNetwork(nextNetwork);
+  };
+  const markAllPriceNotificationsRead = () => {
+    if (!unreadPriceNotifications) return;
+    const network = readDemoNetwork();
+    const notifications = (network.notifications || []).map((item) =>
+      item.distributorId === activeDistributorId ? { ...item, read: true } : item
+    );
+    const nextNetwork = { ...network, notifications };
+    writeDemoNetwork(nextNetwork);
+    setDemoNetwork(nextNetwork);
+    announce("همه اعلان‌ها خوانده‌شده علامت خوردند");
+  };
   useEffect(() => { if (workspaceOwnerId !== activeDistributorId) return; localStorage.setItem(STORE_KEY + (activeDistributorId ? ":" + activeDistributorId : ""), JSON.stringify(data)); window.dispatchEvent(new CustomEvent("rinna-distributor-workspace-updated", { detail: { distributorId: activeDistributorId, data } })); }, [data, activeDistributorId, workspaceOwnerId]);
   useEffect(() => { setData(loadState(activeDistributorId)); setWorkspaceOwnerId(activeDistributorId); }, [activeDistributorId]);
   useEffect(() => {
@@ -274,9 +294,10 @@ export default function DistributorDashboard() {
             <div className="dist-notification-wrap">
               <button className="dist-icon-btn" onClick={() => setShowNotifications((open) => !open)} aria-expanded={showNotifications} aria-label="اعلان‌ها"><Bell size={18}/>{unreadPriceNotifications > 0 && <i>{fa(unreadPriceNotifications)}</i>}</button>
               {showNotifications && <div className="dist-notification-popover">
-                <div className="dist-notification-heading"><b>اعلان‌های کارخانه</b><span>{fa(priceNotifications.length)} اعلان</span></div>
+                <div className="dist-notification-heading"><div><b>اعلان‌های کارخانه</b><span>{fa(unreadPriceNotifications)} خوانده‌نشده از {fa(priceNotifications.length)} اعلان</span></div>{unreadPriceNotifications > 0 && <button className="dist-notification-read-all" onClick={markAllPriceNotificationsRead}><CheckCheck size={14} /> خواندن همه</button>}</div>
                 {priceNotifications.length === 0 ? <div className="dist-notification-empty">هنوز تغییری در قیمت محصولات اعلام نشده است.</div> : priceNotifications.slice(0, 12).map((item) => <div className={"dist-notification-item " + (!item.read ? "unread" : "")} key={item.id}>
-                  <span className="dist-notification-dot"></span><div><b>تغییر قیمت محصول</b><p>قیمت «{item.productName}»{item.scope ? " · " + item.scope : ""} از {toman(item.oldPrice)} به {toman(item.newPrice)} تغییر کرد.</p><time>{new Intl.DateTimeFormat("fa-IR", { dateStyle: "short", timeStyle: "short" }).format(new Date(item.createdAt))}</time></div>
+                  <span className="dist-notification-dot"></span><div className="dist-notification-copy"><b>تغییر قیمت محصول</b><p>قیمت «{item.productName}»{item.scope ? " · " + item.scope : ""} از {toman(item.oldPrice)} به {toman(item.newPrice)} تغییر کرد.</p><time>{new Intl.DateTimeFormat("fa-IR", { dateStyle: "short", timeStyle: "short" }).format(new Date(item.createdAt))}</time></div>
+                  {!item.read ? <button className="dist-notification-read" onClick={() => markPriceNotificationRead(item.id)}><Check size={14} /><span>خواندم</span></button> : <span className="dist-notification-read-state"><Check size={13} /> خوانده شد</span>}
                 </div>)}
               </div>}
             </div>
