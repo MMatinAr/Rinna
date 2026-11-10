@@ -156,3 +156,21 @@
 .dist-notification-item time{font-size:9px;color:#a5a194}
 .dist-official-price{font-weight:800;color:#3e4938}
 @media(max-width:600px){.dist-notification-popover{left:-42px;top:calc(100% + 10px)}}
+
+
+/* Prevent viewport-level horizontal overflow without breaking the notification popover. */
+html{max-width:100%;overflow-x:clip}
+#root{width:100%;max-width:100%;min-width:0}
+.distributor-shell{width:100%;max-width:100%;min-width:0}
+.dist-main,.dist-content,.dist-panel,.dist-home-grid>*{min-width:0;max-width:100%}
+.dist-notification-popover{max-width:calc(100vw - 24px);box-sizing:border-box}
+@media(max-width:600px){
+  .dist-notification-popover{left:auto;right:-42px;width:min(370px,calc(100vw - 24px))}
+  .dist-top-actions{min-width:0}
+  .dist-breadcrumb{min-width:0;overflow:hidden}
+  .dist-breadcrumb b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .dist-toolbar{min-width:0;flex-wrap:wrap}
+  .dist-search{min-width:0;flex:1 1 100%}
+  .dist-filter-wrap{max-width:100%;min-width:0}
+  .dist-page-head,.dist-summary-strip,.dist-metrics,.dist-zone-grid,.dist-report-grid{min-width:0;max-width:100%}
+}
