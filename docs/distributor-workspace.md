@@ -17,3 +17,15 @@ The distributor workspace is available at \`/distributor\`.
 - The manufacturer catalog owns official base prices. The distributor UI displays prices but does not provide an edit action for official base prices.
 - This page currently runs in local mode. No distributor API endpoint is assumed to exist. The API contract should be agreed with the backend owner before wiring RTK Query mutations and queries.
 - Analytics cards marked as sample are illustrative; only order totals are computed from the local dataset.
+
+
+## Inventory operations (Local Mode)
+
+The distributor inventory workspace now provides:
+- Physical stock, reserved quantity, and sellable quantity as separate figures.
+- Goods receipt that increases physical stock and requires a reason.
+- Physical stock adjustment that requires a reason and rejects values below the reserved quantity.
+- A movement ledger for receipts, manual adjustments, shipment deductions, and reservation releases after cancellation.
+- CSV export for the visible movement history.
+
+The browser-local workspace is a UI prototype, not a concurrency-safe inventory service. Production APIs must enforce atomic reservations, idempotency keys, tenant authorization, immutable movement records, and server-side validation. Existing seed data is retained when the workspace is upgraded; the movement ledger starts empty for historical activity that predates this feature.
