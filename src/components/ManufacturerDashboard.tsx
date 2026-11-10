@@ -6,7 +6,7 @@ import {
   Plus, Search, Settings2, Truck, Wallet, X,
 } from "lucide-react";
 import { useManufacturerData, type ManufacturerDistributorView, type ManufacturerProductView } from "../data/manufacturerData";
-import { readDemoNetwork, writeDemoNetwork, type DemoNetwork } from "../data/demoNetwork";
+import { readDemoNetwork, writeDemoNetwork, type DemoDistributor, type DemoNetwork } from "../data/demoNetwork";
 import "../manufacturer.css";
 
 type Section = "overview" | "catalog" | "prices" | "distributors" | "regions";
@@ -18,6 +18,14 @@ const navItems: { id: Section; label: string; icon: typeof LayoutDashboard }[] =
 ];
 const money = (value: number) => value.toLocaleString("fa-IR") + " تومان";
 const fa = (value: number) => value.toLocaleString("fa-IR");
+const getDistributorAreas = (distributor: DemoDistributor) => {
+  try {
+    const raw = localStorage.getItem("rinna-distributor-v1:" + distributor.id) || (distributor.id === "SUP-3" ? localStorage.getItem("rinna-distributor-v1") : null);
+    const workspace = raw ? JSON.parse(raw) : null;
+    const activeZones = Array.isArray(workspace?.zones) ? workspace.zones.filter((zone: any) => zone.active).map((zone: any) => zone.name).filter(Boolean) : [];
+    return activeZones.length ? activeZones : distributor.areas;
+  } catch { return distributor.areas; }
+};
 
 export default function ManufacturerDashboard() {
   const [section, setSection] = useState<Section>("overview");
@@ -52,7 +60,7 @@ export default function ManufacturerDashboard() {
       const workspace = JSON.parse(localStorage.getItem("rinna-distributor-v1:" + d.id) || (d.id === "SUP-3" ? localStorage.getItem("rinna-distributor-v1") : "null") || "null");
       orders = Array.isArray(workspace?.orders) ? workspace.orders.length : 0;
     } catch { /* keep the profile count at zero when local demo data is unavailable */ }
-    return { name: d.name, area: d.areas.join("، ") || d.city, orders, score: "—", status: d.active ? "فعال" : "غیرفعال" };
+    return { name: d.name, area: getDistributorAreas(d).join("، ") || d.city, orders, score: "—", status: d.active ? "فعال" : "غیرفعال" };
   });
 
   const filteredProducts = useMemo(
@@ -106,7 +114,7 @@ export default function ManufacturerDashboard() {
     const distributor = network.distributors.find((item) => item.id === regionalDistributorId && item.active);
     const product = network.products.find((item) => item.id === regionalProductId && item.active);
     const price = Number(regionalPriceDraft);
-    if (!distributor || !product || !regionalArea || !Number.isFinite(price) || price <= 0) {
+    if (!distributor || !product || !regionalArea || !getDistributorAreas(distributor).includes(regionalArea) || !Number.isFinite(price) || price <= 0) {
       announce("پخش‌کننده، محصول، محدوده و قیمت معتبر را انتخاب کن.");
       return;
     }
@@ -261,7 +269,7 @@ export default function ManufacturerDashboard() {
               <h2>قیمت‌گذاری منطقه‌ای</h2>
               <p>قیمت منطقه‌ای را کارخانه برای هر محصول و هر پخش‌کننده تعیین می‌کند. این قیمت فقط برای همان محدوده اعمال می‌شود و قیمت پایه رسمی را تغییر نمی‌دهد.</p>
               <label>پخش‌کننده
-                <select value={regionalDistributorId} onChange={(e) => { const id = e.target.value; setRegionalDistributorId(id); const d = network.distributors.find((x) => x.id === id); const area = d?.areas[0] || ""; setRegionalArea(area); const p = network.products.find((x) => x.id === regionalProductId); setRegionalPriceDraft(String(p?.regionalPrices?.[id + "::" + area] ?? p?.basePrice ?? "")); }}>
+                <select value={regionalDistributorId} onChange={(e) => { const id = e.target.value; setRegionalDistributorId(id); const d = network.distributors.find((x) => x.id === id); const area = d ? getDistributorAreas(d)[0] || "" : ""; setRegionalArea(area); const p = network.products.find((x) => x.id === regionalProductId); setRegionalPriceDraft(String(p?.regionalPrices?.[id + "::" + area] ?? p?.basePrice ?? "")); }}>
                   <option value="">انتخاب پخش‌کننده</option>
                   {network.distributors.filter((d) => d.active).map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
                 </select>
@@ -275,7 +283,7 @@ export default function ManufacturerDashboard() {
               <label>محدوده تحویل
                 <select value={regionalArea} onChange={(e) => { const area = e.target.value; setRegionalArea(area); const p = network.products.find((x) => x.id === regionalProductId); setRegionalPriceDraft(String(p?.regionalPrices?.[regionalDistributorId + "::" + area] ?? p?.basePrice ?? "")); }}>
                   <option value="">انتخاب محدوده</option>
-                  {(network.distributors.find((d) => d.id === regionalDistributorId)?.areas || []).map((area) => <option key={area} value={area}>{area}</option>)}
+                  {(network.distributors.find((d) => d.id === regionalDistributorId) ? getDistributorAreas(network.distributors.find((d) => d.id === regionalDistributorId)!) : []).map((area) => <option key={area} value={area}>{area}</option>)}
                 </select>
               </label>
               <label>قیمت این محدوده (تومان)<input type="number" min="1" value={regionalPriceDraft} onChange={(e) => setRegionalPriceDraft(e.target.value)} placeholder="قیمت نهایی منطقه" /></label>
