@@ -13,9 +13,7 @@ type Section = "overview" | "catalog" | "prices" | "distributors" | "regions";
 const navItems: { id: Section; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "overview", label: "نمای کلی", icon: LayoutDashboard },
   { id: "catalog", label: "کاتالوگ محصولات", icon: Package },
-  { id: "prices", label: "لیست قیمت", icon: Wallet },
   { id: "distributors", label: "شبکه پخش", icon: Truck },
-  { id: "regions", label: "مناطق پوشش", icon: MapPinned },
 ];
 const money = (value: number) => value.toLocaleString("fa-IR") + " تومان";
 const fa = (value: number) => value.toLocaleString("fa-IR");
@@ -131,7 +129,7 @@ export default function ManufacturerDashboard() {
         <header className="manufacturer-topbar">
           <div className="breadcrumb"><span>پنل تولیدکننده</span><b>/</b><strong>{navItems.find((item) => item.id === section)?.label}</strong></div>
           <div className="topbar-actions">
-            <span className="topbar-date">{data.isMock ? "حالت داده نمایشی" : "داده‌های سرویس"}</span>
+            <span className="topbar-date">{data.isMock ? "حالت ارائه MVP" : "داده‌های سرویس"}</span>
             <button className="notification-button" aria-label="اعلان‌ها" onClick={() => announce("اعلان جدیدی ندارید.")}><Bell size={18} /><i /></button>
             <span className="topbar-user">م</span>
           </div>
@@ -152,7 +150,7 @@ export default function ManufacturerDashboard() {
             </div>
           </div>
 
-          {data.isMock && <div className="manufacturer-data-note">این پنل در حال حاضر با داده‌های نمایشی اجرا می‌شود. برای اتصال به بک‌اند، مقدار <code>VITE_MANUFACTURER_DATA_MODE</code> را روی <code>api</code> قرار دهید.</div>}
+          {data.isMock && <div className="manufacturer-data-note">حالت ارائه MVP فعال است؛ تغییرات کاتالوگ و شبکه در همین مرورگر بین دو پنل همگام می‌شوند. برای اتصال به بک‌اند، مقدار <code>VITE_MANUFACTURER_DATA_MODE</code> را روی <code>api</code> قرار دهید.</div>}
           {data.isLoading && <div className="manufacturer-data-note">در حال دریافت اطلاعات از سرویس...</div>}
           {data.hasError && <div className="manufacturer-data-error">دریافت بخشی از اطلاعات با خطا روبه‌رو شد. آدرس API، احراز هویت و قرارداد پاسخ سرور را بررسی کنید.</div>}
 
