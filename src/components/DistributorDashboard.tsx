@@ -122,7 +122,7 @@ export default function DistributorDashboard() {
     const shippedItems = status === "ارسال‌شده" ? (order.reservations || []) : [];
     update("orders", data.orders.map((o: Order) => o.id === id ? { ...o, status, reservations: status === "ارسال‌شده" ? [] : o.reservations, history: [...o.history, { status, at: nowTime(), by: role }] } : o));
     if (shippedItems.length) update("products", data.products.map((p: Product) => {
-      const qty = shippedItems.filter((r) => r.productId === p.id).reduce((sum, r) => sum + r.qty, 0);
+      const qty = shippedItems.filter((r: { productId: string; qty: number }) => r.productId === p.id).reduce((sum, r) => sum + r.qty, 0);
       return qty ? { ...p, stock: Math.max(0, p.stock - qty), reserved: Math.max(0, p.reserved - qty), updated: "همین الان" } : p;
     }));
     log("وضعیت سفارش " + id + " به «" + status + "» تغییر کرد");
@@ -133,7 +133,7 @@ export default function DistributorDashboard() {
     const id = selected.id;
     const released = selected.reservations || [];
     update("orders", data.orders.map((o: Order) => o.id === id ? { ...o, status: "لغوشده", reservations: [], note: "لغو: " + form.reason, history: [...o.history, { status: "لغوشده", at: nowTime(), by: role + " — " + form.reason }] } : o));
-    if (released.length) update("products", data.products.map((p: Product) => ({ ...p, reserved: Math.max(0, p.reserved - released.filter((r) => r.productId === p.id).reduce((sum, r) => sum + r.qty, 0)) })));
+    if (released.length) update("products", data.products.map((p: Product) => ({ ...p, reserved: Math.max(0, p.reserved - released.filter((r: { productId: string; qty: number }) => r.productId === p.id).reduce((sum, r) => sum + r.qty, 0)) })));
     setModal(null); setSelectedOrder(null); setForm({});
     log("سفارش " + id + " لغو شد؛ رزرو اقلام باید در دفتر موجودی آزاد شود", "warning");
     announce("سفارش لغو شد و در تاریخچه ثبت شد");
