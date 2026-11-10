@@ -333,8 +333,6 @@ export default function DistributorDashboard() {
           {section === "inventory" && <DistributorInventory
             products={data.products}
             movements={data.inventoryMovements || []}
-            zones={data.zones.filter((zone: Zone) => zone.active).map((zone: Zone) => zone.name)}
-            distributorId={activeDistributorId}
             onProductsChange={(products) => update("products", products)}
             onMovementsChange={(movements) => update("inventoryMovements", movements)}
             onLog={log}
