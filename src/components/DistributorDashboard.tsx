@@ -14,7 +14,7 @@ import { readDemoNetwork, type DemoNetwork } from "../data/demoNetwork";
 
 type Section = "home" | "orders" | "inventory" | "coverage" | "customers" | "reports" | "settings";
 type OrderStatus = "تأییدشده" | "در حال آماده‌سازی" | "آماده ارسال" | "ارسال‌شده" | "تحویل‌شده" | "لغوشده";
-type Product = { id: string; name: string; sku: string; unit: string; price: number; stock: number; reserved: number; lowAt: number; category: string; updated: string; manufacturerProductId?: string; regionalPrices?: Record<string, number> };
+type Product = { id: string; name: string; sku: string; unit: string; price: number; stock: number; reserved: number; lowAt: number; category: string; updated: string; manufacturerProductId?: string };
 type Order = { id: string; customer: string; area: string; date: string; items: number; total: number; status: OrderStatus; address: string; note: string; reservations: { productId: string; qty: number }[]; history: { status: string; at: string; by: string }[] };
 type Zone = { id: string; name: string; fee: number; min: number; days: string; eta: string; active: boolean };
 type Customer = { id: string; name: string; cafe: string; area: string; orders: number; total: number; phone: string };
@@ -63,8 +63,8 @@ const loadState = () => {
   const products = network.products.filter((p) => p.active).map((p) => {
     const existing = initialProducts.find((item) => item.sku === p.sku);
     return existing
-      ? { ...existing, name: p.name, price: p.basePrice, category: p.category, unit: p.pack, manufacturerProductId: p.id, regionalPrices: existing.regionalPrices || {} }
-      : { id: p.id, name: p.name, sku: p.sku, unit: p.pack, price: p.basePrice, stock: 0, reserved: 0, lowAt: 5, category: p.category, updated: "از کاتالوگ کارخانه", manufacturerProductId: p.id, regionalPrices: {} };
+      ? { ...existing, name: p.name, price: p.basePrice, category: p.category, unit: p.pack, manufacturerProductId: p.id }
+      : { id: p.id, name: p.name, sku: p.sku, unit: p.pack, price: p.basePrice, stock: 0, reserved: 0, lowAt: 5, category: p.category, updated: "از کاتالوگ کارخانه", manufacturerProductId: p.id };
   });
   return { products, orders: initialOrders, zones: initialZones, customers: initialCustomers, activity: [{ id: 1, text: "کاتالوگ رسمی کارخانه همگام‌سازی شد", time: "اکنون", type: "sync" }] };
 };
@@ -105,6 +105,16 @@ export default function DistributorDashboard() {
 
   const [mobileNav, setMobileNav] = useState(false);
   const [activeDistributorId, setActiveDistributorId] = useState(() => readDemoNetwork().distributors.find((d) => d.id === "SUP-3")?.id || readDemoNetwork().distributors[0]?.id || "");
+  const [showNotifications, setShowNotifications] = useState(false);
+  const demoNetwork = readDemoNetwork();
+  const priceNotifications = (demoNetwork.notifications || []).filter((item) => item.distributorId === activeDistributorId).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  const unreadPriceNotifications = priceNotifications.filter((item) => !item.read).length;
+  const markPriceNotificationsRead = () => {
+    const latest = readDemoNetwork();
+    const next = { ...latest, notifications: (latest.notifications || []).map((item) => item.distributorId === activeDistributorId ? { ...item, read: true } : item) };
+    writeDemoNetwork(next);
+    setShowNotifications(true);
+  };
 
   useEffect(() => { localStorage.setItem(STORE_KEY, JSON.stringify(data)); }, [data]);
   useEffect(() => {
@@ -115,8 +125,8 @@ export default function DistributorDashboard() {
         const products = network.products.filter((p) => p.active).map((p) => {
           const existing = current.products.find((item: Product) => item.manufacturerProductId === p.id || item.sku === p.sku);
           return existing
-            ? { ...existing, name: p.name, sku: p.sku, unit: p.pack, price: p.basePrice, category: p.category, manufacturerProductId: p.id, regionalPrices: existing.regionalPrices || {} }
-            : { id: p.id, name: p.name, sku: p.sku, unit: p.pack, price: p.basePrice, stock: 0, reserved: 0, lowAt: 5, category: p.category, updated: "از کاتالوگ کارخانه", manufacturerProductId: p.id, regionalPrices: {} };
+            ? { ...existing, name: p.name, sku: p.sku, unit: p.pack, price: p.basePrice, category: p.category, manufacturerProductId: p.id }
+            : { id: p.id, name: p.name, sku: p.sku, unit: p.pack, price: p.basePrice, stock: 0, reserved: 0, lowAt: 5, category: p.category, updated: "از کاتالوگ کارخانه", manufacturerProductId: p.id };
         });
         return { ...current, products };
       });
@@ -240,7 +250,7 @@ export default function DistributorDashboard() {
         </nav>
         <div className="dist-sidebar-bottom">
           <div className="dist-network-state"><span></span><div><b>کاتالوگ کارخانه متصل است</b><small>همگام‌سازی نمایشی در همین مرورگر</small></div></div>
-          <button onClick={() => { announce("راهنمای نسخه نمایشی MVP: کاتالوگ از پنل کارخانه همگام می‌شود و قیمت منطقه‌ای از بخش موجودی قابل تنظیم است."); setMobileNav(false); }}><CircleHelp size={16} /> راهنما و پشتیبانی</button>
+          <button onClick={() => { announce("قیمت محصولات فقط توسط کارخانه تعیین می‌شود؛ تغییر قیمت از طریق اعلان به شما اطلاع داده می‌شود."); setMobileNav(false); }}><CircleHelp size={16} /> راهنما و پشتیبانی</button>
           <div className="dist-user"><span className="dist-user-avatar">م</span><div><b>مدیر مجموعه</b><small>دسترسی کامل</small></div><Ellipsis size={18} /></div>
         </div>
       </aside>
@@ -251,7 +261,15 @@ export default function DistributorDashboard() {
           <div className="dist-breadcrumb"><span>فضای همکاران</span><ChevronLeft size={14} /><b>{title}</b></div>
           <div className="dist-top-actions">
             <span className="dist-date"><CalendarDays size={15} /> سه‌شنبه، ۱۹ آبان ۱۴۰۵</span>
-            <button className="dist-icon-btn" onClick={() => announce("اعلان جدیدی برای نمایش وجود ندارد")} aria-label="اعلان‌ها"><Bell size={18} /><i></i></button>
+            <div className="dist-notification-wrap">
+              <button className="dist-icon-btn" onClick={() => showNotifications ? setShowNotifications(false) : markPriceNotificationsRead()} aria-label="اعلان‌ها"><Bell size={18}/>{unreadPriceNotifications > 0 && <i>{fa(unreadPriceNotifications)}</i>}</button>
+              {showNotifications && <div className="dist-notification-popover">
+                <div className="dist-notification-heading"><b>اعلان‌های کارخانه</b><span>{fa(priceNotifications.length)} اعلان</span></div>
+                {priceNotifications.length === 0 ? <div className="dist-notification-empty">هنوز تغییری در قیمت محصولات اعلام نشده است.</div> : priceNotifications.slice(0, 12).map((item) => <div className={"dist-notification-item " + (!item.read ? "unread" : "")} key={item.id}>
+                  <span className="dist-notification-dot"></span><div><b>تغییر قیمت محصول</b><p>قیمت «{item.productName}» از {toman(item.oldPrice)} به {toman(item.newPrice)} تغییر کرد.</p><time>{new Intl.DateTimeFormat("fa-IR", { dateStyle: "short", timeStyle: "short" }).format(new Date(item.createdAt))}</time></div>
+                </div>)}
+              </div>}
+            </div>
             <span className="dist-top-avatar">پ</span>
           </div>
         </header>
