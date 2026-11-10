@@ -6,7 +6,8 @@ The distributor workspace is available at \`/distributor\`.
 - The distributor UI is intentionally separate from the manufacturer dashboard and uses a warm charcoal / bone / terracotta / olive palette.
 - Local workspace data is persisted in browser localStorage under \`rinna-distributor-v1\`.
 - Orders can move through the operational lifecycle: confirmed → preparing → ready to ship → shipped → delivered. Cancellation requires a reason and is recorded in order history.
-- Inventory edits, new product offers, delivery areas, and activity entries update local state and persist after refresh.
+- Inventory edits, new product offers selected from the official sample catalog, delivery areas, and activity entries update local state and persist after refresh.
+- Distributor product offers cannot edit official base prices; a new offer selects its product and price from the manufacturer catalog.
 - CSV export is generated from the current local order dataset.
 - Role switching is a UX preview only. It is not authorization; the backend must enforce all permissions.
 
