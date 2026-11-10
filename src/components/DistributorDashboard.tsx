@@ -94,6 +94,7 @@ const actionLabel: Record<string, string> = {
 
 export default function DistributorDashboard() {
   const [activeDistributorId, setActiveDistributorId] = useState(() => readDemoNetwork().distributors.find((d) => d.id === "SUP-3")?.id || readDemoNetwork().distributors[0]?.id || "");
+  const [workspaceOwnerId, setWorkspaceOwnerId] = useState(activeDistributorId);
   const [data, setData] = useState<any>(() => loadState(activeDistributorId));
   const [section, setSection] = useState<Section>("home");
   const [query, setQuery] = useState("");
@@ -116,8 +117,8 @@ export default function DistributorDashboard() {
     setShowNotifications(true);
   };
 
-  useEffect(() => { localStorage.setItem(STORE_KEY + (activeDistributorId ? ":" + activeDistributorId : ""), JSON.stringify(data)); window.dispatchEvent(new CustomEvent("rinna-distributor-workspace-updated", { detail: { distributorId: activeDistributorId, data } })); }, [data, activeDistributorId]);
-  useEffect(() => { setData(loadState(activeDistributorId)); }, [activeDistributorId]);
+  useEffect(() => { if (workspaceOwnerId !== activeDistributorId) return; localStorage.setItem(STORE_KEY + (activeDistributorId ? ":" + activeDistributorId : ""), JSON.stringify(data)); window.dispatchEvent(new CustomEvent("rinna-distributor-workspace-updated", { detail: { distributorId: activeDistributorId, data } })); }, [data, activeDistributorId, workspaceOwnerId]);
+  useEffect(() => { setData(loadState(activeDistributorId)); setWorkspaceOwnerId(activeDistributorId); }, [activeDistributorId]);
   useEffect(() => {
     const syncCatalog = (event?: Event) => {
       const network = (event as CustomEvent<DemoNetwork> | undefined)?.detail || readDemoNetwork();
