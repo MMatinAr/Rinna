@@ -9,14 +9,17 @@ The manufacturer and distributor dashboards share a browser-based demo network t
 3. Open `/distributor` in a second tab using the same browser profile and origin.
 4. In the manufacturer catalog, add a product with a name, SKU/barcode, package, and official base price. It appears in the distributor catalog automatically.
 5. Change an existing product's official base price from the manufacturer catalog. The distributor receives the updated official price and a notification showing the old and new prices.
-6. In the manufacturer network section, add a distributor or remove one from the network.
-7. In the distributor workspace, select the demo distributor account and open the notification bell to review factory price changes.
+6. Open the manufacturer's regional pricing section. Select a distributor, product, and delivery area, then set a regional price. Only that distributor sees the regional price and receives the alert.
+7. Open the manufacturer's distributor network and select a distributor profile to inspect its inventory and orders.
+8. In the manufacturer network section, add a distributor or remove one from the network.
+9. In the distributor workspace, switch between demo distributor accounts to see separate inventory and order workspaces, then open the notification bell to review factory price changes.
 
 ## MVP scope shown in the UI
 
 - Manufacturer: overview, official catalog and base prices, distributor network.
 - Distributor: daily workspace, order flow, factory catalog and stock, delivery coverage.
-- All product prices are set and changed by the manufacturer; distributors can only view the official price.
+- All base and regional product prices are set and changed by the manufacturer; distributors can only view the applicable price.
+- Each demo distributor account has its own inventory and order workspace. The manufacturer can inspect a read-only summary through its distributor profile.
 - Manufacturer-created products are read-only catalog entries for the distributor; the distributor manages its own stock only.
 
 ## Demo limitations
