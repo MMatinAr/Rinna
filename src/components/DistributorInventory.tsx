@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowDownLeft, ArrowUpLeft, ClipboardList, PackagePlus, PencilLine, Search } from "lucide-react";
 
 type Product = {
@@ -30,6 +30,7 @@ export default function DistributorInventory({ products, movements, onProductsCh
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("همه");
   const [activeArea, setActiveArea] = useState(zones[0] || "");
+  useEffect(() => { setActiveArea(zones[0] || ""); }, [distributorId, zones.join("|")]);
   const [activeProduct, setActiveProduct] = useState<Product | null>(null);
   const [mode, setMode] = useState<"receipt" | "adjustment" | null>(null);
   const [quantity, setQuantity] = useState("");
