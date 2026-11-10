@@ -12,7 +12,7 @@ import "./distributor.css";
 type Section = "home" | "orders" | "inventory" | "coverage" | "customers" | "reports" | "settings";
 type OrderStatus = "تأییدشده" | "در حال آماده‌سازی" | "آماده ارسال" | "ارسال‌شده" | "تحویل‌شده" | "لغوشده";
 type Product = { id: string; name: string; sku: string; unit: string; price: number; stock: number; reserved: number; lowAt: number; category: string; updated: string };
-type Order = { id: string; customer: string; area: string; date: string; items: number; total: number; status: OrderStatus; address: string; note: string; history: { status: string; at: string; by: string }[] };
+type Order = { id: string; customer: string; area: string; date: string; items: number; total: number; status: OrderStatus; address: string; note: string; reservations: { productId: string; qty: number }[]; history: { status: string; at: string; by: string }[] };
 type Zone = { id: string; name: string; fee: number; min: number; days: string; eta: string; active: boolean };
 type Customer = { id: string; name: string; cafe: string; area: string; orders: number; total: number; phone: string };
 
@@ -26,11 +26,11 @@ const initialProducts: Product[] = [
   { id: "P-106", name: "ماست یونانی", sku: "KAL-4012", unit: "ظرف ۹۰۰ گرم", price: 112000, stock: 26, reserved: 3, lowAt: 10, category: "لبنیات", updated: "دیروز، ۱۵:۱۲" }
 ];
 const initialOrders: Order[] = [
-  { id: "RN-2481", customer: "کافه ویونا", area: "ونک", date: "امروز، ۱۰:۲۸", items: 8, total: 2845000, status: "تأییدشده", address: "تهران، ونک، خیابان ملاصدرا", note: "تحویل قبل از ساعت ۱۴", history: [{ status: "تأییدشده", at: "۱۰:۲۸", by: "سیستم" }] },
-  { id: "RN-2480", customer: "کافه رُست", area: "جردن", date: "امروز، ۰۹:۵۲", items: 5, total: 1730000, status: "در حال آماده‌سازی", address: "تهران، جردن، خیابان نلسون ماندلا", note: "", history: [{ status: "تأییدشده", at: "۰۹:۵۲", by: "سیستم" }, { status: "در حال آماده‌سازی", at: "۱۰:۰۱", by: "مدیر فروش" }] },
-  { id: "RN-2479", customer: "بیکری آرت", area: "سعادت‌آباد", date: "امروز، ۰۹:۱۵", items: 11, total: 3960000, status: "آماده ارسال", address: "تهران، سعادت‌آباد، میدان کاج", note: "تماس قبل از رسیدن", history: [{ status: "تأییدشده", at: "۰۹:۱۵", by: "سیستم" }, { status: "در حال آماده‌سازی", at: "۰۹:۴۰", by: "انباردار" }, { status: "آماده ارسال", at: "۱۰:۲۰", by: "انباردار" }] },
-  { id: "RN-2478", customer: "کافه کُنج", area: "یوسف‌آباد", date: "دیروز، ۱۶:۴۰", items: 4, total: 1280000, status: "ارسال‌شده", address: "تهران، یوسف‌آباد، خیابان ۲۱", note: "", history: [{ status: "تأییدشده", at: "۱۶:۴۰", by: "سیستم" }, { status: "ارسال‌شده", at: "۱۷:۱۰", by: "مسئول ارسال" }] },
-  { id: "RN-2477", customer: "کافه ویونا", area: "ونک", date: "دیروز، ۱۲:۰۵", items: 7, total: 2410000, status: "تحویل‌شده", address: "تهران، ونک، خیابان ملاصدرا", note: "", history: [{ status: "تأییدشده", at: "۱۲:۰۵", by: "سیستم" }, { status: "تحویل‌شده", at: "۱۴:۰۲", by: "مسئول ارسال" }] }
+  { id: "RN-2481", customer: "کافه ویونا", area: "ونک", date: "امروز، ۱۰:۲۸", items: 8, total: 2845000, status: "تأییدشده", address: "تهران، ونک، خیابان ملاصدرا", note: "تحویل قبل از ساعت ۱۴", reservations: [{ productId: "P-101", qty: 3 }, { productId: "P-102", qty: 2 }], history: [{ status: "تأییدشده", at: "۱۰:۲۸", by: "سیستم" }] },
+  { id: "RN-2480", customer: "کافه رُست", area: "جردن", date: "امروز، ۰۹:۵۲", items: 5, total: 1730000, status: "در حال آماده‌سازی", address: "تهران، جردن، خیابان نلسون ماندلا", note: "", reservations: [{ productId: "P-103", qty: 2 }, { productId: "P-105", qty: 5 }], history: [{ status: "تأییدشده", at: "۰۹:۵۲", by: "سیستم" }, { status: "در حال آماده‌سازی", at: "۱۰:۰۱", by: "مدیر فروش" }] },
+  { id: "RN-2479", customer: "بیکری آرت", area: "سعادت‌آباد", date: "امروز، ۰۹:۱۵", items: 11, total: 3960000, status: "آماده ارسال", address: "تهران، سعادت‌آباد، میدان کاج", note: "تماس قبل از رسیدن", reservations: [{ productId: "P-101", qty: 4 }, { productId: "P-104", qty: 2 }], history: [{ status: "تأییدشده", at: "۰۹:۱۵", by: "سیستم" }, { status: "در حال آماده‌سازی", at: "۰۹:۴۰", by: "انباردار" }, { status: "آماده ارسال", at: "۱۰:۲۰", by: "انباردار" }] },
+  { id: "RN-2478", customer: "کافه کُنج", area: "یوسف‌آباد", date: "دیروز، ۱۶:۴۰", items: 4, total: 1280000, status: "ارسال‌شده", address: "تهران، یوسف‌آباد، خیابان ۲۱", note: "", reservations: [], history: [{ status: "تأییدشده", at: "۱۶:۴۰", by: "سیستم" }, { status: "ارسال‌شده", at: "۱۷:۱۰", by: "مسئول ارسال" }] },
+  { id: "RN-2477", customer: "کافه ویونا", area: "ونک", date: "دیروز، ۱۲:۰۵", items: 7, total: 2410000, status: "تحویل‌شده", address: "تهران، ونک، خیابان ملاصدرا", note: "", reservations: [], history: [{ status: "تأییدشده", at: "۱۲:۰۵", by: "سیستم" }, { status: "تحویل‌شده", at: "۱۴:۰۲", by: "مسئول ارسال" }] }
 ];
 const initialZones: Zone[] = [
   { id: "Z-01", name: "ونک و میرداماد", fee: 85000, min: 1500000, days: "شنبه تا پنجشنبه", eta: "همان روز", active: true },
@@ -118,14 +118,21 @@ export default function DistributorDashboard() {
     const order = data.orders.find((o: Order) => o.id === id);
     if (!order || !nextStatus[order.status]) return;
     const status = nextStatus[order.status] as OrderStatus;
-    update("orders", data.orders.map((o: Order) => o.id === id ? { ...o, status, history: [...o.history, { status, at: nowTime(), by: role }] } : o));
+    const shippedItems = status === "ارسال‌شده" ? (order.reservations || []) : [];
+    update("orders", data.orders.map((o: Order) => o.id === id ? { ...o, status, reservations: status === "ارسال‌شده" ? [] : o.reservations, history: [...o.history, { status, at: nowTime(), by: role }] } : o));
+    if (shippedItems.length) update("products", data.products.map((p: Product) => {
+      const qty = shippedItems.filter((r) => r.productId === p.id).reduce((sum, r) => sum + r.qty, 0);
+      return qty ? { ...p, stock: Math.max(0, p.stock - qty), reserved: Math.max(0, p.reserved - qty), updated: "همین الان" } : p;
+    }));
     log("وضعیت سفارش " + id + " به «" + status + "» تغییر کرد");
     announce("وضعیت سفارش به‌روزرسانی شد");
   };
   const cancelOrder = () => {
     if (!selected || !String(form.reason || "").trim()) return;
     const id = selected.id;
-    update("orders", data.orders.map((o: Order) => o.id === id ? { ...o, status: "لغوشده", note: "لغو: " + form.reason, history: [...o.history, { status: "لغوشده", at: nowTime(), by: role + " — " + form.reason }] } : o));
+    const released = selected.reservations || [];
+    update("orders", data.orders.map((o: Order) => o.id === id ? { ...o, status: "لغوشده", reservations: [], note: "لغو: " + form.reason, history: [...o.history, { status: "لغوشده", at: nowTime(), by: role + " — " + form.reason }] } : o));
+    if (released.length) update("products", data.products.map((p: Product) => ({ ...p, reserved: Math.max(0, p.reserved - released.filter((r) => r.productId === p.id).reduce((sum, r) => sum + r.qty, 0)) })));
     setModal(null); setSelectedOrder(null); setForm({});
     log("سفارش " + id + " لغو شد؛ رزرو اقلام باید در دفتر موجودی آزاد شود", "warning");
     announce("سفارش لغو شد و در تاریخچه ثبت شد");
