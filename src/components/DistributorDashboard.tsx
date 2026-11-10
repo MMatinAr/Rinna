@@ -131,6 +131,7 @@ export default function DistributorDashboard() {
         return { ...current, products };
       });
     };
+    syncCatalog();
     window.addEventListener("rinna-demo-network-updated", syncCatalog);
     window.addEventListener("storage", syncCatalog);
     return () => { window.removeEventListener("rinna-demo-network-updated", syncCatalog); window.removeEventListener("storage", syncCatalog); };
