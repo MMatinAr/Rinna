@@ -7,6 +7,7 @@ export type DemoCatalogProduct = {
   category: string;
   pack: string;
   basePrice: number;
+  regionalPrices?: Record<string, number>;
   active: boolean;
 };
 
@@ -25,6 +26,7 @@ export type DemoPriceNotification = {
   productName: string;
   oldPrice: number;
   newPrice: number;
+  scope?: string;
   createdAt: string;
   read: boolean;
 };
