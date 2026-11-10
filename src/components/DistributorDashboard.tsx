@@ -140,8 +140,8 @@ export default function DistributorDashboard() {
         const products = network.products.filter((p) => p.active).map((p) => {
           const existing = current.products.find((item: Product) => item.manufacturerProductId === p.id || item.sku === p.sku);
           return existing
-            ? { ...existing, name: p.name, sku: p.sku, unit: p.pack, price: p.basePrice, category: p.category, manufacturerProductId: p.id }
-            : { id: p.id, name: p.name, sku: p.sku, unit: p.pack, price: p.basePrice, stock: 0, reserved: 0, lowAt: 5, category: p.category, updated: "از کاتالوگ کارخانه", manufacturerProductId: p.id };
+            ? { ...existing, name: p.name, sku: p.sku, unit: p.pack, price: p.basePrice, regionalPrices: p.regionalPrices || {}, category: p.category, manufacturerProductId: p.id }
+            : { id: p.id, name: p.name, sku: p.sku, unit: p.pack, price: p.basePrice, regionalPrices: p.regionalPrices || {}, stock: 0, reserved: 0, lowAt: 5, category: p.category, updated: "از کاتالوگ کارخانه", manufacturerProductId: p.id };
         });
         return { ...current, products };
       });
