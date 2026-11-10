@@ -60,6 +60,19 @@ const loadState = (distributorId = "") => {
     if (raw) return JSON.parse(raw);
   } catch { /* use the initial workspace when stored data is unavailable */ }
   const network = readDemoNetwork();
+  if (distributorId && distributorId !== "SUP-3") {
+    const distributor = network.distributors.find((item) => item.id === distributorId);
+    const products = network.products.filter((p) => p.active).map((p) => ({
+      id: p.id, name: p.name, sku: p.sku, unit: p.pack, price: p.basePrice,
+      regionalPrices: p.regionalPrices || {}, stock: 0, reserved: 0, lowAt: 5,
+      category: p.category, updated: "از کاتالوگ کارخانه", manufacturerProductId: p.id
+    }));
+    const zones = (distributor?.areas || []).map((name, index) => ({
+      id: "ZONE-" + distributorId + "-" + index, name, fee: 0, min: 0,
+      days: "شنبه تا پنجشنبه", eta: "۱ روز کاری", active: true
+    }));
+    return { products, orders: [], zones, customers: [], activity: [{ id: 1, text: "حساب پخش‌کننده آماده شد؛ موجودی و سفارش‌ها هنوز ثبت نشده‌اند.", time: "اکنون", type: "sync" }] };
+  }
   const products = network.products.filter((p) => p.active).map((p) => {
     const existing = initialProducts.find((item) => item.sku === p.sku);
     return existing
