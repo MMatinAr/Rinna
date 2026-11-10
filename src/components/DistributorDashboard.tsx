@@ -56,7 +56,7 @@ const fa = (n: number) => new Intl.NumberFormat("fa-IR").format(n);
 const nowTime = () => new Intl.DateTimeFormat("fa-IR", { hour: "2-digit", minute: "2-digit" }).format(new Date());
 const loadState = (distributorId = "") => {
   try {
-    const raw = localStorage.getItem(STORE_KEY + (distributorId ? ":" + distributorId : ""));
+    const raw = localStorage.getItem(STORE_KEY + (distributorId ? ":" + distributorId : "")) || (distributorId === "SUP-3" ? localStorage.getItem(STORE_KEY) : null);
     if (raw) return JSON.parse(raw);
   } catch { /* use the initial workspace when stored data is unavailable */ }
   const network = readDemoNetwork();
