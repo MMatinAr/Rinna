@@ -110,6 +110,36 @@ export default function ManufacturerDashboard() {
   };
 
 
+  const saveBasePrice = (sku: string, price: number) => {
+    const latest = readDemoNetwork();
+    const currentProduct = latest.products.find((p) => p.sku === sku);
+    if (!currentProduct) { announce("محصول در کاتالوگ فعلی پیدا نشد؛ صفحه را تازه‌سازی کن."); return; }
+    if (!Number.isFinite(price) || price <= 0) { announce("قیمت واردشده معتبر نیست."); return; }
+    if (currentProduct.basePrice === price) { announce("قیمت جدید با قیمت فعلی یکسان است."); return; }
+    const changedAt = new Date().toISOString();
+    const next: DemoNetwork = {
+      ...latest,
+      products: latest.products.map((p) => p.id === currentProduct.id ? { ...p, basePrice: price } : p),
+      notifications: [
+        ...(latest.notifications || []),
+        ...latest.distributors.filter((d) => d.active).map((d) => ({
+          id: "PRICE-BASE-" + changedAt + "-" + d.id,
+          distributorId: d.id,
+          productId: currentProduct.id,
+          productName: currentProduct.name,
+          oldPrice: currentProduct.basePrice,
+          newPrice: price,
+          scope: "قیمت پایه",
+          createdAt: changedAt,
+          read: false,
+        })),
+      ],
+    };
+    writeDemoNetwork(next);
+    setNetwork(next);
+    announce("قیمت پایه کارخانه تغییر کرد و برای " + fa(next.distributors.filter((d) => d.active).length) + " پخش‌کننده اعلان ارسال شد.");
+  };
+
   const saveRegionalPrice = () => {
     const distributor = network.distributors.find((item) => item.id === regionalDistributorId && item.active);
     const product = network.products.find((item) => item.id === regionalProductId && item.active);
@@ -231,35 +261,7 @@ export default function ManufacturerDashboard() {
 
           {section === "catalog" && <section className="manufacturer-panel">
             <div className="panel-heading catalog-toolbar"><div><h2>کاتالوگ رسمی محصولات</h2><p>مشخصات و شناسه مرجع محصولات برند را مدیریت کنید.</p></div><label className="manufacturer-search"><Search size={16} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="نام محصول یا بارکد..." /></label></div>
-            <ProductTable products={filteredProducts} onPriceChange={(sku, price) => {
-              const latest = readDemoNetwork();
-              const currentProduct = latest.products.find((p) => p.sku === sku);
-              if (!currentProduct) { announce("محصول در کاتالوگ فعلی پیدا نشد؛ صفحه را تازه‌سازی کن."); return; }
-              if (!Number.isFinite(price) || price <= 0) { announce("قیمت واردشده معتبر نیست."); return; }
-              if (currentProduct.basePrice === price) { announce("قیمت جدید با قیمت فعلی یکسان است."); return; }
-              const changedAt = new Date().toISOString();
-              const next: DemoNetwork = {
-                ...latest,
-                products: latest.products.map((p) => p.id === currentProduct.id ? { ...p, basePrice: price } : p),
-                notifications: [
-                  ...(latest.notifications || []),
-                  ...latest.distributors.filter((d) => d.active).map((d) => ({
-                    id: "PRICE-BASE-" + changedAt + "-" + d.id,
-                    distributorId: d.id,
-                    productId: currentProduct.id,
-                    productName: currentProduct.name,
-                    oldPrice: currentProduct.basePrice,
-                    newPrice: price,
-                    scope: "قیمت پایه",
-                    createdAt: changedAt,
-                    read: false,
-                  })),
-                ],
-              };
-              writeDemoNetwork(next);
-              setNetwork(next);
-              announce("قیمت پایه کارخانه تغییر کرد و برای " + fa(next.distributors.filter((d) => d.active).length) + " پخش‌کننده اعلان ارسال شد.");
-            }} onEditPrice={(product) => setPriceEdit({ sku: product.sku, name: product.name, price: String(product.price) })} />
+            <ProductTable products={filteredProducts} onEditPrice={(product) => setPriceEdit({ sku: product.sku, name: product.name, price: String(product.price) })} />
           </section>}
 
 
@@ -331,7 +333,7 @@ export default function ManufacturerDashboard() {
         </div>
       </main>
 
-      {priceEdit && <div className="manufacturer-modal-backdrop" onClick={() => setPriceEdit(null)}><div className="manufacturer-modal" onClick={(e) => e.stopPropagation()}><button className="modal-close" onClick={() => setPriceEdit(null)}><X size={18}/></button><h2>تغییر قیمت پایه رسمی</h2><p>{priceEdit.name} · این قیمت پس از ذخیره برای تمام پخش‌کننده‌های متصل به‌روزرسانی می‌شود.</p><label>قیمت جدید (تومان)<input type="number" min="1" value={priceEdit.price} onChange={(e) => setPriceEdit((v) => v ? { ...v, price: e.target.value } : v)} /></label><button className="manufacturer-button primary full" onClick={() => { const value = Number(priceEdit.price); if (!Number.isFinite(value) || value <= 0) return announce("قیمت معتبر وارد کن."); onPriceChange(priceEdit.sku, value); setPriceEdit(null); }}>ذخیره و انتشار قیمت</button></div></div>}
+      {priceEdit && <div className="manufacturer-modal-backdrop" onClick={() => setPriceEdit(null)}><div className="manufacturer-modal" onClick={(e) => e.stopPropagation()}><button className="modal-close" onClick={() => setPriceEdit(null)}><X size={18}/></button><h2>تغییر قیمت پایه رسمی</h2><p>{priceEdit.name} · این قیمت پس از ذخیره برای تمام پخش‌کننده‌های متصل به‌روزرسانی می‌شود.</p><label>قیمت جدید (تومان)<input type="number" min="1" value={priceEdit.price} onChange={(e) => setPriceEdit((v) => v ? { ...v, price: e.target.value } : v)} /></label><button className="manufacturer-button primary full" onClick={() => { const value = Number(priceEdit.price); if (!Number.isFinite(value) || value <= 0) return announce("قیمت معتبر وارد کن."); saveBasePrice(priceEdit.sku, value); setPriceEdit(null); }}>ذخیره و انتشار قیمت</button></div></div>}
       {showAddDistributor && <div className="manufacturer-modal-backdrop" onClick={() => setShowAddDistributor(false)}><div className="manufacturer-modal" onClick={(e) => e.stopPropagation()}><button className="modal-close" onClick={() => setShowAddDistributor(false)}><X size={18} /></button><h2>افزودن پخش‌کننده به شبکه</h2><p>در نسخه نمایشی، نام شرکت و محدوده فعالیت را ثبت کن تا در فضای پخش‌کننده هم قابل مشاهده شود.</p><label>نام شرکت پخش<input value={newDistributor.name} onChange={(e) => setNewDistributor((v) => ({ ...v, name: e.target.value }))} placeholder="مثلاً پخش مرکزی" /></label><label>شهر اصلی فعالیت<input value={newDistributor.city} onChange={(e) => setNewDistributor((v) => ({ ...v, city: e.target.value }))} /></label><label>محدوده‌ها (با ویرگول فارسی جدا کن)<input value={newDistributor.areas} onChange={(e) => setNewDistributor((v) => ({ ...v, areas: e.target.value }))} placeholder="شمال تهران، مرکز تهران" /></label><button className="manufacturer-button primary full" onClick={saveDistributor}>افزودن به شبکه</button></div></div>}
       {notice && <div className="manufacturer-toast"><Check size={17} />{notice}<button onClick={() => setNotice("")} aria-label="بستن"><X size={14} /></button></div>}
       {showAdd && <div className="manufacturer-modal-backdrop" onClick={() => setShowAdd(false)}><div className="manufacturer-modal" onClick={(e) => e.stopPropagation()}><button className="modal-close" onClick={() => setShowAdd(false)}><X size={18} /></button><h2>افزودن محصول مرجع</h2><p>{data.isMock ? "این فرم در حالت نمایشی به سرور متصل نیست." : "محصول جدید به کاتالوگ رسمی برند اضافه می‌شود."}</p><label>نام محصول<input value={newProduct.name} onChange={(e) => setNewProduct((v) => ({ ...v, name: e.target.value }))} placeholder="مثلاً شیر کم‌چرب" /></label><label>بارکد<input value={newProduct.barcode} onChange={(e) => setNewProduct((v) => ({ ...v, barcode: e.target.value }))} placeholder="شناسه یا بارکد محصول" /></label><label>واحد بسته‌بندی<input value={newProduct.packaging} onChange={(e) => setNewProduct((v) => ({ ...v, packaging: e.target.value }))} placeholder="مثلاً بطری ۱ لیتری" /></label><label>قیمت پایه رسمی (تومان)<input type="number" min="1" value={(newProduct as any).basePrice || ""} onChange={(e) => setNewProduct((v) => ({ ...v, basePrice: e.target.value } as any))} placeholder="مثلاً ۵۰۰۰۰" /></label><button className="manufacturer-button primary full" onClick={submitProduct} disabled={data.isCreatingProduct}>{data.isCreatingProduct ? "در حال ثبت..." : "ثبت محصول"}</button></div></div>}
@@ -345,7 +347,7 @@ function Metric({ label, value, detail, icon, trend }: { label: string; value: s
 function Attention({ icon, title, desc, onClick }: { icon: ReactNode; title: string; desc: string; onClick: () => void }) {
   return <button className="attention-item" onClick={onClick}><span>{icon}</span><div><b>{title}</b><small>{desc}</small></div><ArrowDownLeft size={15} /></button>;
 }
-function ProductTable({ products, onPriceChange, onEditPrice }: { products: ManufacturerProductView[]; onPriceChange: (sku: string, price: number) => void; onEditPrice: (product: ManufacturerProductView) => void }) {
+function ProductTable({ products, onEditPrice }: { products: ManufacturerProductView[]; onEditPrice: (product: ManufacturerProductView) => void }) {
   return <div className="manufacturer-table-wrap"><table className="manufacturer-table"><thead><tr><th>محصول</th><th>شناسه کالا</th><th>بسته‌بندی</th><th>قیمت پایه</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody>{products.map((p) => <tr key={p.id}><td><b>{p.name}</b><small>{p.category}</small></td><td>{p.sku}</td><td>{p.pack}</td><td>{money(p.price)}</td><td><span className={p.status === "فعال" ? "table-status good" : "table-status warn"}>{p.status}</span></td><td><button className="manufacturer-button secondary" onClick={() => onEditPrice(p)}>تغییر قیمت</button></td></tr>)}</tbody></table>{products.length === 0 && <div className="table-empty">محصولی پیدا نشد.</div>}</div>;
 }
 function DistributorTable({ rows, compact = false, onRemove, onSelect }: { rows: ManufacturerDistributorView[]; compact?: boolean; onRemove?: (name: string) => void; onSelect?: (name: string) => void }) {
