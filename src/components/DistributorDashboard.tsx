@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
 import {
   Activity, AlertTriangle, ArrowDownLeft, ArrowLeft, ArrowUpLeft, BarChart3,
   Bell, Boxes, Building2, Check, CheckCircle2, ChevronDown, ChevronLeft,
@@ -18,11 +19,11 @@ type Customer = { id: string; name: string; cafe: string; area: string; orders: 
 
 const STORE_KEY = "rinna-distributor-v1";
 const initialProducts: Product[] = [
-  { id: "P-101", name: "شیر پرچرب کاله", sku: "KAL-1001", unit: "بطری ۱ لیتری", price: 38500, stock: 84, reserved: 12, lowAt: 20, category: "لبنیات", updated: "امروز، ۱۰:۴۲" },
-  { id: "P-102", name: "خامه صبحانه", sku: "KAL-1008", unit: "پاکت ۲۰۰ گرم", price: 42500, stock: 18, reserved: 4, lowAt: 15, category: "لبنیات", updated: "امروز، ۰۹:۱۸" },
-  { id: "P-103", name: "پنیر ماسکارپونه", sku: "KAL-2041", unit: "ظرف ۵۰۰ گرم", price: 168000, stock: 31, reserved: 6, lowAt: 10, category: "لبنیات", updated: "دیروز، ۱۷:۳۰" },
+  { id: "P-101", name: "شیر پرچرب کاله", sku: "KAL-1001", unit: "بطری ۱ لیتری", price: 38500, stock: 84, reserved: 7, lowAt: 20, category: "لبنیات", updated: "امروز، ۱۰:۴۲" },
+  { id: "P-102", name: "خامه صبحانه", sku: "KAL-1008", unit: "پاکت ۲۰۰ گرم", price: 42500, stock: 18, reserved: 2, lowAt: 15, category: "لبنیات", updated: "امروز، ۰۹:۱۸" },
+  { id: "P-103", name: "پنیر ماسکارپونه", sku: "KAL-2041", unit: "ظرف ۵۰۰ گرم", price: 168000, stock: 31, reserved: 2, lowAt: 10, category: "لبنیات", updated: "دیروز، ۱۷:۳۰" },
   { id: "P-104", name: "کره حیوانی", sku: "KAL-3010", unit: "بسته ۱۰۰ گرم", price: 29500, stock: 9, reserved: 2, lowAt: 12, category: "لبنیات", updated: "امروز، ۰۸:۵۰" },
-  { id: "P-105", name: "شیر کم‌چرب", sku: "KAL-1002", unit: "بطری ۱ لیتری", price: 36500, stock: 120, reserved: 20, lowAt: 25, category: "لبنیات", updated: "امروز، ۱۱:۰۵" },
+  { id: "P-105", name: "شیر کم‌چرب", sku: "KAL-1002", unit: "بطری ۱ لیتری", price: 36500, stock: 120, reserved: 5, lowAt: 25, category: "لبنیات", updated: "امروز، ۱۱:۰۵" },
   { id: "P-106", name: "ماست یونانی", sku: "KAL-4012", unit: "ظرف ۹۰۰ گرم", price: 112000, stock: 26, reserved: 3, lowAt: 10, category: "لبنیات", updated: "دیروز، ۱۵:۱۲" }
 ];
 const initialOrders: Order[] = [
@@ -311,7 +312,7 @@ export default function DistributorDashboard() {
   );
 }
 
-function Metric({ icon, label, value, note, tone }: { icon: React.ReactNode; label: string; value: string; note: string; tone: string }) {
+function Metric({ icon, label, value, note, tone }: { icon: ReactNode; label: string; value: string; note: string; tone: string }) {
   return <div className="dist-metric"><span className={"dist-metric-icon "+tone}>{icon}</span><small>{label}</small><b>{value}</b><p>{note}</p></div>;
 }
 function Status({ status }: { status: string }) {
