@@ -187,7 +187,29 @@ export default function ManufacturerDashboard() {
 
           {section === "catalog" && <section className="manufacturer-panel">
             <div className="panel-heading catalog-toolbar"><div><h2>کاتالوگ رسمی محصولات</h2><p>مشخصات و شناسه مرجع محصولات برند را مدیریت کنید.</p></div><label className="manufacturer-search"><Search size={16} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="نام محصول یا بارکد..." /></label></div>
-            <ProductTable products={filteredProducts} onPriceChange={(sku, price) => { const next = { ...network, products: network.products.map((p) => p.sku === sku ? { ...p, basePrice: price } : p) }; setNetwork(next); writeDemoNetwork(next); announce("قیمت پایه رسمی به‌روزرسانی و برای پخش‌کننده‌ها همگام شد."); }} onEditPrice={(product) => setPriceEdit({ sku: product.sku, name: product.name, price: String(product.price) })} />
+            <ProductTable products={filteredProducts} onPriceChange={(sku, price) => {
+              const currentProduct = network.products.find((p) => p.sku === sku);
+              if (!currentProduct || currentProduct.basePrice === price) return;
+              const next = {
+                ...network,
+                products: network.products.map((p) => p.sku === sku ? { ...p, basePrice: price } : p),
+                notifications: [
+                  ...(network.notifications || []),
+                  ...network.distributors.filter((d) => d.active).map((d) => ({
+                    id: "PRICE-" + Date.now() + "-" + d.id,
+                    distributorId: d.id,
+                    productId: currentProduct.id,
+                    productName: currentProduct.name,
+                    oldPrice: currentProduct.basePrice,
+                    newPrice: price,
+                    createdAt: new Date().toISOString(),
+                    read: false,
+                  })),
+                ],
+              };
+              setNetwork(next); writeDemoNetwork(next);
+              announce("قیمت رسمی تغییر کرد و اعلان آن برای پخش‌کنندگان فعال ارسال شد.");
+            }} onEditPrice={(product) => setPriceEdit({ sku: product.sku, name: product.name, price: String(product.price) })} />
           </section>}
 
           {section === "prices" && <div className="manufacturer-price-layout">
