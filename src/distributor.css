@@ -134,3 +134,25 @@
 .distributor-shell .dist-inventory-workspace .dist-table .dist-inv-actions>.dist-inv-action-adjust:hover{
   background:#DCE8D6!important;border-color:#BFCFB7!important;color:#4F6848!important;
 }
+
+
+/* Factory price notifications */
+.dist-notification-wrap{position:relative;display:flex;align-items:center}
+.dist-notification-wrap>.dist-icon-btn{position:relative}
+.dist-notification-wrap>.dist-icon-btn i{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:20px;background:#D96F4D;color:#fff;font-size:9px;font-style:normal;display:grid;place-items:center;border:2px solid #FAF9F5}
+.dist-notification-popover{position:absolute;z-index:80;top:calc(100% + 13px);left:0;width:min(370px,calc(100vw - 28px));max-height:430px;overflow-y:auto;background:#fff;border:1px solid #e9e4d9;border-radius:12px;box-shadow:0 18px 50px #24252220;padding:0 15px}
+.dist-notification-heading{display:flex;justify-content:space-between;align-items:center;padding:15px 1px;border-bottom:1px solid #f0ece4}
+.dist-notification-heading b{font-size:12px;color:#35362f}
+.dist-notification-heading span{font-size:9px;color:#999687}
+.dist-notification-empty{padding:24px 8px;text-align:center;color:#999687;font-size:10px;line-height:1.9}
+.dist-notification-item{display:flex;align-items:flex-start;gap:10px;padding:13px 2px;border-bottom:1px solid #f2eee8}
+.dist-notification-item:last-child{border-bottom:0}
+.dist-notification-item.unread{background:linear-gradient(90deg,#fff,#fbf7f1);margin-inline:-15px;padding-inline:17px}
+.dist-notification-dot{width:7px;height:7px;flex:none;margin-top:5px;border-radius:50%;background:#d5d0c5}
+.dist-notification-item.unread .dist-notification-dot{background:#D96F4D;box-shadow:0 0 0 4px #D96F4D18}
+.dist-notification-item>div{min-width:0}
+.dist-notification-item b{display:block;font-size:10px;color:#45463e}
+.dist-notification-item p{font-size:10px;line-height:1.9;color:#777568;margin:4px 0}
+.dist-notification-item time{font-size:9px;color:#a5a194}
+.dist-official-price{font-weight:800;color:#3e4938}
+@media(max-width:600px){.dist-notification-popover{left:-42px;top:calc(100% + 10px)}}
