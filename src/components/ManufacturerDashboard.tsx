@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import {
   Activity, ArrowDownLeft, ArrowUpLeft, Bell, Boxes, Check, ChevronDown,
@@ -6,6 +6,7 @@ import {
   Plus, Search, Settings2, Truck, Upload, Wallet, X,
 } from "lucide-react";
 import { useManufacturerData, type ManufacturerDistributorView, type ManufacturerProductView } from "../data/manufacturerData";
+import { readDemoNetwork, writeDemoNetwork, type DemoNetwork } from "../data/demoNetwork";
 import "../manufacturer.css";
 
 type Section = "overview" | "catalog" | "prices" | "distributors" | "regions";
@@ -25,17 +26,28 @@ export default function ManufacturerDashboard() {
   const [notice, setNotice] = useState("");
   const [priceDraft, setPriceDraft] = useState("2026-11-10");
   const [showAdd, setShowAdd] = useState(false);
+  const [showAddDistributor, setShowAddDistributor] = useState(false);
+  const [network, setNetwork] = useState<DemoNetwork>(readDemoNetwork);
+  const [newDistributor, setNewDistributor] = useState({ name: "", city: "تهران", areas: "" });
   const [newProduct, setNewProduct] = useState({ name: "", barcode: "", packaging: "", categoryId: "1" });
   const data = useManufacturerData(query);
+  useEffect(() => {
+    const sync = (event?: Event) => setNetwork((event as CustomEvent<DemoNetwork> | undefined)?.detail || readDemoNetwork());
+    window.addEventListener("rinna-demo-network-updated", sync);
+    window.addEventListener("storage", sync);
+    return () => { window.removeEventListener("rinna-demo-network-updated", sync); window.removeEventListener("storage", sync); };
+  }, []);
+  const networkProducts: ManufacturerProductView[] = network.products.map((p) => ({ id: Number(p.id.replace(/\\D/g, "")) || 1, name: p.name, sku: p.sku, category: p.category, pack: p.pack, price: p.basePrice, status: p.active ? "فعال" : "غیرفعال" }));
+  const networkDistributors: ManufacturerDistributorView[] = network.distributors.map((d) => ({ name: d.name, area: d.areas.join("، ") || d.city, orders: 0, score: "—", status: d.active ? "فعال" : "غیرفعال" }));
 
   const filteredProducts = useMemo(
-    () => data.products.filter((p) => p.name.includes(query) || p.sku.includes(query)),
-    [data.products, query],
+    () => networkProducts.filter((p) => p.name.includes(query) || p.sku.includes(query)),
+    [networkProducts, query],
   );
 
   const filteredDistributors = useMemo(
-    () => data.distributors.filter((d) => d.name.includes(query) || d.area.includes(query)),
-    [data.distributors, query],
+    () => networkDistributors.filter((d) => d.name.includes(query) || d.area.includes(query)),
+    [networkDistributors, query],
   );
 
   const announce = (message: string) => {
@@ -57,8 +69,8 @@ export default function ManufacturerDashboard() {
   };
 
   const submitProduct = async () => {
-    if (!newProduct.name.trim() || !newProduct.barcode.trim() || !newProduct.packaging.trim()) {
-      announce("نام، بارکد و بسته‌بندی محصول را کامل کنید.");
+    if (!newProduct.name.trim() || !newProduct.barcode.trim() || !newProduct.packaging.trim() || Number((newProduct as any).basePrice) <= 0) {
+      announce("نام، بارکد، بسته‌بندی و قیمت پایه را کامل کنید.");
       return;
     }
     if (data.isMock) {
@@ -81,7 +93,15 @@ export default function ManufacturerDashboard() {
     }
   };
 
-  const overview = data.overview;
+  const saveDistributor = () => {
+    if (!newDistributor.name.trim()) return announce("نام شرکت پخش را وارد کن.");
+    if (network.distributors.some((d) => d.name.trim() === newDistributor.name.trim())) return announce("این پخش‌کننده قبلاً ثبت شده است.");
+    const next = { ...network, distributors: [...network.distributors, { id: "SUP-" + Date.now(), name: newDistributor.name.trim(), city: newDistributor.city, areas: newDistributor.areas.split("،").map((v) => v.trim()).filter(Boolean), active: true }] };
+    setNetwork(next); writeDemoNetwork(next); setNewDistributor({ name: "", city: "تهران", areas: "" }); setShowAddDistributor(false);
+    announce("پخش‌کننده به شبکه کارخانه اضافه شد.");
+  };
+
+  const overview = { ...data.overview, active_products: network.products.filter((p) => p.active).length, active_distributors: network.distributors.filter((d) => d.active).length, approved_distributors: network.distributors.length };
 
   return (
     <div className="manufacturer-shell" dir="rtl">
@@ -99,7 +119,7 @@ export default function ManufacturerDashboard() {
         <nav className="manufacturer-nav">
           {navItems.map(({ id, label, icon: Icon }) => (
             <button key={id} className={section === id ? "selected" : ""} onClick={() => setSection(id)}>
-              <Icon size={17} /><span>{label}</span>{id === "distributors" && <i>{fa(data.distributors.length)}</i>}
+              <Icon size={17} /><span>{label}</span>{id === "distributors" && <i>{fa(network.distributors.length)}</i>}
             </button>
           ))}
         </nav>
@@ -130,7 +150,7 @@ export default function ManufacturerDashboard() {
             <div className="heading-buttons">
               {section === "catalog" && <button className="manufacturer-button primary" onClick={() => setShowAdd(true)}><Plus size={16} /> محصول جدید</button>}
               {section === "prices" && <button className="manufacturer-button primary" onClick={publishPrices} disabled={data.isPublishingPrices}><Upload size={16} /> انتشار لیست قیمت</button>}
-              {section === "distributors" && <button className="manufacturer-button primary" onClick={() => announce("فرم دعوت پخش‌کننده در مرحله بعد اضافه می‌شود.")}><Plus size={16} /> افزودن پخش‌کننده</button>}
+              {section === "distributors" && <button className="manufacturer-button primary" onClick={() => setShowAddDistributor(true)}><Plus size={16} /> افزودن پخش‌کننده</button>}
               {section === "overview" && <button className="manufacturer-button secondary" onClick={() => setSection("distributors")}>مدیریت شبکه <ArrowDownLeft size={15} /></button>}
             </div>
           </div>
@@ -165,7 +185,7 @@ export default function ManufacturerDashboard() {
 
             <section className="manufacturer-panel">
               <div className="panel-heading"><div><h2>پخش‌کنندگان اخیر</h2><p>خلاصه‌ای از عملکرد همکاران شبکه</p></div><button onClick={() => setSection("distributors")}>مشاهده همه <ArrowDownLeft size={14} /></button></div>
-              <DistributorTable rows={data.distributors} compact />
+              <DistributorTable rows={networkDistributors} compact />
             </section>
           </>}
 
@@ -189,7 +209,7 @@ export default function ManufacturerDashboard() {
 
           {section === "distributors" && <section className="manufacturer-panel">
             <div className="panel-heading"><div><h2>اعضای شبکه توزیع</h2><p>هر پخش‌کننده می‌تواند در چند منطقه و چند شبکه مجاز فعالیت کند.</p></div><label className="manufacturer-search"><Search size={16} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="جست‌وجوی پخش‌کننده..." /></label></div>
-            <DistributorTable rows={filteredDistributors} />
+            <DistributorTable rows={filteredDistributors} onRemove={(name) => { const next = { ...network, distributors: network.distributors.filter((d) => d.name !== name) }; setNetwork(next); writeDemoNetwork(next); announce("دسترسی پخش‌کننده از شبکه این کارخانه حذف شد."); }} />
           </section>}
 
           {section === "regions" && <section className="manufacturer-panel">
@@ -202,8 +222,9 @@ export default function ManufacturerDashboard() {
         </div>
       </main>
 
+      {showAddDistributor && <div className="manufacturer-modal-backdrop" onClick={() => setShowAddDistributor(false)}><div className="manufacturer-modal" onClick={(e) => e.stopPropagation()}><button className="modal-close" onClick={() => setShowAddDistributor(false)}><X size={18} /></button><h2>افزودن پخش‌کننده به شبکه</h2><p>در نسخه نمایشی، نام شرکت و محدوده فعالیت را ثبت کن تا در فضای پخش‌کننده هم قابل مشاهده شود.</p><label>نام شرکت پخش<input value={newDistributor.name} onChange={(e) => setNewDistributor((v) => ({ ...v, name: e.target.value }))} placeholder="مثلاً پخش مرکزی" /></label><label>شهر اصلی فعالیت<input value={newDistributor.city} onChange={(e) => setNewDistributor((v) => ({ ...v, city: e.target.value }))} /></label><label>محدوده‌ها (با ویرگول فارسی جدا کن)<input value={newDistributor.areas} onChange={(e) => setNewDistributor((v) => ({ ...v, areas: e.target.value }))} placeholder="شمال تهران، مرکز تهران" /></label><button className="manufacturer-button primary full" onClick={saveDistributor}>افزودن به شبکه</button></div></div>}
       {notice && <div className="manufacturer-toast"><Check size={17} />{notice}<button onClick={() => setNotice("")} aria-label="بستن"><X size={14} /></button></div>}
-      {showAdd && <div className="manufacturer-modal-backdrop" onClick={() => setShowAdd(false)}><div className="manufacturer-modal" onClick={(e) => e.stopPropagation()}><button className="modal-close" onClick={() => setShowAdd(false)}><X size={18} /></button><h2>افزودن محصول مرجع</h2><p>{data.isMock ? "این فرم در حالت نمایشی به سرور متصل نیست." : "محصول جدید به کاتالوگ رسمی برند اضافه می‌شود."}</p><label>نام محصول<input value={newProduct.name} onChange={(e) => setNewProduct((v) => ({ ...v, name: e.target.value }))} placeholder="مثلاً شیر کم‌چرب" /></label><label>بارکد<input value={newProduct.barcode} onChange={(e) => setNewProduct((v) => ({ ...v, barcode: e.target.value }))} placeholder="شناسه یا بارکد محصول" /></label><label>واحد بسته‌بندی<input value={newProduct.packaging} onChange={(e) => setNewProduct((v) => ({ ...v, packaging: e.target.value }))} placeholder="مثلاً بطری ۱ لیتری" /></label><label>شناسه دسته‌بندی<input type="number" min="1" value={newProduct.categoryId} onChange={(e) => setNewProduct((v) => ({ ...v, categoryId: e.target.value }))} /></label><button className="manufacturer-button primary full" onClick={submitProduct} disabled={data.isCreatingProduct}>{data.isCreatingProduct ? "در حال ثبت..." : "ثبت محصول"}</button></div></div>}
+      {showAdd && <div className="manufacturer-modal-backdrop" onClick={() => setShowAdd(false)}><div className="manufacturer-modal" onClick={(e) => e.stopPropagation()}><button className="modal-close" onClick={() => setShowAdd(false)}><X size={18} /></button><h2>افزودن محصول مرجع</h2><p>{data.isMock ? "این فرم در حالت نمایشی به سرور متصل نیست." : "محصول جدید به کاتالوگ رسمی برند اضافه می‌شود."}</p><label>نام محصول<input value={newProduct.name} onChange={(e) => setNewProduct((v) => ({ ...v, name: e.target.value }))} placeholder="مثلاً شیر کم‌چرب" /></label><label>بارکد<input value={newProduct.barcode} onChange={(e) => setNewProduct((v) => ({ ...v, barcode: e.target.value }))} placeholder="شناسه یا بارکد محصول" /></label><label>واحد بسته‌بندی<input value={newProduct.packaging} onChange={(e) => setNewProduct((v) => ({ ...v, packaging: e.target.value }))} placeholder="مثلاً بطری ۱ لیتری" /></label><label>قیمت پایه رسمی (تومان)<input type="number" min="1" value={(newProduct as any).basePrice || ""} onChange={(e) => setNewProduct((v) => ({ ...v, basePrice: e.target.value } as any))} placeholder="مثلاً ۵۰۰۰۰" /></label><button className="manufacturer-button primary full" onClick={submitProduct} disabled={data.isCreatingProduct}>{data.isCreatingProduct ? "در حال ثبت..." : "ثبت محصول"}</button></div></div>}
     </div>
   );
 }
@@ -217,7 +238,7 @@ function Attention({ icon, title, desc, onClick }: { icon: ReactNode; title: str
 function ProductTable({ products }: { products: ManufacturerProductView[] }) {
   return <div className="manufacturer-table-wrap"><table className="manufacturer-table"><thead><tr><th>محصول</th><th>شناسه کالا</th><th>بسته‌بندی</th><th>قیمت پایه</th><th>وضعیت</th></tr></thead><tbody>{products.map((p) => <tr key={p.id}><td><b>{p.name}</b><small>{p.category}</small></td><td>{p.sku}</td><td>{p.pack}</td><td>{money(p.price)}</td><td><span className={p.status === "فعال" ? "table-status good" : "table-status warn"}>{p.status}</span></td></tr>)}</tbody></table>{products.length === 0 && <div className="table-empty">محصولی پیدا نشد.</div>}</div>;
 }
-function DistributorTable({ rows, compact = false }: { rows: ManufacturerDistributorView[]; compact?: boolean }) {
+function DistributorTable({ rows, compact = false, onRemove }: { rows: ManufacturerDistributorView[]; compact?: boolean; onRemove?: (name: string) => void }) {
   const visibleRows = compact ? rows.slice(0, 3) : rows;
-  return <div className="manufacturer-table-wrap"><table className="manufacturer-table"><thead><tr><th>پخش‌کننده</th><th>محدوده فعالیت</th><th>سفارش‌های ماه</th><th>تحویل به‌موقع</th><th>وضعیت</th></tr></thead><tbody>{visibleRows.map((d) => <tr key={d.name}><td><b>{d.name}</b><small>شبکه رسمی کاله</small></td><td>{d.area}</td><td>{fa(d.orders)}</td><td>{d.score}</td><td><span className={d.status === "فعال" ? "table-status good" : d.status === "غیرفعال" ? "table-status" : "table-status warn"}>{d.status}</span></td></tr>)}</tbody></table>{visibleRows.length === 0 && <div className="table-empty">پخش‌کننده‌ای پیدا نشد.</div>}</div>;
+  return <div className="manufacturer-table-wrap"><table className="manufacturer-table"><thead><tr><th>پخش‌کننده</th><th>محدوده فعالیت</th><th>سفارش‌های ماه</th><th>تحویل به‌موقع</th><th>وضعیت</th>{onRemove && <th>عملیات</th>}</tr></thead><tbody>{visibleRows.map((d) => <tr key={d.name}><td><b>{d.name}</b><small>شبکه رسمی کاله</small></td><td>{d.area}</td><td>{fa(d.orders)}</td><td>{d.score}</td><td><span className={d.status === "فعال" ? "table-status good" : d.status === "غیرفعال" ? "table-status" : "table-status warn"}>{d.status}</span></td>{onRemove && <td><button className="manufacturer-button secondary" onClick={() => onRemove(d.name)}>حذف از شبکه</button></td>}</tr>)}</tbody></table>{visibleRows.length === 0 && <div className="table-empty">پخش‌کننده‌ای پیدا نشد.</div>}</div>;
 }
