@@ -109,7 +109,7 @@
   }
   .manufacturer-sidebar.is-open{transform:translate3d(0,0,0);visibility:visible}
   .manufacturer-brand{width:100%;display:flex;align-items:center;justify-content:flex-start;padding:0 0 20px;border-bottom:1px solid #39434e}
-  .manufacturer-mobile-close{display:grid;place-items:center;margin-right:auto;width:36px;height:36px;border:0;border-radius:9px;background:#ffffff12;color:#e9eef5}
+  .manufacturer-mobile-close{display:grid;place-items:center;position:absolute;top:20px;left:17px;width:36px;height:36px;border:0;border-radius:9px;background:#ffffff12;color:#e9eef5}
   .manufacturer-company{display:flex;margin:20px 0;padding:11px}
   .manufacturer-nav-label{display:block}
   .manufacturer-nav{display:grid;overflow:visible;margin-top:0;gap:5px}
