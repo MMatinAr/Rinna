@@ -18,15 +18,13 @@ type Props = {
   onProductsChange: (products: Product[]) => void;
   onMovementsChange: (movements: Movement[]) => void;
   onLog: (message: string, type?: string) => void;
-  zones: string[];
-  distributorId: string;
 };
 
 const fa = (value: number) => new Intl.NumberFormat("fa-IR").format(value);
 const toman = (value: number) => fa(value) + " تومان";
 const timeLabel = (value: string) => new Intl.DateTimeFormat("fa-IR", { dateStyle: "short", timeStyle: "short" }).format(new Date(value));
 
-export default function DistributorInventory({ products, movements, onProductsChange, onMovementsChange, onLog, zones, distributorId }: Props) {
+export default function DistributorInventory({ products, movements, onProductsChange, onMovementsChange, onLog }: Props) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("همه");
   const [activeProduct, setActiveProduct] = useState<Product | null>(null);
