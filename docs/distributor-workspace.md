@@ -15,7 +15,7 @@ The distributor workspace is available at \`/distributor\`.
 - Seed data is sample data, not live supplier or cafe records.
 - Local inventory edits do not reserve or deduct stock on a server. The backend must implement atomic reservations, inventory ledger entries, cancellation release, idempotency, and audit records.
 - The manufacturer catalog owns official base prices. The distributor UI displays prices but does not provide an edit action for official base prices.
-- This page currently runs in local mode. No distributor API endpoint is assumed to exist. The API contract should be agreed with the backend owner before wiring RTK Query mutations and queries.
+- This page currently runs in Local Mode. Proposed distributor routes and DTOs are documented in `docs/distributor-api.md`; the RTK Query service is registered in the Redux store, but the dashboard UI is not wired to it yet. The backend owner must confirm the contract before API Mode is implemented.
 - Analytics cards marked as sample are illustrative; only order totals are computed from the local dataset.
 
 
@@ -29,3 +29,11 @@ The distributor inventory workspace now provides:
 - CSV export for the visible movement history.
 
 The browser-local workspace is a UI prototype, not a concurrency-safe inventory service. Production APIs must enforce atomic reservations, idempotency keys, tenant authorization, immutable movement records, and server-side validation. Existing seed data is retained when the workspace is upgraded; the movement ledger starts empty for historical activity that predates this feature.
+
+
+## API integration preparation
+
+- Proposed DTOs and RTK Query endpoints live in `src/services/distributorApi.ts`.
+- The API reducer and middleware are registered in the shared Redux store.
+- `VITE_DISTRIBUTOR_DATA_MODE` is documented as a future mode switch; the current dashboard does not read it yet and remains on Local Mode.
+- Review `docs/distributor-api.md` with the backend owner before implementing the UI data adapter or enabling live requests.
