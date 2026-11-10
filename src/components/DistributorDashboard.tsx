@@ -104,11 +104,13 @@ export default function DistributorDashboard() {
   const [form, setForm] = useState<any>({});
 
   const [mobileNav, setMobileNav] = useState(false);
+  const [activeDistributorId, setActiveDistributorId] = useState(() => readDemoNetwork().distributors.find((d) => d.id === "SUP-3")?.id || readDemoNetwork().distributors[0]?.id || "");
 
   useEffect(() => { localStorage.setItem(STORE_KEY, JSON.stringify(data)); }, [data]);
   useEffect(() => {
     const syncCatalog = (event?: Event) => {
       const network = (event as CustomEvent<DemoNetwork> | undefined)?.detail || readDemoNetwork();
+      setActiveDistributorId((currentId) => network.distributors.some((d) => d.id === currentId && d.active) ? currentId : network.distributors.find((d) => d.active)?.id || "");
       setData((current: any) => {
         const products = network.products.filter((p) => p.active).map((p) => {
           const existing = current.products.find((item: Product) => item.manufacturerProductId === p.id || item.sku === p.sku);
@@ -226,7 +228,7 @@ export default function DistributorDashboard() {
           <span><b>RINNA</b><small>PARTNER WORKSPACE</small></span>
           <button className="dist-mobile-close" onClick={() => setMobileNav(false)} aria-label="بستن منو"><X size={18} /></button>
         </div>
-        <div className="dist-company"><span className="dist-company-avatar">پ</span><div><b>{readDemoNetwork().distributors.find((d) => d.id === "SUP-3")?.name || "پخش آزمایشی"}</b><small>شبکه رسمی کارخانه · حالت نمایشی</small></div><ChevronDown size={15} /></div>
+        <div className="dist-company"><span className="dist-company-avatar">پ</span><div><select aria-label="انتخاب شرکت پخش نمایشی" value={activeDistributorId} onChange={(e) => setActiveDistributorId(e.target.value)}>{readDemoNetwork().distributors.filter((d) => d.active).map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select><small>شبکه رسمی کارخانه · حساب نمایشی</small></div><ChevronDown size={15} /></div>
         <div className="dist-nav-label">فضای کاری</div>
         <nav className="dist-nav">
           {navItems.map((item) => {
@@ -314,6 +316,7 @@ export default function DistributorDashboard() {
             products={data.products}
             movements={data.inventoryMovements || []}
             zones={data.zones.filter((zone: Zone) => zone.active).map((zone: Zone) => zone.name)}
+            distributorId={activeDistributorId}
             onProductsChange={(products) => update("products", products)}
             onMovementsChange={(movements) => update("inventoryMovements", movements)}
             onLog={log}
