@@ -23,7 +23,7 @@ const getDistributorAreas = (distributor: DemoDistributor) => {
     const raw = localStorage.getItem("rinna-distributor-v1:" + distributor.id) || (distributor.id === "SUP-3" ? localStorage.getItem("rinna-distributor-v1") : null);
     const workspace = raw ? JSON.parse(raw) : null;
     const activeZones = Array.isArray(workspace?.zones) ? workspace.zones.filter((zone: any) => zone.active).map((zone: any) => zone.name).filter(Boolean) : [];
-    return activeZones.length ? activeZones : distributor.areas;
+    return Array.isArray(workspace?.zones) ? activeZones : distributor.areas;
   } catch { return distributor.areas; }
 };
 
