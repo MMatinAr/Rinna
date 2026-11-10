@@ -123,14 +123,6 @@ export default function DistributorDashboard() {
   const [demoNetwork, setDemoNetwork] = useState<DemoNetwork>(readDemoNetwork);
   const priceNotifications = (demoNetwork.notifications || []).filter((item) => item.distributorId === activeDistributorId).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   const unreadPriceNotifications = priceNotifications.filter((item) => !item.read).length;
-  const markPriceNotificationsRead = () => {
-    const latest = readDemoNetwork();
-    const next = { ...latest, notifications: (latest.notifications || []).map((item) => item.distributorId === activeDistributorId ? { ...item, read: true } : item) };
-    writeDemoNetwork(next);
-    setDemoNetwork(next);
-    setShowNotifications(true);
-  };
-
   useEffect(() => { if (workspaceOwnerId !== activeDistributorId) return; localStorage.setItem(STORE_KEY + (activeDistributorId ? ":" + activeDistributorId : ""), JSON.stringify(data)); window.dispatchEvent(new CustomEvent("rinna-distributor-workspace-updated", { detail: { distributorId: activeDistributorId, data } })); }, [data, activeDistributorId, workspaceOwnerId]);
   useEffect(() => { setData(loadState(activeDistributorId)); setWorkspaceOwnerId(activeDistributorId); }, [activeDistributorId]);
   useEffect(() => {
