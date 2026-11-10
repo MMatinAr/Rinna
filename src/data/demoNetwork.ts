@@ -18,9 +18,21 @@ export type DemoDistributor = {
   active: boolean;
 };
 
+export type DemoPriceNotification = {
+  id: string;
+  distributorId: string;
+  productId: string;
+  productName: string;
+  oldPrice: number;
+  newPrice: number;
+  createdAt: string;
+  read: boolean;
+};
+
 export type DemoNetwork = {
   products: DemoCatalogProduct[];
   distributors: DemoDistributor[];
+  notifications?: DemoPriceNotification[];
 };
 
 export const initialDemoNetwork: DemoNetwork = {
