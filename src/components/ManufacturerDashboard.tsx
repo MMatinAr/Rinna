@@ -13,6 +13,7 @@ type Section = "overview" | "catalog" | "prices" | "distributors" | "regions";
 const navItems: { id: Section; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "overview", label: "نمای کلی", icon: LayoutDashboard },
   { id: "catalog", label: "کاتالوگ محصولات", icon: Package },
+  { id: "prices", label: "قیمت‌گذاری مناطق", icon: Wallet },
   { id: "distributors", label: "شبکه پخش", icon: Truck },
 ];
 const money = (value: number) => value.toLocaleString("fa-IR") + " تومان";
@@ -28,6 +29,10 @@ export default function ManufacturerDashboard() {
   const [network, setNetwork] = useState<DemoNetwork>(readDemoNetwork);
   const [newDistributor, setNewDistributor] = useState({ name: "", city: "تهران", areas: "" });
   const [priceEdit, setPriceEdit] = useState<{ sku: string; name: string; price: string } | null>(null);
+  const [regionalDistributorId, setRegionalDistributorId] = useState("");
+  const [regionalProductId, setRegionalProductId] = useState("");
+  const [regionalArea, setRegionalArea] = useState("");
+  const [regionalPriceDraft, setRegionalPriceDraft] = useState("");
   const [newProduct, setNewProduct] = useState({ name: "", barcode: "", packaging: "", categoryId: "1" });
   const data = useManufacturerData(query);
   useEffect(() => {
@@ -97,6 +102,30 @@ export default function ManufacturerDashboard() {
     announce("پخش‌کننده به شبکه کارخانه اضافه شد.");
   };
 
+
+  const saveRegionalPrice = () => {
+    const distributor = network.distributors.find((item) => item.id === regionalDistributorId && item.active);
+    const product = network.products.find((item) => item.id === regionalProductId && item.active);
+    const price = Number(regionalPriceDraft);
+    if (!distributor || !product || !regionalArea || !Number.isFinite(price) || price <= 0) {
+      announce("پخش‌کننده، محصول، محدوده و قیمت معتبر را انتخاب کن.");
+      return;
+    }
+    const key = regionalDistributorId + "::" + regionalArea;
+    const oldPrice = product.regionalPrices?.[key] ?? product.basePrice;
+    if (oldPrice === price) { announce("قیمت منطقه‌ای تغییری نکرده است."); return; }
+    const next = {
+      ...network,
+      products: network.products.map((item) => item.id === product.id ? { ...item, regionalPrices: { ...(item.regionalPrices || {}), [key]: price } } : item),
+      notifications: [
+        ...(network.notifications || []),
+        { id: "PRICE-REG-" + Date.now(), distributorId: distributor.id, productId: product.id, productName: product.name, oldPrice, newPrice: price, scope: regionalArea, createdAt: new Date().toISOString(), read: false },
+      ],
+    };
+    setNetwork(next);
+    writeDemoNetwork(next);
+    announce("قیمت منطقه‌ای توسط کارخانه ثبت شد و اعلان برای پخش‌کننده ارسال شد.");
+  };
   const overview = { ...data.overview, active_products: network.products.filter((p) => p.active).length, active_distributors: network.distributors.filter((d) => d.active).length, approved_distributors: network.distributors.length };
 
   return (
@@ -212,18 +241,46 @@ export default function ManufacturerDashboard() {
             }} onEditPrice={(product) => setPriceEdit({ sku: product.sku, name: product.name, price: String(product.price) })} />
           </section>}
 
+
           {section === "prices" && <div className="manufacturer-price-layout">
             <section className="manufacturer-panel price-release">
-              <span className="price-icon"><Wallet size={20} /></span><h2>انتشار لیست قیمت جدید</h2><p>قیمت پایه محصولات رسمی برای تمام شبکه پخش یکسان است. هزینه ارسال هر پخش‌کننده جداگانه محاسبه می‌شود.</p>
-              <label>تاریخ شروع اعتبار<input type="date" value={priceDraft} onChange={(e) => setPriceDraft(e.target.value)} /></label>
-              <button className="manufacturer-button primary full" onClick={publishPrices} disabled={data.isPublishingPrices}><Upload size={16} /> انتشار برای شبکه</button>
+              <span className="price-icon"><Wallet size={20} /></span>
+              <h2>قیمت‌گذاری منطقه‌ای</h2>
+              <p>قیمت منطقه‌ای را کارخانه برای هر محصول و هر پخش‌کننده تعیین می‌کند. این قیمت فقط برای همان محدوده اعمال می‌شود و قیمت پایه رسمی را تغییر نمی‌دهد.</p>
+              <label>پخش‌کننده
+                <select value={regionalDistributorId} onChange={(e) => { const id = e.target.value; setRegionalDistributorId(id); const d = network.distributors.find((x) => x.id === id); setRegionalArea(d?.areas[0] || ""); }}>
+                  <option value="">انتخاب پخش‌کننده</option>
+                  {network.distributors.filter((d) => d.active).map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+                </select>
+              </label>
+              <label>محصول
+                <select value={regionalProductId} onChange={(e) => { const id = e.target.value; setRegionalProductId(id); const p = network.products.find((x) => x.id === id); const area = regionalArea || network.distributors.find((x) => x.id === regionalDistributorId)?.areas[0] || ""; setRegionalPriceDraft(String(p?.regionalPrices?.[regionalDistributorId + "::" + area] ?? p?.basePrice ?? "")); }}>
+                  <option value="">انتخاب محصول</option>
+                  {network.products.filter((p) => p.active).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                </select>
+              </label>
+              <label>محدوده تحویل
+                <select value={regionalArea} onChange={(e) => { const area = e.target.value; setRegionalArea(area); const p = network.products.find((x) => x.id === regionalProductId); setRegionalPriceDraft(String(p?.regionalPrices?.[regionalDistributorId + "::" + area] ?? p?.basePrice ?? "")); }}>
+                  <option value="">انتخاب محدوده</option>
+                  {(network.distributors.find((d) => d.id === regionalDistributorId)?.areas || []).map((area) => <option key={area} value={area}>{area}</option>)}
+                </select>
+              </label>
+              <label>قیمت این محدوده (تومان)<input type="number" min="1" value={regionalPriceDraft} onChange={(e) => setRegionalPriceDraft(e.target.value)} placeholder="قیمت نهایی منطقه" /></label>
+              <button className="manufacturer-button primary full" onClick={saveRegionalPrice}>ثبت و اعلام قیمت منطقه‌ای</button>
             </section>
             <section className="manufacturer-panel">
-              <div className="panel-heading"><div><h2>آخرین نسخه‌های قیمت</h2><p>تاریخچه تغییرات قیمت مرکزی</p></div></div>
-              {data.priceLists.map((item) => <div className="price-version" key={item.id}><span className={item.status === "active" ? "version-status live" : "version-status"}>{item.status === "active" ? "در حال اجرا" : item.status === "scheduled" ? "زمان‌بندی‌شده" : "آرشیو"}</span><b>لیست قیمت شماره {fa(item.version)}</b><small>شروع اعتبار: {item.effective_from}</small><strong>{fa(item.product_count)} محصول</strong></div>)}
-              {data.priceLists.length === 0 && <div className="table-empty">هنوز لیست قیمتی ثبت نشده است.</div>}
+              <div className="panel-heading"><div><h2>قیمت‌های ثبت‌شده</h2><p>قیمت پایه و قیمت‌های منطقه‌ای به تفکیک پخش‌کننده</p></div></div>
+              {network.products.filter((p) => p.active).map((product) => <div className="price-version" key={product.id}>
+                <b>{product.name}</b><small>قیمت پایه کارخانه: {money(product.basePrice)}</small>
+                {Object.entries(product.regionalPrices || {}).map(([key, value]) => {
+                  const parts = key.split("::");
+                  const distributor = network.distributors.find((d) => d.id === parts[0]);
+                  return <div className="manufacturer-regional-price" key={key}><span>{(distributor?.name || "پخش‌کننده حذف‌شده") + " · " + parts.slice(1).join("::")}</span><strong>{money(value)}</strong></div>;
+                })}
+                {Object.keys(product.regionalPrices || {}).length === 0 && <small>هنوز قیمت منطقه‌ای ثبت نشده است.</small>}
+              </div>)}
             </section>
-          </div>}
+          </div>
 
           {section === "distributors" && <section className="manufacturer-panel">
             <div className="panel-heading"><div><h2>اعضای شبکه توزیع</h2><p>هر پخش‌کننده می‌تواند در چند منطقه و چند شبکه مجاز فعالیت کند.</p></div><label className="manufacturer-search"><Search size={16} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="جست‌وجوی پخش‌کننده..." /></label></div>
