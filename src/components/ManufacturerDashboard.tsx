@@ -45,7 +45,7 @@ export default function ManufacturerDashboard() {
     window.addEventListener("rinna-distributor-workspace-updated", refreshProfiles);
     return () => { window.removeEventListener("rinna-demo-network-updated", sync); window.removeEventListener("storage", sync); window.removeEventListener("storage", refreshProfiles); window.removeEventListener("rinna-distributor-workspace-updated", refreshProfiles); };
   }, []);
-  const networkProducts: ManufacturerProductView[] = network.products.map((p) => ({ id: Number(p.id.replace(/\\D/g, "")) || 1, name: p.name, sku: p.sku, category: p.category, pack: p.pack, price: p.basePrice, status: p.active ? "فعال" : "غیرفعال" }));
+  const networkProducts: ManufacturerProductView[] = network.products.map((p) => ({ id: Number(p.id.replace(/\D/g, "")) || 1, name: p.name, sku: p.sku, category: p.category, pack: p.pack, price: p.basePrice, status: p.active ? "فعال" : "غیرفعال" }));
   const networkDistributors: ManufacturerDistributorView[] = network.distributors.map((d) => {
     let orders = 0;
     try {
