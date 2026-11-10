@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import {
   Activity, ArrowDownLeft, ArrowUpLeft, Bell, Boxes, Check, ChevronDown,
   CircleHelp, ClipboardList, Command, LayoutDashboard, MapPinned, Package,
-  Plus, Search, Settings2, Truck, Upload, Wallet, X,
+  Plus, Search, Settings2, Truck, Wallet, X,
 } from "lucide-react";
 import { useManufacturerData, type ManufacturerDistributorView, type ManufacturerProductView } from "../data/manufacturerData";
 import { readDemoNetwork, writeDemoNetwork, type DemoNetwork } from "../data/demoNetwork";
@@ -23,7 +23,6 @@ export default function ManufacturerDashboard() {
   const [section, setSection] = useState<Section>("overview");
   const [query, setQuery] = useState("");
   const [notice, setNotice] = useState("");
-  const [priceDraft, setPriceDraft] = useState("2026-11-10");
   const [showAdd, setShowAdd] = useState(false);
   const [showAddDistributor, setShowAddDistributor] = useState(false);
   const [network, setNetwork] = useState<DemoNetwork>(readDemoNetwork);
@@ -71,18 +70,6 @@ export default function ManufacturerDashboard() {
     window.setTimeout(() => setNotice(""), 3200);
   };
 
-  const publishPrices = async () => {
-    if (data.isMock) {
-      announce("حالت نمایشی: انتشار لیست قیمت شبیه‌سازی شد؛ هنوز در سرور ذخیره نشده است.");
-      return;
-    }
-    try {
-      await data.publishPrices({ effective_from: priceDraft }).unwrap();
-      announce("لیست قیمت با موفقیت برای شبکه منتشر شد.");
-    } catch {
-      announce("انتشار لیست قیمت انجام نشد؛ اطلاعات و اتصال سرور را بررسی کنید.");
-    }
-  };
 
   const submitProduct = async () => {
     if (!newProduct.name.trim() || !newProduct.barcode.trim() || !newProduct.packaging.trim() || Number((newProduct as any).basePrice) <= 0) {
@@ -195,7 +182,6 @@ export default function ManufacturerDashboard() {
             </div>
             <div className="heading-buttons">
               {section === "catalog" && <button className="manufacturer-button primary" onClick={() => setShowAdd(true)}><Plus size={16} /> محصول جدید</button>}
-              {section === "prices" && <button className="manufacturer-button primary" onClick={publishPrices} disabled={data.isPublishingPrices}><Upload size={16} /> انتشار لیست قیمت</button>}
               {section === "distributors" && <button className="manufacturer-button primary" onClick={() => setShowAddDistributor(true)}><Plus size={16} /> افزودن پخش‌کننده</button>}
               {section === "overview" && <button className="manufacturer-button secondary" onClick={() => setSection("distributors")}>مدیریت شبکه <ArrowDownLeft size={15} /></button>}
             </div>
