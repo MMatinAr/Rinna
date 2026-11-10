@@ -14,7 +14,7 @@ import { readDemoNetwork, type DemoNetwork } from "../data/demoNetwork";
 
 type Section = "home" | "orders" | "inventory" | "coverage" | "customers" | "reports" | "settings";
 type OrderStatus = "تأییدشده" | "در حال آماده‌سازی" | "آماده ارسال" | "ارسال‌شده" | "تحویل‌شده" | "لغوشده";
-type Product = { id: string; name: string; sku: string; unit: string; price: number; stock: number; reserved: number; lowAt: number; category: string; updated: string; manufacturerProductId?: string };
+type Product = { id: string; name: string; sku: string; unit: string; price: number; stock: number; reserved: number; lowAt: number; category: string; updated: string; manufacturerProductId?: string; regionalPrices?: Record<string, number> };
 type Order = { id: string; customer: string; area: string; date: string; items: number; total: number; status: OrderStatus; address: string; note: string; reservations: { productId: string; qty: number }[]; history: { status: string; at: string; by: string }[] };
 type Zone = { id: string; name: string; fee: number; min: number; days: string; eta: string; active: boolean };
 type Customer = { id: string; name: string; cafe: string; area: string; orders: number; total: number; phone: string };
@@ -63,8 +63,8 @@ const loadState = () => {
   const products = network.products.filter((p) => p.active).map((p) => {
     const existing = initialProducts.find((item) => item.sku === p.sku);
     return existing
-      ? { ...existing, name: p.name, price: p.basePrice, category: p.category, unit: p.pack, manufacturerProductId: p.id }
-      : { id: p.id, name: p.name, sku: p.sku, unit: p.pack, price: p.basePrice, stock: 0, reserved: 0, lowAt: 5, category: p.category, updated: "از کاتالوگ کارخانه", manufacturerProductId: p.id };
+      ? { ...existing, name: p.name, price: p.basePrice, regionalPrices: p.regionalPrices || {}, category: p.category, unit: p.pack, manufacturerProductId: p.id }
+      : { id: p.id, name: p.name, sku: p.sku, unit: p.pack, price: p.basePrice, regionalPrices: p.regionalPrices || {}, stock: 0, reserved: 0, lowAt: 5, category: p.category, updated: "از کاتالوگ کارخانه", manufacturerProductId: p.id };
   });
   return { products, orders: initialOrders, zones: initialZones, customers: initialCustomers, activity: [{ id: 1, text: "کاتالوگ رسمی کارخانه همگام‌سازی شد", time: "اکنون", type: "sync" }] };
 };
@@ -337,6 +337,8 @@ export default function DistributorDashboard() {
             onProductsChange={(products) => update("products", products)}
             onMovementsChange={(movements) => update("inventoryMovements", movements)}
             onLog={log}
+            zones={data.zones.filter((zone: Zone) => zone.active).map((zone: Zone) => zone.name)}
+            distributorId={activeDistributorId}
           />}
 
           {section === "coverage" && <>
