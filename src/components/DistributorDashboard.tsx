@@ -120,13 +120,14 @@ export default function DistributorDashboard() {
 
   const [mobileNav, setMobileNav] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const demoNetwork = readDemoNetwork();
+  const [demoNetwork, setDemoNetwork] = useState<DemoNetwork>(readDemoNetwork);
   const priceNotifications = (demoNetwork.notifications || []).filter((item) => item.distributorId === activeDistributorId).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   const unreadPriceNotifications = priceNotifications.filter((item) => !item.read).length;
   const markPriceNotificationsRead = () => {
     const latest = readDemoNetwork();
     const next = { ...latest, notifications: (latest.notifications || []).map((item) => item.distributorId === activeDistributorId ? { ...item, read: true } : item) };
     writeDemoNetwork(next);
+    setDemoNetwork(next);
     setShowNotifications(true);
   };
 
@@ -135,6 +136,7 @@ export default function DistributorDashboard() {
   useEffect(() => {
     const syncCatalog = (event?: Event) => {
       const network = (event as CustomEvent<DemoNetwork> | undefined)?.detail || readDemoNetwork();
+      setDemoNetwork(network);
       setActiveDistributorId((currentId) => network.distributors.some((d) => d.id === currentId && d.active) ? currentId : network.distributors.find((d) => d.active)?.id || "");
       setData((current: any) => {
         const products = network.products.filter((p) => p.active).map((p) => {
@@ -278,7 +280,7 @@ export default function DistributorDashboard() {
           <div className="dist-top-actions">
             <span className="dist-date"><CalendarDays size={15} /> سه‌شنبه، ۱۹ آبان ۱۴۰۵</span>
             <div className="dist-notification-wrap">
-              <button className="dist-icon-btn" onClick={() => showNotifications ? setShowNotifications(false) : markPriceNotificationsRead()} aria-label="اعلان‌ها"><Bell size={18}/>{unreadPriceNotifications > 0 && <i>{fa(unreadPriceNotifications)}</i>}</button>
+              <button className="dist-icon-btn" onClick={() => showNotifications ? setShowNotifications(false) : markPriceNotificationsRead()} aria-expanded={showNotifications} aria-label="اعلان‌ها"><Bell size={18}/>{unreadPriceNotifications > 0 && <i>{fa(unreadPriceNotifications)}</i>}</button>
               {showNotifications && <div className="dist-notification-popover">
                 <div className="dist-notification-heading"><b>اعلان‌های کارخانه</b><span>{fa(priceNotifications.length)} اعلان</span></div>
                 {priceNotifications.length === 0 ? <div className="dist-notification-empty">هنوز تغییری در قیمت محصولات اعلام نشده است.</div> : priceNotifications.slice(0, 12).map((item) => <div className={"dist-notification-item " + (!item.read ? "unread" : "")} key={item.id}>
