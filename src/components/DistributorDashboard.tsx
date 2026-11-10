@@ -8,7 +8,7 @@ import {
   Settings2, ShoppingBag, Truck, Users, Wallet, X, RefreshCw, ClipboardList,
   SlidersHorizontal, CalendarDays, CircleDot, RotateCcw, TrendingUp
 } from "lucide-react";
-import "./distributor.css";
+import "../distributor.css";
 
 type Section = "home" | "orders" | "inventory" | "coverage" | "customers" | "reports" | "settings";
 type OrderStatus = "تأییدشده" | "در حال آماده‌سازی" | "آماده ارسال" | "ارسال‌شده" | "تحویل‌شده" | "لغوشده";
