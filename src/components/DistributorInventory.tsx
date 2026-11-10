@@ -3,7 +3,7 @@ import { ArrowDownLeft, ArrowUpLeft, ClipboardList, PackagePlus, PencilLine, Sea
 
 type Product = {
   id: string; name: string; sku: string; unit: string; price: number;
-  stock: number; reserved: number; lowAt: number; category: string; updated: string;
+  stock: number; reserved: number; lowAt: number; category: string; updated: string; regionalPrices?: Record<string, number>;
 };
 type Movement = {
   id: string; productId: string; productName: string;
@@ -18,15 +18,18 @@ type Props = {
   onProductsChange: (products: Product[]) => void;
   onMovementsChange: (movements: Movement[]) => void;
   onLog: (message: string, type?: string) => void;
+  zones: string[];
+  distributorId: string;
 };
 
 const fa = (value: number) => new Intl.NumberFormat("fa-IR").format(value);
 const toman = (value: number) => fa(value) + " تومان";
 const timeLabel = (value: string) => new Intl.DateTimeFormat("fa-IR", { dateStyle: "short", timeStyle: "short" }).format(new Date(value));
 
-export default function DistributorInventory({ products, movements, onProductsChange, onMovementsChange, onLog }: Props) {
+export default function DistributorInventory({ products, movements, onProductsChange, onMovementsChange, onLog, zones, distributorId }: Props) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("همه");
+  const [activeArea, setActiveArea] = useState(zones[0] || "");
   const [activeProduct, setActiveProduct] = useState<Product | null>(null);
   const [mode, setMode] = useState<"receipt" | "adjustment" | null>(null);
   const [quantity, setQuantity] = useState("");
@@ -140,7 +143,7 @@ export default function DistributorInventory({ products, movements, onProductsCh
       <div className="dist-toolbar">
         <label className="dist-search"><Search size={17}/><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="جست‌وجوی نام، شناسه یا دسته محصول..."/></label>
         <div className="dist-filter-wrap"><select value={filter} onChange={(event) => setFilter(event.target.value)}><option>همه</option><option>کم‌موجود</option><option>موجود</option></select></div>
-        <span className="dist-result-count">{fa(visibleProducts.length)} محصول</span>
+        <label className="dist-filter-wrap"><span>محدوده</span><select value={activeArea} onChange={(event) => setActiveArea(event.target.value)}><option value="">قیمت پایه</option>{zones.map((zone) => <option key={zone} value={zone}>{zone}</option>)}</select></label><span className="dist-result-count">{fa(visibleProducts.length)} محصول</span>
       </div>
 
       <section className="dist-panel dist-table-panel">
@@ -149,10 +152,12 @@ export default function DistributorInventory({ products, movements, onProductsCh
           <tbody>
             {visibleProducts.map((product) => {
               const available = product.stock - product.reserved;
+              const regionalPrice = activeArea ? product.regionalPrices?.[distributorId + "::" + activeArea] : undefined;
+              const displayPrice = regionalPrice ?? product.price;
               return <tr key={product.id}>
                 <td data-label="محصول"><b>{product.name}</b><small className="dist-subcell">{product.unit}</small></td>
                 <td data-label="شناسه کالا">{product.sku}</td>
-                <td data-label="قیمت مصوب کارخانه"><b className="dist-official-price">{toman(product.price)}</b><small className="dist-subcell">اعلام‌شده توسط کارخانه</small></td>
+                <td data-label="قیمت مصوب کارخانه"><b className="dist-official-price">{toman(displayPrice)}</b><small className="dist-subcell">{regionalPrice ? "قیمت منطقه‌ای مصوب کارخانه" : "قیمت پایه مصوب کارخانه"}</small></td>
                 <td data-label="موجودی فیزیکی"><b>{fa(product.stock)}</b></td>
                 <td data-label="رزروشده">{fa(product.reserved)}</td>
                 <td data-label="قابل فروش"><b className={available <= product.lowAt ? "dist-inv-low" : "dist-inv-available"}>{fa(available)}</b></td>
