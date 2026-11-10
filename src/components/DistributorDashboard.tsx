@@ -238,7 +238,7 @@ export default function DistributorDashboard() {
         </nav>
         <div className="dist-sidebar-bottom">
           <div className="dist-network-state"><span></span><div><b>کاتالوگ کارخانه متصل است</b><small>همگام‌سازی نمایشی در همین مرورگر</small></div></div>
-          <button onClick={() => { setSection("settings"); setMobileNav(false); }}><CircleHelp size={16} /> راهنما و پشتیبانی</button>
+          <button onClick={() => { announce("راهنمای نسخه نمایشی MVP: کاتالوگ از پنل کارخانه همگام می‌شود و قیمت منطقه‌ای از بخش موجودی قابل تنظیم است."); setMobileNav(false); }}><CircleHelp size={16} /> راهنما و پشتیبانی</button>
           <div className="dist-user"><span className="dist-user-avatar">م</span><div><b>مدیر مجموعه</b><small>دسترسی کامل</small></div><Ellipsis size={18} /></div>
         </div>
       </aside>
