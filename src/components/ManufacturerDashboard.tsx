@@ -268,7 +268,7 @@ export default function ManufacturerDashboard() {
               <h2>قیمت‌گذاری منطقه‌ای</h2>
               <p>قیمت منطقه‌ای را کارخانه برای هر محصول و هر پخش‌کننده تعیین می‌کند. این قیمت فقط برای همان محدوده اعمال می‌شود و قیمت پایه رسمی را تغییر نمی‌دهد.</p>
               <label>پخش‌کننده
-                <select value={regionalDistributorId} onChange={(e) => { const id = e.target.value; setRegionalDistributorId(id); const d = network.distributors.find((x) => x.id === id); setRegionalArea(d?.areas[0] || ""); }}>
+                <select value={regionalDistributorId} onChange={(e) => { const id = e.target.value; setRegionalDistributorId(id); const d = network.distributors.find((x) => x.id === id); const area = d?.areas[0] || ""; setRegionalArea(area); const p = network.products.find((x) => x.id === regionalProductId); setRegionalPriceDraft(String(p?.regionalPrices?.[id + "::" + area] ?? p?.basePrice ?? "")); }}>
                   <option value="">انتخاب پخش‌کننده</option>
                   {network.distributors.filter((d) => d.active).map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
                 </select>
