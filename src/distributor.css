@@ -174,3 +174,10 @@ html{max-width:100%;overflow-x:clip}
   .dist-filter-wrap{max-width:100%;min-width:0}
   .dist-page-head,.dist-summary-strip,.dist-metrics,.dist-zone-grid,.dist-report-grid{min-width:0;max-width:100%}
 }
+
+
+/* Keep the notification menu above dashboard content on desktop and mobile. */
+.dist-topbar{position:relative;z-index:60;overflow:visible}
+.dist-top-actions{position:relative;z-index:61}
+.dist-notification-wrap{position:relative;z-index:62}
+.dist-notification-popover{z-index:9999;display:block}
