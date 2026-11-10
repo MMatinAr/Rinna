@@ -58,7 +58,8 @@ export function readDemoNetwork(): DemoNetwork {
       const parsed = JSON.parse(raw) as Partial<DemoNetwork>;
       return {
         products: Array.isArray(parsed.products) ? parsed.products : initialDemoNetwork.products,
-        distributors: Array.isArray(parsed.distributors) ? parsed.distributors : initialDemoNetwork.distributors
+        distributors: Array.isArray(parsed.distributors) ? parsed.distributors : initialDemoNetwork.distributors,
+        notifications: Array.isArray(parsed.notifications) ? parsed.notifications : []
       };
     }
   } catch { /* fall back to deterministic demo data */ }
