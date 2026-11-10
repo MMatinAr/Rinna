@@ -19,13 +19,14 @@ type Props = {
   onMovementsChange: (movements: Movement[]) => void;
   onLog: (message: string, type?: string) => void;
   zones: string[];
+  distributorId: string;
 };
 
 const fa = (value: number) => new Intl.NumberFormat("fa-IR").format(value);
 const toman = (value: number) => fa(value) + " تومان";
 const timeLabel = (value: string) => new Intl.DateTimeFormat("fa-IR", { dateStyle: "short", timeStyle: "short" }).format(new Date(value));
 
-export default function DistributorInventory({ products, movements, onProductsChange, onMovementsChange, onLog, zones }: Props) {
+export default function DistributorInventory({ products, movements, onProductsChange, onMovementsChange, onLog, zones, distributorId }: Props) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("همه");
   const [activeProduct, setActiveProduct] = useState<Product | null>(null);
@@ -115,7 +116,7 @@ export default function DistributorInventory({ products, movements, onProductsCh
     if (!priceProduct || !priceZone) return;
     const amount = Number(regionalPrice);
     if (!Number.isFinite(amount) || amount <= 0) { setPriceError("قیمت باید عددی بزرگ‌تر از صفر باشد."); return; }
-    const updated = { ...priceProduct, regionalPrices: { ...(priceProduct.regionalPrices || {}), [priceZone]: amount } };
+    const updated = { ...priceProduct, regionalPrices: { ...(priceProduct.regionalPrices || {}), [distributorId + "::" + priceZone]: amount } };
     onProductsChange(products.map((item) => item.id === priceProduct.id ? updated : item));
     onLog("قیمت عرضه «" + priceProduct.name + "» در " + priceZone + " به‌روزرسانی شد");
     setPriceProduct(null); setRegionalPrice(""); setPriceError("");
@@ -167,12 +168,12 @@ export default function DistributorInventory({ products, movements, onProductsCh
               return <tr key={product.id}>
                 <td data-label="محصول"><b>{product.name}</b><small className="dist-subcell">{product.unit}</small></td>
                 <td data-label="شناسه کالا">{product.sku}</td>
-                <td data-label="قیمت پایه رسمی">{toman(product.price)}</td><td data-label="قیمت عرضه منطقه"><b>{toman(product.regionalPrices?.[priceZone] ?? product.price)}</b><small className="dist-subcell">{product.regionalPrices?.[priceZone] ? "قیمت اختصاصی منطقه" : "برابر قیمت پایه"}</small></td>
+                <td data-label="قیمت پایه رسمی">{toman(product.price)}</td><td data-label="قیمت عرضه منطقه"><b>{toman(product.regionalPrices?.[distributorId + "::" + priceZone] ?? product.price)}</b><small className="dist-subcell">{product.regionalPrices?.[distributorId + "::" + priceZone] ? "قیمت اختصاصی منطقه" : "برابر قیمت پایه"}</small></td>
                 <td data-label="موجودی فیزیکی"><b>{fa(product.stock)}</b></td>
                 <td data-label="رزروشده">{fa(product.reserved)}</td>
                 <td data-label="قابل فروش"><b className={available <= product.lowAt ? "dist-inv-low" : "dist-inv-available"}>{fa(available)}</b></td>
                 <td data-label="وضعیت"><span className={"dist-status " + (available <= product.lowAt ? "warning" : "success")}><i/>{available <= product.lowAt ? "نیازمند تأمین" : "موجود"}</span></td>
-                <td data-label="قیمت منطقه‌ای"><button type="button" className="dist-inv-action dist-inv-action-adjust" onClick={() => { setPriceProduct(product); setRegionalPrice(String(product.regionalPrices?.[priceZone] ?? product.price)); setPriceError(""); }}>تنظیم قیمت</button></td><td data-label="عملیات انبار"><div className="dist-inv-actions">
+                <td data-label="قیمت منطقه‌ای"><button type="button" className="dist-inv-action dist-inv-action-adjust" onClick={() => { setPriceProduct(product); setRegionalPrice(String(product.regionalPrices?.[distributorId + "::" + priceZone] ?? product.price)); setPriceError(""); }}>تنظیم قیمت</button></td><td data-label="عملیات انبار"><div className="dist-inv-actions">
                   <button type="button" className="dist-inv-action dist-inv-action-receipt" onClick={() => openMovement(product, "receipt")}><PackagePlus size={14}/> ورود کالا</button>
                   <button type="button" className="dist-inv-action dist-inv-action-adjust" onClick={() => openMovement(product, "adjustment")}><PencilLine size={14}/> اصلاح</button>
                 </div></td>
@@ -193,7 +194,7 @@ export default function DistributorInventory({ products, movements, onProductsCh
           </div>)}</div>}
       </section>
 
-      {priceProduct && <div className="dist-modal-backdrop" onClick={() => setPriceProduct(null)}><div className="dist-modal" onClick={(event) => event.stopPropagation()}><button className="dist-modal-close" onClick={() => setPriceProduct(null)}><X size={18}/></button><span className="dist-eyebrow">REGIONAL PRICING</span><h2>قیمت عرضه منطقه‌ای</h2><p>{priceProduct.name} · قیمت پایه کارخانه: {toman(priceProduct.price)}</p><label className="dist-form-label">منطقه<select value={priceZone} onChange={(event) => { setPriceZone(event.target.value); setRegionalPrice(String(priceProduct.regionalPrices?.[event.target.value] ?? priceProduct.price)); }}>{zones.map((zone) => <option key={zone}>{zone}</option>)}</select></label><label className="dist-form-label">قیمت عرضه در این منطقه (تومان)<input type="number" min="1" value={regionalPrice} onChange={(event) => setRegionalPrice(event.target.value)} /></label><div className="dist-info-note">این تغییر فقط قیمت عرضه همین پخش‌کننده در منطقه انتخابی را تغییر می‌دهد؛ قیمت پایه رسمی کارخانه دست‌نخورده می‌ماند.</div>{priceError && <div className="dist-inv-error">{priceError}</div>}<button className="dist-btn dist-btn-primary dist-btn-full" onClick={saveRegionalPrice}>ذخیره قیمت منطقه‌ای</button></div></div>}
+      {priceProduct && <div className="dist-modal-backdrop" onClick={() => setPriceProduct(null)}><div className="dist-modal" onClick={(event) => event.stopPropagation()}><button className="dist-modal-close" onClick={() => setPriceProduct(null)}><X size={18}/></button><span className="dist-eyebrow">REGIONAL PRICING</span><h2>قیمت عرضه منطقه‌ای</h2><p>{priceProduct.name} · قیمت پایه کارخانه: {toman(priceProduct.price)}</p><label className="dist-form-label">منطقه<select value={priceZone} onChange={(event) => { setPriceZone(event.target.value); setRegionalPrice(String(priceProduct.regionalPrices?.[distributorId + "::" + event.target.value] ?? priceProduct.price)); }}>{zones.map((zone) => <option key={zone}>{zone}</option>)}</select></label><label className="dist-form-label">قیمت عرضه در این منطقه (تومان)<input type="number" min="1" value={regionalPrice} onChange={(event) => setRegionalPrice(event.target.value)} /></label><div className="dist-info-note">این تغییر فقط قیمت عرضه همین پخش‌کننده در منطقه انتخابی را تغییر می‌دهد؛ قیمت پایه رسمی کارخانه دست‌نخورده می‌ماند.</div>{priceError && <div className="dist-inv-error">{priceError}</div>}<button className="dist-btn dist-btn-primary dist-btn-full" onClick={saveRegionalPrice}>ذخیره قیمت منطقه‌ای</button></div></div>}
       {mode && activeProduct && <div className="dist-modal-backdrop" onClick={closeMovement}><div className="dist-modal dist-inv-modal" onClick={(event) => event.stopPropagation()}>
         <button className="dist-modal-close" onClick={closeMovement} aria-label="بستن"><X size={18}/></button>
         <span className="dist-eyebrow">{mode === "receipt" ? "GOODS RECEIPT" : "STOCK ADJUSTMENT"}</span>
