@@ -47,7 +47,14 @@ export default function ManufacturerDashboard() {
     return () => { window.removeEventListener("rinna-demo-network-updated", sync); window.removeEventListener("storage", sync); window.removeEventListener("storage", refreshProfiles); window.removeEventListener("rinna-distributor-workspace-updated", refreshProfiles); };
   }, []);
   const networkProducts: ManufacturerProductView[] = network.products.map((p) => ({ id: Number(p.id.replace(/\\D/g, "")) || 1, name: p.name, sku: p.sku, category: p.category, pack: p.pack, price: p.basePrice, status: p.active ? "فعال" : "غیرفعال" }));
-  const networkDistributors: ManufacturerDistributorView[] = network.distributors.map((d) => ({ name: d.name, area: d.areas.join("، ") || d.city, orders: 0, score: "—", status: d.active ? "فعال" : "غیرفعال" }));
+  const networkDistributors: ManufacturerDistributorView[] = network.distributors.map((d) => {
+    let orders = 0;
+    try {
+      const workspace = JSON.parse(localStorage.getItem("rinna-distributor-v1:" + d.id) || (d.id === "SUP-3" ? localStorage.getItem("rinna-distributor-v1") : "null") || "null");
+      orders = Array.isArray(workspace?.orders) ? workspace.orders.length : 0;
+    } catch { /* keep the profile count at zero when local demo data is unavailable */ }
+    return { name: d.name, area: d.areas.join("، ") || d.city, orders, score: "—", status: d.active ? "فعال" : "غیرفعال" };
+  });
 
   const filteredProducts = useMemo(
     () => networkProducts.filter((p) => p.name.includes(query) || p.sku.includes(query)),
