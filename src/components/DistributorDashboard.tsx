@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import {
   Activity, AlertTriangle, ArrowDownLeft, ArrowLeft, ArrowUpLeft, BarChart3,
-  Bell, Boxes, Building2, Check, CheckCheck, CheckCircle2, ChevronDown, ChevronLeft,
+  Bell, Boxes, Building2, Check, CheckCheck, CheckCircle2, ChevronLeft,
   CircleHelp, Clock3, Coffee, Download, Ellipsis, FileText, Filter, Gauge,
   LayoutDashboard, MapPin, Menu, Package, PackageCheck, Plus, Search,
   Settings2, ShoppingBag, Truck, Users, Wallet, X, RefreshCw, ClipboardList,
@@ -286,7 +286,7 @@ export default function DistributorDashboard() {
           <span><b>RINNA</b><small>PARTNER WORKSPACE</small></span>
           <button className="dist-mobile-close" onClick={() => setMobileNav(false)} aria-label="بستن منو"><X size={18} /></button>
         </div>
-        <div className="dist-company"><span className="dist-company-avatar">پ</span><div><select aria-label="انتخاب شرکت پخش نمایشی" value={activeDistributorId} onChange={(e) => setActiveDistributorId(e.target.value)}>{readDemoNetwork().distributors.filter((d) => d.active).map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select><small>شبکه رسمی کارخانه · حساب نمایشی</small></div><ChevronDown size={15} /></div>
+        <div className="dist-company"><span className="dist-company-avatar">پ</span><div><select aria-label="انتخاب شرکت پخش نمایشی" value={activeDistributorId} onChange={(e) => setActiveDistributorId(e.target.value)}>{readDemoNetwork().distributors.filter((d) => d.active).map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select><small>شبکه رسمی کارخانه · حساب نمایشی</small></div></div>
         <div className="dist-nav-label">فضای کاری</div>
         <nav className="dist-nav">
           {navItems.map((item) => {
