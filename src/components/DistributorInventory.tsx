@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowDownLeft, ArrowUpLeft, ClipboardList, PackagePlus, PencilLine, Search } from "lucide-react";
+import RinnaSelect from "./RinnaSelect";
 
 type Product = {
   id: string; name: string; sku: string; unit: string; price: number;
@@ -143,8 +144,8 @@ export default function DistributorInventory({ products, movements, onProductsCh
 
       <div className="dist-toolbar">
         <label className="dist-search"><Search size={17}/><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="جست‌وجوی نام، شناسه یا دسته محصول..."/></label>
-        <div className="dist-filter-wrap"><select value={filter} onChange={(event) => setFilter(event.target.value)}><option>همه</option><option>کم‌موجود</option><option>موجود</option></select></div>
-        <label className="dist-filter-wrap"><span>محدوده</span><select value={activeArea} onChange={(event) => setActiveArea(event.target.value)}><option value="">قیمت پایه</option>{zones.map((zone) => <option key={zone} value={zone}>{zone}</option>)}</select></label><span className="dist-result-count">{fa(visibleProducts.length)} محصول</span>
+        <div className="dist-filter-wrap"><RinnaSelect ariaLabel="فیلتر موجودی" value={filter} onChange={setFilter} options={["همه","کم‌موجود","موجود"].map((item)=>({value:item,label:item}))} /></div>
+        <div className="dist-filter-wrap"><span>محدوده</span><RinnaSelect ariaLabel="محدوده قیمت" value={activeArea} onChange={setActiveArea} options={[{value:"",label:"قیمت پایه"},...zones.map((zone)=>({value:zone,label:zone}))]} /></div><span className="dist-result-count">{fa(visibleProducts.length)} محصول</span>
       </div>
 
       <section className="dist-panel dist-table-panel">
