@@ -106,6 +106,7 @@ export default function RinnaSelect({
       next = (next + direction + options.length) % options.length;
       if (!options[next].disabled) {
         setActiveIndex(next);
+        optionRefs.current[next]?.focus();
         return;
       }
     }
