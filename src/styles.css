@@ -326,3 +326,52 @@ select{
   font:inherit;transition:border-color .18s ease,box-shadow .18s ease,background-color .18s ease;
 }
 select:focus-visible{outline:0;border-color:#b58a66;box-shadow:0 0 0 3px rgba(168,117,69,.12)}
+
+/* RINNA custom select: trigger and opened option list share one visual system. */
+.rinna-select{position:relative;display:block;width:100%;min-width:0;color:#34352f;font:inherit;direction:rtl}
+.rinna-select-trigger{width:100%;min-height:42px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 13px;border:1px solid #e5dfd4;border-radius:9px;background:#fffdfa;color:inherit;font:inherit;font-size:11px;text-align:right;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease,background .18s ease}
+.rinna-select-trigger:hover{border-color:#cfc3b2;background:#fff}
+.rinna-select-trigger:focus-visible{outline:0;border-color:#b58a66;box-shadow:0 0 0 3px rgba(168,117,69,.13)}
+.rinna-select-trigger:disabled{opacity:.55;cursor:not-allowed}
+.rinna-select-trigger>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rinna-select-trigger .is-placeholder{color:#9b988d;font-weight:400}
+.rinna-select-trigger>svg{flex:none;color:#898679;transition:transform .18s ease}
+.rinna-select-trigger>svg.is-open{transform:rotate(180deg)}
+.rinna-select-menu{position:absolute;z-index:120;top:calc(100% + 7px);right:0;left:0;max-height:min(260px,45vh);overflow-y:auto;overscroll-behavior:contain;padding:5px;border:1px solid #e8e2d8;border-radius:11px;background:#fffefa;box-shadow:0 14px 34px rgba(38,35,28,.14),0 3px 8px rgba(38,35,28,.05);animation:rinna-select-in .14s ease-out}
+.rinna-select-option{width:100%;min-height:37px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;border:0;border-radius:7px;background:transparent;color:#55564e;font:inherit;font-size:11px;text-align:right;cursor:pointer;transition:background .14s ease,color .14s ease}
+.rinna-select-option:hover,.rinna-select-option.is-active{background:#f4f0e8;color:#34352f}
+.rinna-select-option.is-selected{background:#f5eee5;color:#986744;font-weight:700}
+.rinna-select-option.is-selected>svg{color:#a87545;flex:none}
+.rinna-select-option:disabled{opacity:.45;cursor:not-allowed}
+.rinna-select-empty{padding:12px;color:#969286;font-size:11px;text-align:center}
+.rinna-select-menu::-webkit-scrollbar{width:6px}
+.rinna-select-menu::-webkit-scrollbar-track{background:transparent}
+.rinna-select-menu::-webkit-scrollbar-thumb{border:1px solid #fffefa;border-radius:10px;background:#d8d1c5}
+.manufacturer-shell .rinna-select-trigger{border-color:#e1e6ee;background:#fff;color:#354150}
+.manufacturer-shell .rinna-select-trigger:hover{border-color:#c7d1df}
+.manufacturer-shell .rinna-select-trigger:focus-visible{border-color:#7894ed;box-shadow:0 0 0 3px rgba(49,94,232,.12)}
+.manufacturer-shell .rinna-select-option.is-selected{background:#edf2ff;color:#315ee8}
+.manufacturer-shell .rinna-select-option.is-selected>svg{color:#315ee8}
+.distributor-shell .rinna-select-trigger{border-color:#e7e1d7;background:#fff;color:#56574e}
+.distributor-shell .rinna-select-trigger:focus-visible{border-color:#d27a5d;box-shadow:0 0 0 3px rgba(217,101,67,.12)}
+.distributor-shell .rinna-select-option.is-selected{background:#f8eee8;color:#bd6347}
+.distributor-shell .rinna-select-option.is-selected>svg{color:#bd6347}
+.dist-filter-wrap>.rinna-select{flex:1;width:auto;min-width:105px}
+.dist-filter-wrap>.rinna-select .rinna-select-trigger{min-height:36px;padding:0 8px;border:0;background:transparent;font-size:10px;white-space:nowrap}
+.dist-filter-wrap>.rinna-select .rinna-select-trigger:focus-visible{box-shadow:inset 0 0 0 1px #d27a5d}
+.dist-company .rinna-select{width:100%}
+.dist-company .rinna-select-trigger{min-height:25px;padding:0;border:0;border-radius:0;background:transparent;color:#f5f3ed;font-size:11px;font-weight:800}
+.dist-company .rinna-select-trigger:hover{background:transparent;color:#fff}
+.dist-company .rinna-select-trigger:focus-visible{box-shadow:0 0 0 2px rgba(230,161,138,.4);border-radius:4px}
+.dist-company .rinna-select-trigger>svg{color:#a7a698}
+.dist-company .rinna-select-menu{top:calc(100% + 10px);background:#34352f;border-color:#4b4c43;box-shadow:0 16px 32px rgba(0,0,0,.3)}
+.dist-company .rinna-select-option{color:#e8e5dc}
+.dist-company .rinna-select-option:hover,.dist-company .rinna-select-option.is-active{background:#414239;color:#fff}
+.dist-company .rinna-select-option.is-selected{background:#4a3a32;color:#f0b49c}
+.dist-company .rinna-select-option.is-selected>svg{color:#f0b49c}
+.manufacturer-price-layout .price-release label>.rinna-select{margin-top:7px}
+.dist-form-label>.rinna-select{margin-top:7px}
+@keyframes rinna-select-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.rinna-select-trigger,.rinna-select-trigger>svg,.rinna-select-option{transition:none}.rinna-select-menu{animation:none}}
+@media(max-width:480px){.rinna-select-menu{max-height:38vh}.dist-filter-wrap>.rinna-select{min-width:90px}}
+
