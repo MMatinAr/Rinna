@@ -8,6 +8,7 @@ import {
 import { useManufacturerData, type ManufacturerDistributorView, type ManufacturerProductView } from "../data/manufacturerData";
 import { readDemoNetwork, writeDemoNetwork, type DemoDistributor, type DemoNetwork } from "../data/demoNetwork";
 import "../manufacturer.css";
+import RinnaSelect from "./RinnaSelect";
 
 type Section = "overview" | "catalog" | "prices" | "distributors" | "regions";
 const navItems: { id: Section; label: string; icon: typeof LayoutDashboard }[] = [
@@ -288,22 +289,13 @@ export default function ManufacturerDashboard() {
               <h2>قیمت‌گذاری منطقه‌ای</h2>
               <p>قیمت منطقه‌ای را کارخانه برای هر محصول و هر پخش‌کننده تعیین می‌کند. این قیمت فقط برای همان محدوده اعمال می‌شود و قیمت پایه رسمی را تغییر نمی‌دهد.</p>
               <label>پخش‌کننده
-                <select value={regionalDistributorId} onChange={(e) => { const id = e.target.value; setRegionalDistributorId(id); const d = network.distributors.find((x) => x.id === id); const area = d ? getDistributorAreas(d)[0] || "" : ""; setRegionalArea(area); const p = network.products.find((x) => x.id === regionalProductId); setRegionalPriceDraft(String(p?.regionalPrices?.[id + "::" + area] ?? p?.basePrice ?? "")); }}>
-                  <option value="">انتخاب پخش‌کننده</option>
-                  {network.distributors.filter((d) => d.active).map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
-                </select>
+                <RinnaSelect ariaLabel="انتخاب پخش‌کننده" value={regionalDistributorId} placeholder="انتخاب پخش‌کننده" onChange={(id) => { setRegionalDistributorId(id); const d = network.distributors.find((x) => x.id === id); const area = d ? getDistributorAreas(d)[0] || "" : ""; setRegionalArea(area); const p = network.products.find((x) => x.id === regionalProductId); setRegionalPriceDraft(String(p?.regionalPrices?.[id + "::" + area] ?? p?.basePrice ?? "")); }} options={network.distributors.filter((d) => d.active).map((d) => ({ value: d.id, label: d.name }))} />
               </label>
               <label>محصول
-                <select value={regionalProductId} onChange={(e) => { const id = e.target.value; setRegionalProductId(id); const p = network.products.find((x) => x.id === id); const selectedDistributor = network.distributors.find((x) => x.id === regionalDistributorId); const area = regionalArea || (selectedDistributor ? getDistributorAreas(selectedDistributor)[0] || "" : ""); setRegionalPriceDraft(String(p?.regionalPrices?.[regionalDistributorId + "::" + area] ?? p?.basePrice ?? "")); }}>
-                  <option value="">انتخاب محصول</option>
-                  {network.products.filter((p) => p.active).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-                </select>
+                <RinnaSelect ariaLabel="انتخاب محصول" value={regionalProductId} placeholder="انتخاب محصول" onChange={(id) => { setRegionalProductId(id); const p = network.products.find((x) => x.id === id); const selectedDistributor = network.distributors.find((x) => x.id === regionalDistributorId); const area = regionalArea || (selectedDistributor ? getDistributorAreas(selectedDistributor)[0] || "" : ""); setRegionalPriceDraft(String(p?.regionalPrices?.[regionalDistributorId + "::" + area] ?? p?.basePrice ?? "")); }} options={network.products.filter((p) => p.active).map((p) => ({ value: p.id, label: p.name }))} />
               </label>
               <label>محدوده تحویل
-                <select value={regionalArea} onChange={(e) => { const area = e.target.value; setRegionalArea(area); const p = network.products.find((x) => x.id === regionalProductId); setRegionalPriceDraft(String(p?.regionalPrices?.[regionalDistributorId + "::" + area] ?? p?.basePrice ?? "")); }}>
-                  <option value="">انتخاب محدوده</option>
-                  {network.distributors.flatMap((d) => d.id === regionalDistributorId ? getDistributorAreas(d).map((area) => <option key={area} value={area}>{area}</option>) : [])}
-                </select>
+                <RinnaSelect ariaLabel="انتخاب محدوده تحویل" value={regionalArea} placeholder="انتخاب محدوده" onChange={(area) => { setRegionalArea(area); const p = network.products.find((x) => x.id === regionalProductId); setRegionalPriceDraft(String(p?.regionalPrices?.[regionalDistributorId + "::" + area] ?? p?.basePrice ?? "")); }} options={network.distributors.flatMap((d) => d.id === regionalDistributorId ? getDistributorAreas(d).map((area) => ({ value: area, label: area })) : [])} />
               </label>
               <label>قیمت این محدوده (تومان)<input type="number" min="1" value={regionalPriceDraft} onChange={(e) => setRegionalPriceDraft(e.target.value)} placeholder="قیمت نهایی منطقه" /></label>
               <button className="manufacturer-button primary full" onClick={saveRegionalPrice}>ثبت و اعلام قیمت منطقه‌ای</button>
