@@ -337,7 +337,7 @@ select:focus-visible{outline:0;border-color:#b58a66;box-shadow:0 0 0 3px rgba(16
 .rinna-select-trigger .is-placeholder{color:#9b988d;font-weight:400}
 .rinna-select-trigger>svg{flex:none;color:#898679;transition:transform .18s ease}
 .rinna-select-trigger>svg.is-open{transform:rotate(180deg)}
-.rinna-select-menu{position:absolute;z-index:120;top:calc(100% + 7px);right:0;left:0;max-height:min(260px,45vh);overflow-y:auto;overscroll-behavior:contain;padding:5px;border:1px solid #e8e2d8;border-radius:11px;background:#fffefa;box-shadow:0 14px 34px rgba(38,35,28,.14),0 3px 8px rgba(38,35,28,.05);animation:rinna-select-in .14s ease-out}
+.rinna-select-menu{position:fixed;z-index:9999;overflow-y:auto;overscroll-behavior:contain;padding:5px;border:1px solid #e8e2d8;border-radius:11px;background:#fffefa;box-shadow:0 14px 34px rgba(38,35,28,.14),0 3px 8px rgba(38,35,28,.05);animation:rinna-select-in .14s ease-out}
 .rinna-select-option{width:100%;min-height:37px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;border:0;border-radius:7px;background:transparent;color:#55564e;font:inherit;font-size:11px;text-align:right;cursor:pointer;transition:background .14s ease,color .14s ease}
 .rinna-select-option:hover,.rinna-select-option.is-active{background:#f4f0e8;color:#34352f}
 .rinna-select-option.is-selected{background:#f5eee5;color:#986744;font-weight:700}
@@ -352,6 +352,11 @@ select:focus-visible{outline:0;border-color:#b58a66;box-shadow:0 0 0 3px rgba(16
 .manufacturer-shell .rinna-select-trigger:focus-visible{border-color:#7894ed;box-shadow:0 0 0 3px rgba(49,94,232,.12)}
 .manufacturer-shell .rinna-select-option.is-selected{background:#edf2ff;color:#315ee8}
 .manufacturer-shell .rinna-select-option.is-selected>svg{color:#315ee8}
+.rinna-select-menu.is-blue{border-color:#e1e7f0;background:#fff;box-shadow:0 14px 34px rgba(32,48,80,.14),0 3px 8px rgba(32,48,80,.05)}
+.rinna-select-menu.is-blue .rinna-select-option{color:#4b596a}
+.rinna-select-menu.is-blue .rinna-select-option:hover,.rinna-select-menu.is-blue .rinna-select-option.is-active{background:#f1f4fa;color:#27384f}
+.rinna-select-menu.is-blue .rinna-select-option.is-selected{background:#edf2ff;color:#315ee8}
+.rinna-select-menu.is-blue .rinna-select-option.is-selected>svg{color:#315ee8}
 .distributor-shell .rinna-select-trigger{border-color:#e7e1d7;background:#fff;color:#56574e}
 .distributor-shell .rinna-select-trigger:focus-visible{border-color:#d27a5d;box-shadow:0 0 0 3px rgba(217,101,67,.12)}
 .distributor-shell .rinna-select-option.is-selected{background:#f8eee8;color:#bd6347}
@@ -364,11 +369,11 @@ select:focus-visible{outline:0;border-color:#b58a66;box-shadow:0 0 0 3px rgba(16
 .dist-company .rinna-select-trigger:hover{background:transparent;color:#fff}
 .dist-company .rinna-select-trigger:focus-visible{box-shadow:0 0 0 2px rgba(230,161,138,.4);border-radius:4px}
 .dist-company .rinna-select-trigger>svg{color:#a7a698}
-.dist-company .rinna-select-menu{top:calc(100% + 10px);background:#34352f;border-color:#4b4c43;box-shadow:0 16px 32px rgba(0,0,0,.3)}
-.dist-company .rinna-select-option{color:#e8e5dc}
-.dist-company .rinna-select-option:hover,.dist-company .rinna-select-option.is-active{background:#414239;color:#fff}
-.dist-company .rinna-select-option.is-selected{background:#4a3a32;color:#f0b49c}
-.dist-company .rinna-select-option.is-selected>svg{color:#f0b49c}
+.rinna-select-menu.is-dark{background:#34352f;border-color:#4b4c43;box-shadow:0 16px 32px rgba(0,0,0,.3)}
+.rinna-select-menu.is-dark .rinna-select-option{color:#e8e5dc}
+.rinna-select-menu.is-dark .rinna-select-option:hover,.rinna-select-menu.is-dark .rinna-select-option.is-active{background:#414239;color:#fff}
+.rinna-select-menu.is-dark .rinna-select-option.is-selected{background:#4a3a32;color:#f0b49c}
+.rinna-select-menu.is-dark .rinna-select-option.is-selected>svg{color:#f0b49c}
 .manufacturer-price-layout .price-release label>.rinna-select{margin-top:7px}
 .dist-form-label>.rinna-select{margin-top:7px}
 @keyframes rinna-select-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
