@@ -122,3 +122,23 @@
   .manufacturer-topbar .breadcrumb{min-width:0;flex:1;overflow:hidden}
   .manufacturer-topbar .topbar-actions{flex:none}
 }
+
+
+/* Consistent minimal select controls — manufacturer workspace */
+.manufacturer-shell select{
+  appearance:none;-webkit-appearance:none;
+  border:1px solid #e3e7ec;border-radius:8px;
+  background-color:#fff;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237d8995' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:left 11px center;background-size:14px;
+  padding:0 12px 0 34px;color:#354150;
+  transition:border-color .18s ease,box-shadow .18s ease,background-color .18s ease;
+}
+.manufacturer-shell select:focus-visible{
+  outline:0;border-color:#8da4ed;box-shadow:0 0 0 3px rgba(49,94,232,.11);
+}
+.price-release label select{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237d8995' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:left 11px center;background-size:14px;
+  padding-inline:11px 34px;
+}
