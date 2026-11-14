@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Check, ChevronDown } from "lucide-react";
 
 export type RinnaSelectOption = {
@@ -31,14 +32,17 @@ export default function RinnaSelect({
     Math.max(0, options.findIndex((option) => option.value === value)),
   );
   const rootRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const [menuPosition, setMenuPosition] = useState<{ top: number; left: number; width: number; maxHeight: number } | null>(null);
   const listboxId = useId();
   const selected = options.find((option) => option.value === value);
 
   useEffect(() => {
     if (!open) return;
     const closeOutside = (event: PointerEvent) => {
-      if (event.target instanceof Node && !rootRef.current?.contains(event.target)) {
+      if (event.target instanceof Node && !rootRef.current?.contains(event.target) && !menuRef.current?.contains(event.target)) {
         setOpen(false);
       }
     };
@@ -50,6 +54,31 @@ export default function RinnaSelect({
     return () => {
       document.removeEventListener("pointerdown", closeOutside);
       document.removeEventListener("keydown", closeEscape);
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const updatePosition = () => {
+      const rect = rootRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const below = window.innerHeight - rect.bottom - 16;
+      const above = rect.top - 16;
+      const placeAbove = below < 190 && above > below;
+      const maxHeight = Math.max(120, Math.min(260, (placeAbove ? above : below) - 7));
+      setMenuPosition({
+        top: placeAbove ? Math.max(8, rect.top - maxHeight - 7) : rect.bottom + 7,
+        left: rect.left,
+        width: rect.width,
+        maxHeight,
+      });
+    };
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, true);
+    return () => {
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
     };
   }, [open]);
 
@@ -67,6 +96,7 @@ export default function RinnaSelect({
     if (option.disabled) return;
     onChange(option.value);
     setOpen(false);
+    triggerRef.current?.focus();
   };
 
   const moveActive = (direction: 1 | -1) => {
@@ -85,6 +115,7 @@ export default function RinnaSelect({
     <div className={`rinna-select ${className}`} ref={rootRef}>
       <button
         type="button"
+        ref={triggerRef}
         className="rinna-select-trigger"
         aria-label={ariaLabel}
         aria-haspopup="listbox"
@@ -107,8 +138,15 @@ export default function RinnaSelect({
         <span className={!selected ? "is-placeholder" : ""}>{selected?.label || placeholder}</span>
         <ChevronDown size={15} aria-hidden="true" className={open ? "is-open" : ""} />
       </button>
-      {open && (
-        <div className="rinna-select-menu" id={listboxId} role="listbox" aria-label={ariaLabel}>
+      {open && menuPosition && createPortal(
+        <div
+          ref={menuRef}
+          className={`rinna-select-menu ${className.includes("rinna-select-dark") ? "is-dark" : className.includes("rinna-select-blue") ? "is-blue" : "is-copper"}`}
+          id={listboxId}
+          role="listbox"
+          aria-label={ariaLabel}
+          style={{ top: menuPosition.top, left: menuPosition.left, width: menuPosition.width, maxHeight: menuPosition.maxHeight }}
+        >
           {options.map((option, index) => (
             <button
               type="button"
@@ -140,7 +178,8 @@ export default function RinnaSelect({
             </button>
           ))}
           {options.length === 0 && <div className="rinna-select-empty">گزینه‌ای وجود ندارد</div>}
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );
