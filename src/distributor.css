@@ -229,3 +229,26 @@ html{max-width:100%;overflow-x:clip}
   .dist-notification-item.unread{margin-inline:-9px;padding-inline:11px}
   .dist-notification-heading{align-items:flex-start}
 }
+
+
+/* Consistent minimal select controls — distributor workspace */
+.distributor-shell select{
+  appearance:none;-webkit-appearance:none;
+  border:1px solid #e5e0d5;border-radius:9px;
+  background-color:#fff;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237f8075' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:left 11px center;background-size:14px;
+  padding:0 12px 0 34px;color:#42433b;
+  transition:border-color .18s ease,box-shadow .18s ease,background-color .18s ease;
+}
+.distributor-shell select:focus-visible{
+  outline:0;border-color:#b98268;box-shadow:0 0 0 3px rgba(185,130,104,.13);
+}
+.dist-company select{
+  border:0;border-radius:5px;background-color:transparent;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23c5c2b5' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-position:left 1px center;background-size:14px;
+  padding:0 0 0 22px;color:#f5f3ed;
+}
+.dist-filter-wrap select{border:0;border-radius:5px;background-color:transparent;padding:0 2px 0 23px;background-position:left 1px center;box-shadow:none}
+.dist-setting-row select,.dist-form-label select{padding-inline:10px 32px}
