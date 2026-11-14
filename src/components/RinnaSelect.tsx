@@ -97,9 +97,10 @@ export default function RinnaSelect({
             event.preventDefault();
             if (!open) openAt();
             else moveActive(event.key === "ArrowDown" ? 1 : -1);
-          } else if ((event.key === "Enter" || event.key === " ") && !open) {
+          } else if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();
-            openAt();
+            if (!open) openAt();
+            else if (options[activeIndex]) choose(options[activeIndex]);
           }
         }}
       >
