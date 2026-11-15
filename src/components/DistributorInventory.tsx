@@ -25,7 +25,7 @@ type Props = {
 
 const fa = (value: number) => new Intl.NumberFormat("fa-IR").format(value);
 const normalizeDigits = (value: string) => value.replace(/[۰-۹]/g, d => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))).replace(/[٠-٩]/g, d => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)));
-const formatQuantity = (value: string) => { const digits = normalizeDigits(value).replace(/[^0-9]/g, ""); return digits.replace(/\\B(?=(\\d{3})+(?!\\d))/g, ","); };
+const formatQuantity = (value: string) => { const digits = normalizeDigits(value).replace(/[^0-9]/g, ""); return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ","); };
 const toman = (value: number) => fa(value) + " تومان";
 const timeLabel = (value: string) => new Intl.DateTimeFormat("fa-IR", { dateStyle: "short", timeStyle: "short" }).format(new Date(value));
 
