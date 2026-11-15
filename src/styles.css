@@ -1,17 +1,17 @@
 :root {
   font-family: "Vazirmatn", sans-serif;
-  color: #25251f;
-  background: #faf7f1;
+  color: #252925;
+  background: #f4f3ed;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
-  --ink: #20211c;
-  --forest: #292d25;
-  --linen: #faf7f1;
-  --cream: #f1e9dc;
-  --sand: #d9cbb6;
-  --copper: #a87545;
-  --muted: #77766d;
-  --line: #e9e0d3;
+  --ink: #252925;
+  --forest: #263d36;
+  --linen: #f4f3ed;
+  --cream: #e8ede6;
+  --sand: #c7d3c5;
+  --copper: #527565;
+  --muted: #727b73;
+  --line: #e0e6de;
   --container: 1160px;
 }
 * { box-sizing: border-box; }
@@ -409,3 +409,53 @@ select:focus-visible{outline:0;border-color:#b58a66;box-shadow:0 0 0 3px rgba(16
 .product-detail-not-found h1{margin:0;color:#282821}
 .product-detail-not-found a{color:#9c744d}
 @media(max-width:760px){.product-detail-page{padding:28px 0 60px}.product-detail-container{width:min(100% - 28px,600px)}.product-detail-layout{grid-template-columns:1fr;gap:24px}.product-detail-media{min-height:280px;max-height:440px}.product-detail-info{padding:0}.product-detail-price{margin:20px 0}}
+
+
+/* RINNA Nordic Flow — public homepage palette */
+.hero{background:radial-gradient(ellipse at 80% 20%,rgba(168,185,165,.34) 0,transparent 48%)}
+.hero h1 em,.instant-copy h2 em{color:#527565}
+.hero-visual{box-shadow:0 28px 70px rgba(38,61,54,.13)}
+.hero-proof svg,.instant-points svg,.supplier-copy li svg{color:#6f8f7c}
+.floating-panel{background:rgba(250,251,247,.95);border-color:rgba(255,255,255,.8)}
+.mini-icon,.event-icon,.management-item>span,.cart-button{background:#e8ede6;color:#527565}
+.status-dot,.live-indicator i,.availability i{background:#789b83}
+.status-dot,.live-indicator i{box-shadow:0 0 0 4px #e4ece3}
+.availability{color:#527565}
+.chip.active,.chip:hover{background:#263d36;border-color:#263d36}
+.product-card{border-color:#e0e6de;background:#fbfcf8}
+.product-image{background:#e8ede6}
+.product-category{background:rgba(244,246,240,.94);color:#40564a}
+.product-bottom{border-color:#e8ede6}
+.instant-section{background:#e8ede6}
+.cost-demo{background:#fbfcf8;border-color:#dce5dc;box-shadow:0 22px 60px rgba(38,61,54,.07)}
+.purchase-event{border-color:#e0e6de}
+.cost-result{background:#f1f5ef}
+.event-icon{background:#e8ede6}
+.updated-tag,.event-check,.result-foot{color:#527565}
+.result-foot{border-color:#dce5dc}
+.new-price{color:#527565}
+.approval-icon{background:#e4ece3;color:#527565}
+.manager-approval button{color:#527565}
+.dash-stats div{background:#edf1ea}
+.how-section,.faq-section{background:#edf0e9}
+.step{border-color:#cbd8ca}
+.step-icon{background:#527565;border-color:#edf0e9}
+.step-number{color:#829989}
+.faq-list,.faq-item{border-color:#d8e0d6}
+.faq-item button svg{color:#527565}
+.contact-card{background:#263d36}
+.contact-copy .eyebrow{color:#c5d9c8}
+.contact-assurance{color:#c5d9c8}
+.role-switch button.selected{background:#e8ede6;color:#263d36}
+.lead-form input:focus{border-color:#a8b9a5}
+.footer{background:#1d302a}
+.footer a:hover{color:#c5d9c8}
+.socials a{color:#c5d9c8;border-color:#496056}
+.btn{background:#263d36;border-color:#263d36}
+.btn:hover{background:#1d302a;border-color:#1d302a}
+.btn-outline{background:transparent;color:#263d36;border-color:#a8b9a5}
+.btn-outline:hover{background:#e8ede6;color:#263d36;border-color:#a8b9a5}
+.text-link{color:#527565}
+.eyebrow{color:#527565}
+.eyebrow-dot{background:#789b83}
+@media(max-width:720px){.nav-links{background:#f4f3ed;border-color:#e0e6de}}
