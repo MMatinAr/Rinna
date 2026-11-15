@@ -170,7 +170,7 @@ export default function ManufacturerDashboard() {
   const saveRegionalPrice = () => {
     const distributor = network.distributors.find((item) => item.id === regionalDistributorId && item.active);
     const product = network.products.find((item) => item.id === regionalProductId && item.active);
-    const price = Number(regionalPriceDraft);
+    const price = parseMoney(regionalPriceDraft);
     if (!distributor || !product || !regionalArea || !getDistributorAreas(distributor).includes(regionalArea) || !Number.isFinite(price) || price <= 0) {
       announce("پخش‌کننده، محصول، محدوده و قیمت معتبر را انتخاب کن.");
       return;
