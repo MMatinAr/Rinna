@@ -242,3 +242,23 @@
  .product-image-list{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
  .product-image-item>img{height:82px}
 }
+
+
+/* Wizard layout: the active step owns its scroll area; navigation stays in flow */
+.product-form-wizard{display:flex;flex-direction:column;overflow:hidden;min-height:0}
+.product-form-wizard .product-form-head{position:relative;top:auto;flex:none}
+.product-form-wizard .product-wizard-progress{position:relative;flex:none}
+.product-form-wizard>.product-form-section{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;padding:18px 8px;scrollbar-width:thin;scrollbar-color:#cbd4df transparent}
+.product-form-wizard .product-form-footer{position:relative;bottom:auto;flex:none;margin-top:0}
+.product-wizard-progress button{width:30px;height:30px;border:1px solid #dce3ec;border-radius:50%;display:grid;place-items:center;background:#fff;color:#84909d;font:inherit;font-size:11px;cursor:pointer;transition:background .18s,border-color .18s,color .18s,transform .18s}
+.product-wizard-progress button:hover{transform:translateY(-1px);border-color:#315ee8}
+.product-wizard-progress button.active{background:#315ee8;border-color:#315ee8;color:#fff}
+.product-wizard-progress button.done{background:#eaf5ef;border-color:#b9dfca;color:#27845c}
+.product-wizard-progress i.filled{background:#8ab99d}
+.product-form-wizard .product-form-field textarea{min-height:130px;resize:vertical;line-height:1.9}
+.product-form-wizard .product-form-section.product-image-stage{display:grid;align-content:start;gap:18px}
+@media(max-width:600px){
+ .product-form-wizard{max-height:calc(100dvh - 20px)}
+ .product-form-wizard>.product-form-section{padding:12px 3px}
+ .product-form-wizard .product-form-field textarea{min-height:110px}
+}
