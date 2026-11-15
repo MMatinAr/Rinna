@@ -114,7 +114,6 @@ export default function DistributorDashboard() {
   const [query, setQuery] = useState("");
   const [orderFilter, setOrderFilter] = useState("همه");
   const [role, setRole] = useState("مدیر مجموعه");
-  const [notice, setNotice] = useState("");
   const [toastQueue, setToastQueue] = useState<Array<{id:number;message:string}>>([]);
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
   const [modal, setModal] = useState<"product" | "zone" | "cancel" | null>(null);
