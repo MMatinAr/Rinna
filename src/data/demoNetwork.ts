@@ -11,6 +11,7 @@ export type DemoCatalogProduct = {
   basePrice: number;
   description?: string;
   images?: DemoProductImage[];
+  primaryImageId?: string;
   slug?: string;
   priceTiers?: DemoPriceTier[];
   priceValidFrom?: string;
