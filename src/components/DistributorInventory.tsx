@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowDownLeft, ArrowUpLeft, ClipboardList, PackagePlus, PencilLine, Search } from "lucide-react";
+import { ArrowDownLeft, ArrowUpLeft, ClipboardList, PackagePlus, PencilLine, Search, X } from "lucide-react";
 import RinnaSelect from "./RinnaSelect";
 
 type Product = {
