@@ -109,13 +109,14 @@ export default function ManufacturerDashboard() {
       basePrice: draft.basePrice,
       description: draft.description.trim(),
       images: draft.images.map((image) => ({ ...image, alt: draft.name.trim() })),
+      primaryImageId: draft.primaryImageId,
       slug: editingProductId && previous?.slug ? previous.slug : slug + "-" + id.toLowerCase(),
       priceTiers: draft.priceTiersEnabled ? draft.priceTiers : [],
       priceValidFrom: draft.priceValidFrom,
       priceValidUntil: draft.priceValidUntil || null,
       productionDate: draft.productionDate || null,
       expiryDate: draft.expiryDate || null,
-      active: true,
+      active: draft.active,
     };
     const latest = readDemoNetwork();
     const nextNetwork = { ...latest, products: editingProductId ? latest.products.map((p) => p.id === id ? nextProduct : p) : [nextProduct, ...latest.products], notifications: editingProductId ? (latest.notifications || []) : [...(latest.notifications || []), ...latest.distributors.filter(d=>d.active).map(d=>({id:"PRODUCT-NEW-"+Date.now()+"-"+d.id,distributorId:d.id,productId:id,productName:draft.name.trim(),oldPrice:0,newPrice:draft.basePrice,scope:"محصول جدید",createdAt:new Date().toISOString(),read:false,kind:"product"}))] };
