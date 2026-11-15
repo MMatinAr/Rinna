@@ -24,6 +24,8 @@ type Props = {
 };
 
 const fa = (value: number) => new Intl.NumberFormat("fa-IR").format(value);
+const normalizeDigits = (value: string) => value.replace(/[۰-۹]/g, d => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))).replace(/[٠-٩]/g, d => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)));
+const formatQuantity = (value: string) => { const digits = normalizeDigits(value).replace(/[^0-9]/g, ""); return digits.replace(/\\B(?=(\\d{3})+(?!\\d))/g, ","); };
 const toman = (value: number) => fa(value) + " تومان";
 const timeLabel = (value: string) => new Intl.DateTimeFormat("fa-IR", { dateStyle: "short", timeStyle: "short" }).format(new Date(value));
 
@@ -68,7 +70,7 @@ export default function DistributorInventory({ products, movements, onProductsCh
 
   const saveMovement = () => {
     if (!activeProduct || !mode) return;
-    const amount = Number(quantity);
+    const amount = Number(normalizeDigits(quantity).replace(/,/g, ""));
     if (!Number.isInteger(amount) || amount < 0 || (mode === "receipt" && amount < 1)) {
       setError(mode === "receipt" ? "تعداد ورود باید یک عدد صحیح بزرگ‌تر از صفر باشد." : "موجودی جدید باید عدد صحیح نامنفی باشد.");
       return;
@@ -191,9 +193,9 @@ export default function DistributorInventory({ products, movements, onProductsCh
         <h2>{mode === "receipt" ? "ثبت ورود کالا" : "اصلاح موجودی فیزیکی"}</h2>
         <p>{activeProduct.name} · {activeProduct.sku}</p>
         <div className="dist-inv-modal-summary"><span>فیزیکی فعلی <b>{fa(activeProduct.stock)}</b></span><span>رزروشده <b>{fa(activeProduct.reserved)}</b></span><span>قابل فروش <b>{fa(activeProduct.stock - activeProduct.reserved)}</b></span></div>
-        <label className="dist-form-label">{mode === "receipt" ? "تعداد ورودی" : "موجودی فیزیکی جدید"}<input type="number" min={mode === "receipt" ? 1 : activeProduct.reserved} step="1" value={quantity} onChange={(event) => setQuantity(event.target.value)} placeholder="تعداد را وارد کن"/></label>
-        {mode === "receipt" && quantity !== "" && Number.isFinite(Number(quantity)) && <div className="dist-inv-preview">موجودی پس از ورود: <b>{fa(activeProduct.stock + Math.max(0, Number(quantity) || 0))}</b></div>}
-        {mode === "adjustment" && quantity !== "" && Number.isFinite(Number(quantity)) && <div className="dist-inv-preview">قابل فروش پس از اصلاح: <b>{fa(Number(quantity) - activeProduct.reserved)}</b></div>}
+        <label className="dist-form-label">{mode === "receipt" ? "تعداد ورودی" : "موجودی فیزیکی جدید"}<input type="text" inputMode="numeric" dir="ltr" value={formatQuantity(quantity)} onChange={(event) => setQuantity(formatQuantity(event.target.value))} placeholder="تعداد را وارد کن"/></label>
+        {mode === "receipt" && quantity !== "" && Number.isFinite(Number(normalizeDigits(quantity).replace(/,/g, ""))) && <div className="dist-inv-preview">موجودی پس از ورود: <b>{fa(activeProduct.stock + Math.max(0, Number(normalizeDigits(quantity).replace(/,/g, "")) || 0))}</b></div>}
+        {mode === "adjustment" && quantity !== "" && Number.isFinite(Number(quantity)) && <div className="dist-inv-preview">قابل فروش پس از اصلاح: <b>{fa(Number(normalizeDigits(quantity).replace(/,/g, "")) - activeProduct.reserved)}</b></div>}
         <label className="dist-form-label">دلیل عملیات<textarea rows={3} value={reason} onChange={(event) => setReason(event.target.value)} placeholder="مثلاً رسید خرید شماره ۱۲۳ یا مغایرت شمارش انبار"/></label>
         {error && <div className="dist-inv-error">{error}</div>}
         <button className="dist-btn dist-btn-primary dist-btn-full" onClick={saveMovement}>{mode === "receipt" ? "ثبت ورود کالا" : "ثبت اصلاح موجودی"}</button>
