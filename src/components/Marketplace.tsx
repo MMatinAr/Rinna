@@ -9,7 +9,6 @@ import { readDemoNetwork, type DemoNetwork } from "../data/demoNetwork";
 const AUTOPLAY_INTERVAL = 3000;
 
 type SortMode = "recommended" | "price-asc" | "price-desc" | "name";
-type AvailabilityMode = "all" | "available";
 
 export default function Marketplace() {
   const dispatch = useAppDispatch();
@@ -18,7 +17,6 @@ export default function Marketplace() {
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [sortMode, setSortMode] = useState<SortMode>("recommended");
-  const [availability, setAvailability] = useState<AvailabilityMode>("all");
 
   useEffect(() => {
     const sync = (event?: Event) => setCatalog((event as CustomEvent<DemoNetwork> | undefined)?.detail || readDemoNetwork());
@@ -44,7 +42,6 @@ export default function Marketplace() {
         image_url: mainImage?.dataUrl || "",
         price: product.basePrice,
         unit: product.pack,
-        available: true,
       };
     });
     return activeCatalog.length ? activeCatalog : (data?.length ? data : demoProducts);
@@ -68,23 +65,21 @@ export default function Marketplace() {
       const matchesSearch = !query || product.name.toLocaleLowerCase("fa").includes(query) || product.supplier_name.toLocaleLowerCase("fa").includes(query);
       const matchesMin = min === null || (Number.isFinite(min) && product.price >= min);
       const matchesMax = max === null || (Number.isFinite(max) && product.price <= max);
-      const matchesAvailability = availability === "all" || product.available !== false;
-      return matchesCategory && matchesSearch && matchesMin && matchesMax && matchesAvailability;
+      return matchesCategory && matchesSearch && matchesMin && matchesMax;
     });
     if (sortMode === "price-asc") return filtered.sort((a, b) => a.price - b.price);
     if (sortMode === "price-desc") return filtered.sort((a, b) => b.price - a.price);
     if (sortMode === "name") return filtered.sort((a, b) => a.name.localeCompare(b.name, "fa"));
     return filtered;
-  }, [allProducts, activeCategory, search, minPrice, maxPrice, availability, sortMode]);
+  }, [allProducts, activeCategory, search, minPrice, maxPrice, sortMode]);
 
-  const hasFilters = Boolean(search || activeCategory !== "همه" || minPrice || maxPrice || sortMode !== "recommended" || availability !== "all");
+  const hasFilters = Boolean(search || activeCategory !== "همه" || minPrice || maxPrice || sortMode !== "recommended");
   const resetFilters = () => {
     dispatch(setActiveCategory("همه"));
     dispatch(setSearch(""));
     setMinPrice("");
     setMaxPrice("");
     setSortMode("recommended");
-    setAvailability("all");
   };
 
   const [pageIndex, setPageIndex] = useState(0);
@@ -101,7 +96,7 @@ export default function Marketplace() {
     return () => window.removeEventListener("resize", updatePageSize);
   }, []);
 
-  useEffect(() => { setPageIndex(0); }, [activeCategory, search, minPrice, maxPrice, sortMode, availability]);
+  useEffect(() => { setPageIndex(0); }, [activeCategory, search, minPrice, maxPrice, sortMode]);
   useEffect(() => { if (pageIndex >= pageCount) setPageIndex(0); }, [pageCount, pageIndex]);
 
   useEffect(() => {
@@ -151,7 +146,6 @@ export default function Marketplace() {
             <label className="filter-field"><span>حداقل قیمت (تومان)</span><input inputMode="numeric" type="number" min="0" value={minPrice} onChange={event => setMinPrice(event.target.value)} placeholder="بدون محدودیت" /></label>
             <label className="filter-field"><span>حداکثر قیمت (تومان)</span><input inputMode="numeric" type="number" min="0" value={maxPrice} onChange={event => setMaxPrice(event.target.value)} placeholder="بدون محدودیت" /></label>
             <label className="filter-field"><span>مرتب‌سازی</span><select value={sortMode} onChange={event => setSortMode(event.target.value as SortMode)}><option value="recommended">پیشنهادی</option><option value="price-asc">ارزان‌ترین</option><option value="price-desc">گران‌ترین</option><option value="name">نام محصول</option></select></label>
-            <label className="filter-field"><span>وضعیت موجودی</span><select value={availability} onChange={event => setAvailability(event.target.value as AvailabilityMode)}><option value="all">همه محصولات</option><option value="available">فقط موجودها</option></select></label>
             <button className="filter-reset" type="button" onClick={resetFilters} disabled={!hasFilters}><RotateCcw size={15} /> پاک‌کردن فیلترها</button>
           </div>
         </div>
@@ -162,7 +156,7 @@ export default function Marketplace() {
               {visibleProducts.map(product => (
                 <a className="product-card" key={product.id} href={"/products/"+("slug" in product && product.slug ? product.slug : product.id)} aria-label={"مشاهده محصول "+product.name}>
                   <div className="product-image"><img src={product.image_url} alt={product.name} loading="lazy" /><span className="product-category">{product.category}</span></div>
-                  <div className="product-info"><div><h3>{product.name}</h3><small>{product.supplier_name}</small></div><span className="availability"><i /> {product.available === false ? "ناموجود" : "موجود"}</span></div>
+                  <div className="product-info"><div><h3>{product.name}</h3><small>{product.supplier_name}</small></div><span className="availability"><i /> در کاتالوگ</span></div>
                   <div className="product-bottom"><div><strong>{product.price.toLocaleString("fa-IR")}</strong><small>تومان / {product.unit}</small></div><span className="cart-button" aria-hidden="true"><ShoppingCart size={17} /></span></div>
                 </a>
               ))}
