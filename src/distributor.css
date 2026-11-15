@@ -140,7 +140,7 @@
 .dist-notification-wrap{position:relative;display:flex;align-items:center}
 .dist-notification-wrap>.dist-icon-btn{position:relative}
 .dist-notification-wrap>.dist-icon-btn i{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:20px;background:#D96F4D;color:#fff;font-size:9px;font-style:normal;display:grid;place-items:center;border:2px solid #FAF9F5}
-.dist-notification-popover{position:absolute;z-index:80;top:calc(100% + 13px);left:0;width:min(370px,calc(100vw - 28px));max-height:430px;overflow-y:auto;background:#fff;border:1px solid #e9e4d9;border-radius:12px;box-shadow:0 18px 50px #24252220;padding:0 15px}
+.dist-notification-popover{position:absolute;z-index:80;top:calc(100% + 13px);left:0;width:min(370px,calc(100vw - 28px));max-height:430px;overflow-x: hidden;background:#fff;border:1px solid #e9e4d9;border-radius:12px;box-shadow:0 18px 50px #24252220;padding:0 15px}
 .dist-notification-heading{display:flex;justify-content:space-between;align-items:center;padding:15px 1px;border-bottom:1px solid #f0ece4}
 .dist-notification-heading b{font-size:12px;color:#35362f}
 .dist-notification-heading span{font-size:9px;color:#999687}

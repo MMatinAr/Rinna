@@ -324,7 +324,7 @@ export default function ManufacturerDashboard() {
                 {Object.keys(product.regionalPrices || {}).length === 0 && <small>هنوز قیمت منطقه‌ای ثبت نشده است.</small>}
               </div>)}
             </section>
-          </div>
+          </div>}
 
           {section === "distributors" && <section className="manufacturer-panel">
             <div className="panel-heading"><div><h2>اعضای شبکه توزیع</h2><p>هر پخش‌کننده می‌تواند در چند منطقه و چند شبکه مجاز فعالیت کند.</p></div><label className="manufacturer-search"><Search size={16} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="جست‌وجوی پخش‌کننده..." /></label></div>
