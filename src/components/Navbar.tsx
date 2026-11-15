@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { Menu, X, Coffee } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { setMobileMenuOpen } from "../store/uiSlice";
 
 const links = [
   ["بازار تأمین", "#marketplace"],
-  ["مدیریت کافه", "#management"],
+  ["راهکارهای کسب‌وکارها", "#management"],
   ["برای تأمین‌کنندگان", "#suppliers"],
   ["سؤالات متداول", "#faq"],
 ];
@@ -25,21 +25,20 @@ export default function Navbar() {
   return (
     <header className={`navbar ${scrolled ? "navbar-scrolled" : ""}`}>
       <div className="container nav-inner">
-        <a className="brand" href="#" aria-label="صفحه اصلی">
-          <span className="brand-mark"><Coffee size={20} /></span>
-          <span>نام برند</span>
+        <a className="brand" href="#" aria-label="صفحه اصلی RINNA">
+          <img className="brand-logo" src="/logo.png" alt="RINNA" />
         </a>
         <nav className={`nav-links ${open ? "nav-open" : ""}`}>
           {links.map(([label, href]) => (
             <a key={href} href={href} onClick={() => dispatch(setMobileMenuOpen(false))}>{label}</a>
           ))}
-          <a className="mobile-only" href="#contact">تماس با ما</a>
+          <a className="mobile-only" href="#contact" onClick={() => dispatch(setMobileMenuOpen(false))}>شروع همکاری</a>
         </nav>
         <div className="nav-actions">
           <a className="login-link" href="/login">ورود</a>
-          <a className="btn btn-small" href="#contact">شروع همکاری</a>
+          <a className="btn btn-small" href="#contact">درخواست همکاری</a>
         </div>
-        <button className="icon-button menu-toggle" onClick={() => dispatch(setMobileMenuOpen(!open))} aria-label="باز کردن منو">
+        <button className="icon-button menu-toggle" onClick={() => dispatch(setMobileMenuOpen(!open))} aria-label={open ? "بستن منو" : "باز کردن منو"}>
           {open ? <X /> : <Menu />}
         </button>
       </div>
