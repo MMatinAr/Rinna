@@ -22,7 +22,7 @@ export default function Marketplace() {
   const products = useMemo(() => {
     const activeCatalog = catalog.products.filter(product => product.active).map(product => {
       const mainImage = product.images?.find(image => image.id === product.primaryImageId) || product.images?.[0];
-      return { id: product.id, name: product.name, supplier_name: "تولیدکننده رسمی RINNA", category: product.category, image_url: mainImage?.dataUrl || "", price: product.basePrice, unit: product.pack };
+      return { id: product.id, slug: product.slug || product.id, name: product.name, supplier_name: "تولیدکننده رسمی RINNA", category: product.category, image_url: mainImage?.dataUrl || "", price: product.basePrice, unit: product.pack };
     });
     const source = activeCatalog.length ? activeCatalog : (data?.length ? data : demoProducts);
     return source.filter(product =>
@@ -137,7 +137,7 @@ export default function Marketplace() {
           {products.length > 0 ? (
             <div className="product-grid" aria-live="polite">
               {visibleProducts.map((product) => (
-                <article className="product-card" key={product.id}>
+                <a className="product-card" key={product.id} href={"/products/"+("slug" in product && product.slug ? product.slug : product.id)} aria-label={"مشاهده محصول "+product.name}>
                   <div className="product-image">
                     <img src={product.image_url} alt={product.name} loading="lazy" />
                     <span className="product-category">{product.category}</span>
@@ -154,11 +154,9 @@ export default function Marketplace() {
                       <strong>{product.price.toLocaleString("fa-IR")}</strong>
                       <small>تومان / {product.unit}</small>
                     </div>
-                    <button className="cart-button" aria-label={`افزودن ${product.name}`}>
-                      <ShoppingCart size={17} />
-                    </button>
+                    <span className="cart-button" aria-hidden="true"><ShoppingCart size={17} /></span>
                   </div>
-                </article>
+                </a>
               ))}
             </div>
           ) : (
