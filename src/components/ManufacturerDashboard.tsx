@@ -109,7 +109,7 @@ export default function ManufacturerDashboard() {
       basePrice: draft.basePrice,
       description: draft.description.trim(),
       images: draft.images.map((image) => ({ ...image, alt: draft.name.trim() })),
-      slug: slug + "-" + id.toLowerCase(),
+      slug: editingProductId && previous?.slug ? previous.slug : slug + "-" + id.toLowerCase(),
       priceTiers: draft.priceTiersEnabled ? draft.priceTiers : [],
       priceValidFrom: draft.priceValidFrom,
       priceValidUntil: draft.priceValidUntil || null,
