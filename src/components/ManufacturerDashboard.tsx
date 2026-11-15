@@ -9,6 +9,7 @@ import { useManufacturerData, type ManufacturerDistributorView, type Manufacture
 import { readDemoNetwork, writeDemoNetwork, type DemoDistributor, type DemoNetwork } from "../data/demoNetwork";
 import "../manufacturer.css";
 import RinnaSelect from "./RinnaSelect";
+import ManufacturerProductForm, { type ManufacturerProductDraft } from "./ManufacturerProductForm";
 
 type Section = "overview" | "catalog" | "prices" | "distributors" | "regions";
 const navItems: { id: Section; label: string; icon: typeof LayoutDashboard }[] = [
@@ -44,7 +45,6 @@ export default function ManufacturerDashboard() {
   const [regionalProductId, setRegionalProductId] = useState("");
   const [regionalArea, setRegionalArea] = useState("");
   const [regionalPriceDraft, setRegionalPriceDraft] = useState("");
-  const [newProduct, setNewProduct] = useState({ name: "", barcode: "", packaging: "", categoryId: "1" });
   const data = useManufacturerData(query);
   useEffect(() => {
     const sync = (event?: Event) => setNetwork((event as CustomEvent<DemoNetwork> | undefined)?.detail || readDemoNetwork());
@@ -94,26 +94,32 @@ export default function ManufacturerDashboard() {
   };
 
 
-  const submitProduct = async () => {
-    if (!newProduct.name.trim() || !newProduct.barcode.trim() || !newProduct.packaging.trim() || Number((newProduct as any).basePrice) <= 0) {
-      announce("نام، بارکد، بسته‌بندی و قیمت پایه را کامل کنید.");
-      return;
-    }
+  const submitProduct = (draft: ManufacturerProductDraft) => {
+    const id = "CAT-" + Date.now();
+    const slug = draft.slug || ("product-" + id.toLowerCase());
     const nextProduct = {
-      id: "CAT-" + Date.now(),
-      name: newProduct.name.trim(),
-      sku: newProduct.barcode.trim(),
-      category: "سایر",
-      pack: newProduct.packaging.trim(),
-      basePrice: Number((newProduct as any).basePrice),
+      id,
+      name: draft.name.trim(),
+      sku: draft.barcode.trim() || id,
+      category: draft.category,
+      pack: draft.packaging.trim(),
+      basePrice: draft.basePrice,
+      description: draft.description.trim(),
+      images: draft.images.map((image) => ({ ...image, alt: draft.name.trim() })),
+      slug: slug + "-" + id.toLowerCase(),
+      priceTiers: draft.priceTiersEnabled ? draft.priceTiers : [],
+      priceValidFrom: draft.priceValidFrom,
+      priceValidUntil: draft.priceValidUntil || null,
+      productionDate: draft.productionDate || null,
+      expiryDate: draft.expiryDate || null,
       active: true,
     };
-    const nextNetwork = { ...network, products: [nextProduct, ...network.products] };
+    const latest = readDemoNetwork();
+    const nextNetwork = { ...latest, products: [nextProduct, ...latest.products] };
     setNetwork(nextNetwork);
     writeDemoNetwork(nextNetwork);
     setShowAdd(false);
-    setNewProduct({ name: "", barcode: "", packaging: "", categoryId: "1" });
-    announce("محصول به کاتالوگ کارخانه اضافه شد و در پنل پخش‌کننده قابل مشاهده است.");
+    announce("محصول با موفقیت به کاتالوگ اضافه شد.");
   };
 
   const saveDistributor = () => {
@@ -350,7 +356,7 @@ export default function ManufacturerDashboard() {
       {priceEdit && <div className="manufacturer-modal-backdrop" onClick={() => setPriceEdit(null)}><div className="manufacturer-modal" onClick={(e) => e.stopPropagation()}><button className="modal-close" onClick={() => setPriceEdit(null)}><X size={18}/></button><h2>تغییر قیمت پایه رسمی</h2><p>{priceEdit.name} · این قیمت پس از ذخیره برای تمام پخش‌کننده‌های متصل به‌روزرسانی می‌شود.</p><label>قیمت جدید (تومان)<input type="number" min="1" value={priceEdit.price} onChange={(e) => setPriceEdit((v) => v ? { ...v, price: e.target.value } : v)} /></label><button className="manufacturer-button primary full" onClick={() => { const value = Number(priceEdit.price); if (!Number.isFinite(value) || value <= 0) return announce("قیمت معتبر وارد کن."); saveBasePrice(priceEdit.sku, value); setPriceEdit(null); }}>ذخیره و انتشار قیمت</button></div></div>}
       {showAddDistributor && <div className="manufacturer-modal-backdrop" onClick={() => setShowAddDistributor(false)}><div className="manufacturer-modal" onClick={(e) => e.stopPropagation()}><button className="modal-close" onClick={() => setShowAddDistributor(false)}><X size={18} /></button><h2>افزودن پخش‌کننده به شبکه</h2><p>در نسخه نمایشی، نام شرکت و محدوده فعالیت را ثبت کن تا در فضای پخش‌کننده هم قابل مشاهده شود.</p><label>نام شرکت پخش<input value={newDistributor.name} onChange={(e) => setNewDistributor((v) => ({ ...v, name: e.target.value }))} placeholder="مثلاً پخش مرکزی" /></label><label>شهر اصلی فعالیت<input value={newDistributor.city} onChange={(e) => setNewDistributor((v) => ({ ...v, city: e.target.value }))} /></label><label>محدوده‌ها (با ویرگول فارسی جدا کن)<input value={newDistributor.areas} onChange={(e) => setNewDistributor((v) => ({ ...v, areas: e.target.value }))} placeholder="شمال تهران، مرکز تهران" /></label><button className="manufacturer-button primary full" onClick={saveDistributor}>افزودن به شبکه</button></div></div>}
       {notice && <div className="manufacturer-toast"><Check size={17} />{notice}<button onClick={() => setNotice("")} aria-label="بستن"><X size={14} /></button></div>}
-      {showAdd && <div className="manufacturer-modal-backdrop" onClick={() => setShowAdd(false)}><div className="manufacturer-modal" onClick={(e) => e.stopPropagation()}><button className="modal-close" onClick={() => setShowAdd(false)}><X size={18} /></button><h2>افزودن محصول مرجع</h2><p>{data.isMock ? "این فرم در حالت نمایشی به سرور متصل نیست." : "محصول جدید به کاتالوگ رسمی برند اضافه می‌شود."}</p><label>نام محصول<input value={newProduct.name} onChange={(e) => setNewProduct((v) => ({ ...v, name: e.target.value }))} placeholder="مثلاً شیر کم‌چرب" /></label><label>بارکد<input value={newProduct.barcode} onChange={(e) => setNewProduct((v) => ({ ...v, barcode: e.target.value }))} placeholder="شناسه یا بارکد محصول" /></label><label>واحد بسته‌بندی<input value={newProduct.packaging} onChange={(e) => setNewProduct((v) => ({ ...v, packaging: e.target.value }))} placeholder="مثلاً بطری ۱ لیتری" /></label><label>قیمت پایه رسمی (تومان)<input type="number" min="1" value={(newProduct as any).basePrice || ""} onChange={(e) => setNewProduct((v) => ({ ...v, basePrice: e.target.value } as any))} placeholder="مثلاً ۵۰۰۰۰" /></label><button className="manufacturer-button primary full" onClick={submitProduct} disabled={data.isCreatingProduct}>{data.isCreatingProduct ? "در حال ثبت..." : "ثبت محصول"}</button></div></div>}
+      {showAdd && <ManufacturerProductForm onClose={() => setShowAdd(false)} onSubmit={submitProduct} />}
     </div>
   );
 }
