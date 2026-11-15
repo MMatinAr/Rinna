@@ -26,7 +26,7 @@ const parseJalali = (value:string) => {
   const start=new Date(Date.UTC(target[0]+621,0,1));
   for(let i=0;i<370;i++){
     const d=new Date(start.getTime()+i*86400000);
-    const p=new Intl.DateTimeFormat("en-US-u-ca-persian",{year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(d);
+    const p=new Intl.DateTimeFormat("en-US-u-ca-persian",{year:"numeric",month:"2-digit",day:"2-digit",timeZone:"UTC"}).formatToParts(d);
     const get=(t:string)=>Number(p.find(x=>x.type===t)?.value||0);
     if(get("year")===target[0]&&get("month")===target[1]&&get("day")===target[2])
       return [d.getUTCFullYear(),String(d.getUTCMonth()+1).padStart(2,"0"),String(d.getUTCDate()).padStart(2,"0")].join("-");
