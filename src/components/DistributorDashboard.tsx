@@ -115,6 +115,7 @@ export default function DistributorDashboard() {
   const [orderFilter, setOrderFilter] = useState("همه");
   const [role, setRole] = useState("مدیر مجموعه");
   const [notice, setNotice] = useState("");
+  const [toastQueue, setToastQueue] = useState<Array<{id:number;message:string}>>([]);
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
   const [modal, setModal] = useState<"product" | "zone" | "cancel" | null>(null);
   const [form, setForm] = useState<any>({});
@@ -185,14 +186,14 @@ export default function DistributorDashboard() {
     return () => { window.removeEventListener("rinna-demo-network-updated", syncCatalog); window.removeEventListener("storage", syncCatalog); };
   }, []);
   useEffect(() => {
-    if (!notice) return;
-    const timer = window.setTimeout(() => setNotice(""), 2800);
+    if (!toastQueue.length) return;
+    const timer = window.setTimeout(() => setToastQueue(queue => queue.slice(1)), 3000);
     return () => window.clearTimeout(timer);
-  }, [notice]);
+  }, [toastQueue]);
 
   const update = (key: string, value: any) => setData((d: any) => ({ ...d, [key]: value }));
   const log = (text: string, type = "action") => setData((d: any) => ({ ...d, activity: [{ id: Date.now(), text, time: nowTime(), type }, ...d.activity].slice(0, 12) }));
-  const announce = (message: string) => setNotice(message);
+  const announce = (message: string) => setToastQueue(queue => [...queue, {id: Date.now()+Math.floor(Math.random()*1000), message}].slice(-4));
   const visibleOrders = useMemo(() => data.orders.filter((o: Order) => {
     const matches = (o.id + o.customer + o.area).toLowerCase().includes(query.toLowerCase());
     return matches && (orderFilter === "همه" || o.status === orderFilter);
@@ -421,7 +422,7 @@ export default function DistributorDashboard() {
         {modal === "zone" && <><span className="dist-eyebrow">DELIVERY AREA</span><h2>افزودن محدوده ارسال</h2><p>شرایط سرویس‌دهی این محدوده را مشخص کن.</p><FormField label="نام محدوده" value={form.name||""} onChange={(v:string)=>setForm((f:any)=>({...f,name:v}))} placeholder="مثلاً ونک و میرداماد"/><div className="dist-form-grid"><FormField label="هزینه ارسال (تومان)" type="number" value={form.fee||""} onChange={(v:string)=>setForm((f:any)=>({...f,fee:v}))}/><FormField label="حداقل سفارش (تومان)" type="number" value={form.min||""} onChange={(v:string)=>setForm((f:any)=>({...f,min:v}))}/></div><FormField label="روزهای ارسال" value={form.days||""} onChange={(v:string)=>setForm((f:any)=>({...f,days:v}))} placeholder="شنبه تا پنجشنبه"/><FormField label="زمان تحویل" value={form.eta||""} onChange={(v:string)=>setForm((f:any)=>({...f,eta:v}))} placeholder="همان روز"/><button className="dist-btn dist-btn-primary dist-btn-full" onClick={saveZone}>ثبت محدوده</button></>}
         {modal === "cancel" && <><span className="dist-eyebrow">CANCEL ORDER</span><h2>لغو سفارش {selected?.id}</h2><p>دلیل لغو را ثبت کن تا در تاریخچه سفارش باقی بماند.</p><label className="dist-form-label">دلیل لغو<RinnaSelect ariaLabel="دلیل لغو سفارش" value={form.reason||""} onChange={(reason)=>setForm((f:any)=>({...f,reason}))} placeholder="انتخاب دلیل" options={["درخواست مشتری","مغایرت موجودی","مشکل در ارسال","سایر موارد"].map((item)=>({value:item,label:item}))} /></label><button className="dist-btn dist-btn-danger dist-btn-full" disabled={!form.reason} onClick={cancelOrder}>تأیید لغو سفارش</button></>}
       </div></div>}
-      {notice && <div className="dist-toast"><CheckCircle2 size={17}/>{notice}<button onClick={()=>setNotice("")}><X size={14}/></button></div>}
+      {toastQueue.map((toast,index)=><div className="dist-toast dist-toast-stack" key={toast.id} style={{bottom: `calc(22px + ${(toastQueue.length-1-index)*58}px)`}}><CheckCircle2 size={17}/>{toast.message}<button onClick={()=>setToastQueue(queue=>queue.filter(item=>item.id!==toast.id))}><X size={14}/></button></div>)}
     </div>
   );
 }
