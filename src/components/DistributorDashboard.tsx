@@ -171,7 +171,7 @@ export default function DistributorDashboard() {
       setActiveDistributorId((currentId) => network.distributors.some((d) => d.id === currentId && d.active) ? currentId : network.distributors.find((d) => d.active)?.id || "");
       setData((current: any) => {
         const products = network.products.filter((p) => p.active).map((p) => {
-          const existing = current.products.find((item: Product) => item.manufacturerProductId === p.id || item.sku === p.sku);
+          const existing = (Array.isArray(current.products) ? current.products : []).find((item: Product) => item.manufacturerProductId === p.id || item.sku === p.sku);
           return existing
             ? { ...existing, name: p.name, sku: p.sku, unit: p.pack, price: p.basePrice, regionalPrices: p.regionalPrices || {}, category: p.category, manufacturerProductId: p.id }
             : { id: p.id, name: p.name, sku: p.sku, unit: p.pack, price: p.basePrice, regionalPrices: p.regionalPrices || {}, stock: 0, reserved: 0, lowAt: 5, category: p.category, updated: "از کاتالوگ کارخانه", manufacturerProductId: p.id };
@@ -315,7 +315,7 @@ export default function DistributorDashboard() {
               {showNotifications && <div className="dist-notification-popover">
                 <div className="dist-notification-heading"><div><b>اعلان‌های کارخانه</b><span>{fa(unreadPriceNotifications)} خوانده‌نشده از {fa(priceNotifications.length)} اعلان</span></div>{unreadPriceNotifications > 0 && <button className="dist-notification-read-all" onClick={markAllPriceNotificationsRead}><CheckCheck size={14} /> خواندن همه</button>}</div>
                 {priceNotifications.length === 0 ? <div className="dist-notification-empty">هنوز تغییری در قیمت محصولات اعلام نشده است.</div> : priceNotifications.slice(0, 12).map((item) => <div className={"dist-notification-item " + (!item.read ? "unread" : "")} key={item.id}>
-                  <span className="dist-notification-dot"></span><div className="dist-notification-copy"><b>تغییر قیمت محصول</b><p>قیمت «{item.productName}»{item.scope ? " · " + item.scope : ""} از {toman(item.oldPrice)} به {toman(item.newPrice)} تغییر کرد.</p><time>{new Intl.DateTimeFormat("fa-IR", { dateStyle: "short", timeStyle: "short" }).format(new Date(item.createdAt))}</time></div>
+                  <span className="dist-notification-dot"></span><div className="dist-notification-copy"><b>{(item as any).kind === "product" ? "محصول جدید به کاتالوگ اضافه شد" : "تغییر قیمت محصول"}</b><p>{(item as any).kind === "product" ? "محصول «"+item.productName+"» به کاتالوگ رسمی اضافه شده و برای عرضه در دسترس است." : "قیمت «"+item.productName+"»"+(item.scope ? " · "+item.scope : "")+" از "+toman(item.oldPrice)+" به "+toman(item.newPrice)+" تغییر کرد."}</p><time>{new Intl.DateTimeFormat("fa-IR", { dateStyle: "short", timeStyle: "short" }).format(new Date(item.createdAt))}</time></div>
                   {!item.read ? <button className="dist-notification-read" onClick={() => markPriceNotificationRead(item.id)}><Check size={14} /><span>خواندم</span></button> : <span className="dist-notification-read-state"><Check size={13} /> خوانده شد</span>}
                 </div>)}
               </div>}
