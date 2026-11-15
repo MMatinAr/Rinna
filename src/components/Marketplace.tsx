@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { setActiveCategory, setSearch } from "../store/uiSlice";
 import { useGetProductsQuery } from "../services/cafeApi";
 import { demoProducts } from "../data/demo";
+import { readDemoNetwork, type DemoNetwork } from "../data/demoNetwork";
 
 const categories = ["همه", "قهوه", "سیروپ", "شکلات", "پودر نوشیدنی"];
 const AUTOPLAY_INTERVAL = 3000;
@@ -11,20 +12,24 @@ const AUTOPLAY_INTERVAL = 3000;
 export default function Marketplace() {
   const dispatch = useAppDispatch();
   const { activeCategory, search } = useAppSelector((s) => s.ui);
+  const [catalog, setCatalog] = useState<DemoNetwork>(readDemoNetwork);
+  useEffect(() => { const sync=(event?:Event)=>setCatalog((event as CustomEvent<DemoNetwork>|undefined)?.detail||readDemoNetwork()); window.addEventListener("rinna-demo-network-updated",sync); window.addEventListener("storage",sync); return ()=>{window.removeEventListener("rinna-demo-network-updated",sync);window.removeEventListener("storage",sync);}; }, []);
   const { data } = useGetProductsQuery({
     category: activeCategory === "همه" ? undefined : activeCategory,
     search: search || undefined,
   });
 
-  const products = useMemo(
-    () =>
-      (data?.length ? data : demoProducts).filter(
-        (product) =>
-          (activeCategory === "همه" || product.category === activeCategory) &&
-          (product.name.includes(search) || product.supplier_name.includes(search)),
-      ),
-    [data, activeCategory, search],
-  );
+  const products = useMemo(() => {
+    const activeCatalog = catalog.products.filter(product => product.active).map(product => {
+      const mainImage = product.images?.find(image => image.id === product.primaryImageId) || product.images?.[0];
+      return { id: product.id, name: product.name, supplier_name: "تولیدکننده رسمی RINNA", category: product.category, image_url: mainImage?.dataUrl || "", price: product.basePrice, unit: product.pack };
+    });
+    const source = activeCatalog.length ? activeCatalog : (data?.length ? data : demoProducts);
+    return source.filter(product =>
+      (activeCategory === "همه" || product.category === activeCategory) &&
+      (product.name.includes(search) || product.supplier_name.includes(search))
+    );
+  }, [catalog, data, activeCategory, search]);
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(3);
@@ -194,7 +199,7 @@ export default function Marketplace() {
             </div>
           )}
         </div>
-        <p className="demo-note">اطلاعات محصولات این بخش نمونه نمایشی هستند و پس از اتصال API با داده واقعی جایگزین می‌شوند.</p>
+        {!catalog.products.some(product => product.active) && <p className="demo-note">اطلاعات محصولات این بخش نمونه نمایشی هستند.</p>}
       </div>
     </section>
   );
