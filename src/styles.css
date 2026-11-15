@@ -463,6 +463,7 @@ select:focus-visible{outline:0;border-color:#b58a66;box-shadow:0 0 0 3px rgba(16
 
 /* RINNA homepage identity and business-first marketplace */
 .brand { gap: 0; }
+.brand-light .brand-logo { filter: brightness(0) invert(1); }
 .brand-logo { display: block; width: 132px; height: 44px; object-fit: contain; filter: brightness(0) saturate(100%) invert(20%) sepia(13%) saturate(1000%) hue-rotate(105deg) brightness(91%) contrast(88%); }
 .navbar { background: rgba(244,243,237,.92); border-bottom-color: rgba(38,61,54,.10); }
 .hero { background: radial-gradient(ellipse at 80% 20%, #e3ebe2 0, transparent 48%); }
@@ -475,7 +476,7 @@ select:focus-visible{outline:0;border-color:#b58a66;box-shadow:0 0 0 3px rgba(16
 .chip { border-color: #dce4db; color: #58665d; }
 .filter-panel { margin: 2px 0 28px; padding: 18px 20px; border: 1px solid #e0e7df; border-radius: 13px; background: #fff; }
 .filter-heading { display: flex; align-items: center; gap: 8px; color: var(--forest); font-size: 12px; margin-bottom: 14px; }
-.filter-controls { display: grid; grid-template-columns: repeat(4, minmax(130px, 1fr)) auto; gap: 12px; align-items: end; }
+.filter-controls { display: grid; grid-template-columns: repeat(3, minmax(130px, 1fr)) auto; gap: 12px; align-items: end; }
 .filter-field { display: grid; gap: 7px; min-width: 0; color: #69746b; font-size: 10px; }
 .filter-field input, .filter-field select { width: 100%; height: 40px; padding: 0 10px; border: 1px solid #e0e7df; border-radius: 8px; background: #fbfcf9; color: var(--ink); outline: none; font: inherit; font-size: 11px; }
 .filter-field input:focus, .filter-field select:focus { border-color: #8fa697; box-shadow: 0 0 0 3px rgba(82,117,101,.10); }
