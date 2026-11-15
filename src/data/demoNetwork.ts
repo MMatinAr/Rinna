@@ -1,5 +1,7 @@
 export const DEMO_NETWORK_KEY = "rinna-demo-network-v1";
 
+export type DemoProductImage = { id: string; dataUrl: string; alt: string };
+export type DemoPriceTier = { id: string; minQuantity: number; unitPrice: number };
 export type DemoCatalogProduct = {
   id: string;
   name: string;
@@ -7,6 +9,14 @@ export type DemoCatalogProduct = {
   category: string;
   pack: string;
   basePrice: number;
+  description?: string;
+  images?: DemoProductImage[];
+  slug?: string;
+  priceTiers?: DemoPriceTier[];
+  priceValidFrom?: string;
+  priceValidUntil?: string | null;
+  productionDate?: string | null;
+  expiryDate?: string | null;
   regionalPrices?: Record<string, number>;
   active: boolean;
 };
