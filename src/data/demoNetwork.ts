@@ -39,6 +39,7 @@ export type DemoPriceNotification = {
   scope?: string;
   createdAt: string;
   read: boolean;
+  kind?: "price" | "product";
 };
 
 export type DemoNetwork = {
