@@ -20,7 +20,7 @@ const jalaliParts = (iso:string) => {
   return [get("year"),get("month"),get("day")].join("/");
 };
 const parseJalali = (value:string) => {
-  const m=digits(value).trim().match(/^(\\d{4})[\\/-](\\d{1,2})[\\/-](\\d{1,2})$/);
+  const m=digits(value).trim().match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/);
   if(!m)return "";
   const target=m.slice(1).map(Number);
   const start=new Date(Date.UTC(target[0]+621,0,1));
@@ -34,8 +34,8 @@ const parseJalali = (value:string) => {
   return "";
 };
 const transliteration:Record<string,string>={"ا":"a","آ":"a","ب":"b","پ":"p","ت":"t","ث":"s","ج":"j","چ":"ch","ح":"h","خ":"kh","د":"d","ذ":"z","ر":"r","ز":"z","ژ":"zh","س":"s","ش":"sh","ص":"s","ض":"z","ط":"t","ظ":"z","ع":"a","غ":"gh","ف":"f","ق":"gh","ک":"k","گ":"g","ل":"l","م":"m","ن":"n","و":"v","ه":"h","ی":"y","ئ":"y","ء":"","‌":" "};
-const makeSlug=(v:string)=>v.toLowerCase().replace(/[۰-۹]/g,d=>String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))).replace(/[٠-٩]/g,d=>String("٠١٢٣٤٥٦٧٨٩".indexOf(d))).split("").map(c=>transliteration[c]??c).join("").normalize("NFKD").replace(/[\\u064B-\\u065F\\u0670]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").replace(/-{2,}/g,"-").slice(0,70).replace(/-$/,"");
-const moneyInput=(v:string)=>v.replace(/\\D/g,"").replace(/\\B(?=(\\d{3})+(?!\\d))/g,",");
+const makeSlug=(v:string)=>v.toLowerCase().replace(/[۰-۹]/g,d=>String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))).replace(/[٠-٩]/g,d=>String("٠١٢٣٤٥٦٧٨٩".indexOf(d))).split("").map(c=>transliteration[c]??c).join("").normalize("NFKD").replace(/[\u064B-\u065F\u0670]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").replace(/-{2,}/g,"-").slice(0,70).replace(/-$/,"");
+const moneyInput=(v:string)=>v.replace(/\D/g,"").replace(/\B(?=(\d{3})+(?!\d))/g,",");
 const numberValue=(v:string)=>Number(v.replace(/,/g,""));
 function DateField({label,value,onChange}:{label:string;value:string;onChange:(v:string)=>void}){
   const [draft,setDraft]=useState(jalaliParts(value));
