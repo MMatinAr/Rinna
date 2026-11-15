@@ -507,3 +507,88 @@ select:focus-visible{outline:0;border-color:#b58a66;box-shadow:0 0 0 3px rgba(16
   .filter-reset { grid-column: 1 / -1; }
   .market-results-note { justify-content: flex-start; }
 }
+
+
+/* Compact, selectable homepage filter bar */
+.market-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  min-height: 64px;
+  margin: 4px 0 30px;
+  padding: 10px 14px;
+  overflow: hidden;
+  border: 1px solid #e0e7df;
+  border-radius: 12px;
+  background: #fff;
+}
+.market-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  min-width: 0;
+}
+.market-filter-bar .category-list {
+  width: auto;
+  flex: 1 1 auto;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 2px 0;
+}
+.market-filter-bar .category-list::-webkit-scrollbar { display: none; }
+.market-filter-bar .chip,
+.market-filter-bar .sort-chip {
+  flex: 0 0 auto;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid #e0e7df;
+  border-radius: 8px;
+  background: #f8faf6;
+  color: #66736a;
+  font: inherit;
+  font-size: 11px;
+  white-space: nowrap;
+  transition: .2s ease;
+}
+.market-filter-bar .chip.active,
+.market-filter-bar .chip:hover,
+.market-filter-bar .sort-chip.active,
+.market-filter-bar .sort-chip:hover {
+  border-color: #263d36;
+  background: #263d36;
+  color: #fff;
+}
+.market-filter-divider { width: 1px; height: 30px; flex: 0 0 1px; background: #e4e9e2; }
+.market-filter-bar .sort-list { gap: 5px; }
+.sort-caption { color: #788278; font-size: 10px; white-space: nowrap; }
+.market-filter-bar .sort-chip { min-height: 34px; padding-inline: 11px; background: transparent; }
+.market-filter-bar .filter-reset {
+  flex: 0 0 auto;
+  height: 36px;
+  margin-inline-start: auto;
+  padding: 0 10px;
+  border: 0;
+  background: transparent;
+  color: #788278;
+  font: inherit;
+  font-size: 10px;
+}
+.market-filter-bar .filter-reset:hover:not(:disabled) { color: #263d36; background: #edf2eb; }
+.market-filter-bar .filter-reset:disabled { opacity: .35; cursor: not-allowed; }
+@media (max-width: 980px) {
+  .market-filter-bar { gap: 10px; flex-wrap: wrap; }
+  .market-filter-bar .category-list { flex-basis: 100%; }
+  .market-filter-divider { display: none; }
+  .market-filter-bar .sort-list { flex-wrap: wrap; }
+}
+@media (max-width: 600px) {
+  .market-filter-bar { gap: 8px; padding: 10px; }
+  .market-filter-bar .category-list { margin-inline: -2px; }
+  .market-filter-bar .sort-list { flex: 1 1 100%; overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; }
+  .market-filter-bar .sort-list::-webkit-scrollbar { display: none; }
+  .market-filter-bar .sort-caption { display: none; }
+  .market-filter-bar .filter-reset { margin-inline-start: auto; }
+}
