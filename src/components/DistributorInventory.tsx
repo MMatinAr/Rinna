@@ -91,7 +91,7 @@ export default function DistributorInventory({ products, movements, onProductsCh
     return () => {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", onKeyDown);
-      if (!mode) previousMovementFocus.current?.focus();
+      previousMovementFocus.current?.focus();
     };
   }, [mode]);
 
