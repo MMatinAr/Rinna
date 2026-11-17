@@ -59,26 +59,38 @@ export default function Marketplace() {
   const selectedMinPrice = minPrice;
   const selectedMaxPrice = maxPrice;
 
-  useEffect(() => setMinPriceInput(String(minPrice)), [minPrice]);
-  useEffect(() => setMaxPriceInput(String(maxPrice)), [maxPrice]);
-
+  // Keep a strict gap between the two ends so the range handles never collapse.
   const parsePriceInput = (value: string, fallback: number) => {
     const normalized = value
       .replace(/[۰-۹]/g, digit => String("۰۱۲۳۴۵۶۷۸۹".indexOf(digit)))
       .replace(/[٠-٩]/g, digit => String("٠١٢٣٤٥٦٧٨٩".indexOf(digit)))
-      .replace(/[٬,،\\s]/g, "");
+      .replace(/[\\s٬,،]/g, "");
     const parsed = Number(normalized);
     return Number.isFinite(parsed) && normalized !== "" ? parsed : fallback;
   };
 
   const commitMinPrice = () => {
-    const next = Math.min(selectedMaxPrice, Math.max(PRICE_MIN, parsePriceInput(minPriceInput, selectedMinPrice)));
+    const parsed = parsePriceInput(minPriceInput, selectedMinPrice);
+    const next = Math.min(selectedMaxPrice - PRICE_STEP, Math.max(PRICE_MIN, parsed));
     setMinPrice(next);
     setMinPriceInput(String(next));
   };
 
   const commitMaxPrice = () => {
-    const next = Math.max(selectedMinPrice, Math.min(PRICE_MAX, parsePriceInput(maxPriceInput, selectedMaxPrice)));
+    const parsed = parsePriceInput(maxPriceInput, selectedMaxPrice);
+    const next = Math.max(selectedMinPrice + PRICE_STEP, Math.min(PRICE_MAX, parsed));
+    setMaxPrice(next);
+    setMaxPriceInput(String(next));
+  };
+
+  const changeMinPrice = (value: number) => {
+    const next = Math.min(selectedMaxPrice - PRICE_STEP, Math.max(PRICE_MIN, value));
+    setMinPrice(next);
+    setMinPriceInput(String(next));
+  };
+
+  const changeMaxPrice = (value: number) => {
+    const next = Math.max(selectedMinPrice + PRICE_STEP, Math.min(PRICE_MAX, value));
     setMaxPrice(next);
     setMaxPriceInput(String(next));
   };
@@ -113,6 +125,8 @@ export default function Marketplace() {
     dispatch(setSearch(""));
     setMinPrice(PRICE_MIN);
     setMaxPrice(PRICE_MAX);
+    setMinPriceInput(String(PRICE_MIN));
+    setMaxPriceInput(String(PRICE_MAX));
     setSortMode("recommended");
   };
 
@@ -180,12 +194,12 @@ export default function Marketplace() {
             <div className="market-price-filter" aria-label="محدوده قیمت">
               <div className="market-price-heading"><span>محدوده قیمت</span><strong>تومان</strong></div>
               <div className="market-price-inputs">
-                <label><span>از</span><input type="text" inputMode="numeric" dir="ltr" minLength={1} value={minPriceInput} onChange={event => setMinPriceInput(event.target.value.replace(/[^0-9۰-۹٠-٩,،٬]/g, ""))} onBlur={commitMinPrice} onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); commitMinPrice(); event.currentTarget.blur(); } }} aria-label="حداقل قیمت به تومان" /></label>
-                <label><span>تا</span><input type="text" inputMode="numeric" dir="ltr" minLength={1} value={maxPriceInput} onChange={event => setMaxPriceInput(event.target.value.replace(/[^0-9۰-۹٠-٩,،٬]/g, ""))} onBlur={commitMaxPrice} onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); commitMaxPrice(); event.currentTarget.blur(); } }} aria-label="حداکثر قیمت به تومان" /></label>
+                <label><span>از</span><input type="text" inputMode="numeric" dir="ltr" minLength={1} value={minPriceInput} onChange={event => setMinPriceInput(event.target.value.replace(/[^0-9۰-۹٠-٩,،٬\\s]/g, ""))} onBlur={commitMinPrice} onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); commitMinPrice(); event.currentTarget.blur(); } }} aria-label="حداقل قیمت به تومان" /></label>
+                <label><span>تا</span><input type="text" inputMode="numeric" dir="ltr" minLength={1} value={maxPriceInput} onChange={event => setMaxPriceInput(event.target.value.replace(/[^0-9۰-۹٠-٩,،٬\\s]/g, ""))} onBlur={commitMaxPrice} onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); commitMaxPrice(); event.currentTarget.blur(); } }} aria-label="حداکثر قیمت به تومان" /></label>
               </div>
               <div className="market-range-wrap" style={{"--range-start": ((selectedMinPrice-PRICE_MIN)/(PRICE_MAX-PRICE_MIN))*100+"%", "--range-end": ((selectedMaxPrice-PRICE_MIN)/(PRICE_MAX-PRICE_MIN))*100+"%"} as React.CSSProperties}>
-                <input aria-label="حداقل قیمت" type="range" min={PRICE_MIN} max={PRICE_MAX} step={PRICE_STEP} value={selectedMinPrice} onChange={event => setMinPrice(Math.min(Number(event.target.value), selectedMaxPrice))} />
-                <input aria-label="حداکثر قیمت" type="range" min={PRICE_MIN} max={PRICE_MAX} step={PRICE_STEP} value={selectedMaxPrice} onChange={event => setMaxPrice(Math.max(Number(event.target.value), selectedMinPrice))} />
+                <input aria-label="حداقل قیمت" type="range" min={PRICE_MIN} max={selectedMaxPrice - PRICE_STEP} step={PRICE_STEP} value={selectedMinPrice} onChange={event => changeMinPrice(Number(event.target.value))} />
+                <input aria-label="حداکثر قیمت" type="range" min={selectedMinPrice + PRICE_STEP} max={PRICE_MAX} step={PRICE_STEP} value={selectedMaxPrice} onChange={event => changeMaxPrice(Number(event.target.value))} />
               </div>
               <div className="market-price-limits"><span>۱۰ هزار</span><span>۱۰۰ میلیون</span></div>
             </div>
