@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import {
-  Activity, ArrowDownLeft, ArrowUpLeft, Bell, Boxes, Check, ChevronDown,
-  CircleHelp, ClipboardList, Command, LayoutDashboard, MapPinned, Package,
-  Menu, Plus, Search, Settings2, Truck, Wallet, X,
+  Activity, ArrowDownLeft, ArrowUpLeft, Bell, Boxes, Check, CheckCheck,
+  ClipboardList, Command, LayoutDashboard, MapPinned, Package,
+  Menu, Plus, Search, Truck, Wallet, X,
 } from "lucide-react";
 import { useManufacturerData, type ManufacturerDistributorView, type ManufacturerProductView } from "../data/manufacturerData";
 import { readDemoNetwork, writeDemoNetwork, type DemoDistributor, type DemoNetwork } from "../data/demoNetwork";
@@ -33,6 +33,7 @@ const getDistributorAreas = (distributor: DemoDistributor) => {
 export default function ManufacturerDashboard() {
   const [section, setSection] = useState<Section>("overview");
   const [mobileNav, setMobileNav] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
   const [query, setQuery] = useState("");
   const [notice, setNotice] = useState("");
   const [showAdd, setShowAdd] = useState(false);
@@ -70,6 +71,19 @@ export default function ManufacturerDashboard() {
       window.removeEventListener("keydown", closeOnEscape);
     };
   }, [profileDistributorId]);
+  const manufacturerNotifications = [...(network.notifications || [])].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 12);
+  const unreadManufacturerNotifications = manufacturerNotifications.filter((item) => !item.read).length;
+  const markManufacturerNotificationRead = (id: string) => {
+    const latest = readDemoNetwork();
+    const next = { ...latest, notifications: (latest.notifications || []).map((item) => item.id === id ? { ...item, read: true } : item) };
+    setNetwork(next); writeDemoNetwork(next);
+  };
+  const markAllManufacturerNotificationsRead = () => {
+    const latest = readDemoNetwork();
+    const next = { ...latest, notifications: (latest.notifications || []).map((item) => ({ ...item, read: true })) };
+    setNetwork(next); writeDemoNetwork(next);
+  };
+
   const networkProducts: ManufacturerProductView[] = network.products.map((p) => ({ id: Number(p.id.replace(/\D/g, "")) || 1, name: p.name, sku: p.sku, category: p.category, pack: p.pack, price: p.basePrice, status: p.active ? "فعال" : "غیرفعال" }));
   const networkDistributors: ManufacturerDistributorView[] = network.distributors.map((d) => {
     let orders = 0;
@@ -212,7 +226,6 @@ export default function ManufacturerDashboard() {
         <div className="manufacturer-company">
           <span className="company-avatar">ک</span>
           <span><b>گروه تولیدی کاله</b><small>حساب تولیدکننده</small></span>
-          <ChevronDown size={15} />
         </div>
         <div className="manufacturer-nav-label">مدیریت شبکه</div>
         <nav className="manufacturer-nav">
@@ -224,8 +237,8 @@ export default function ManufacturerDashboard() {
         </nav>
         <div className="manufacturer-sidebar-bottom">
           <div className="network-health"><span className="health-dot" /><span><b>شبکه فعال است</b><small>{data.isMock ? "داده‌های نمایشی" : "اتصال به سرویس داده"}</small></span></div>
-          <button onClick={() => announce("بخش تنظیمات در مرحله بعد تکمیل می‌شود.")}><Settings2 size={17} /> تنظیمات شبکه</button>
-          <button onClick={() => announce("راهنمای پنل در حال آماده‌سازی است.")}><CircleHelp size={17} /> راهنما و پشتیبانی</button>
+          <div className="manufacturer-coming-soon"><span>تنظیمات شبکه</span><small>به‌زودی</small></div>
+          <div className="manufacturer-coming-soon"><span>راهنما و پشتیبانی</span><small>به‌زودی</small></div>
         </div>
       </aside>
       {mobileNav && <button className="manufacturer-mobile-backdrop" aria-label="بستن منو" onClick={() => setMobileNav(false)} />}
@@ -236,7 +249,13 @@ export default function ManufacturerDashboard() {
           <div className="breadcrumb"><span>پنل تولیدکننده</span><b>/</b><strong>{navItems.find((item) => item.id === section)?.label}</strong></div>
           <div className="topbar-actions">
             <span className="topbar-date">{data.isMock ? "حالت ارائه MVP" : "داده‌های سرویس"}</span>
-            <button className="notification-button" aria-label="اعلان‌ها" onClick={() => announce("اعلان جدیدی ندارید.")}><Bell size={18} /><i /></button>
+            <div className="manufacturer-notification-wrap">
+              <button className="notification-button" aria-label="اعلان‌ها" aria-expanded={showNotifications} aria-controls="manufacturer-notifications" onClick={() => setShowNotifications((open) => !open)}><Bell size={18} />{unreadManufacturerNotifications > 0 && <i>{fa(unreadManufacturerNotifications)}</i>}</button>
+              {showNotifications && <div className="manufacturer-notification-popover" id="manufacturer-notifications">
+                <div className="manufacturer-notification-heading"><div><b>اعلان‌های شبکه</b><small>{fa(unreadManufacturerNotifications)} خوانده‌نشده</small></div>{unreadManufacturerNotifications > 0 && <button type="button" onClick={markAllManufacturerNotificationsRead}><CheckCheck size={14}/> خواندن همه</button>}</div>
+                {manufacturerNotifications.length === 0 ? <div className="manufacturer-notification-empty">هنوز اعلانی برای شبکه ثبت نشده است.</div> : manufacturerNotifications.map((item) => <div className={"manufacturer-notification-item " + (!item.read ? "unread" : "")} key={item.id}><div><b>{item.kind === "product" ? "محصول جدید" : "تغییر قیمت"}</b><p>{item.productName} · {item.scope || "قیمت پایه"}</p><time>{new Intl.DateTimeFormat("fa-IR", { dateStyle: "short", timeStyle: "short" }).format(new Date(item.createdAt))}</time></div>{!item.read && <button type="button" onClick={() => markManufacturerNotificationRead(item.id)} aria-label="خواندن اعلان"><Check size={14}/></button>}</div>)}
+              </div>}
+            </div>
             <span className="topbar-user">م</span>
           </div>
         </header>
