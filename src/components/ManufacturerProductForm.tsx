@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ImagePlus, Plus, Trash2, X, ArrowLeft, ArrowRight } from "lucide-react";
 import RinnaSelect from "./RinnaSelect";
 import MoneyInput, { parseMoney } from "./MoneyInput";
@@ -43,6 +43,23 @@ function DateField({label,value,onChange}:{label:string;value:string;onChange:(v
   return <label className="product-form-field">{label}<input inputMode="numeric" dir="ltr" placeholder="۱۴۰۵/۰۸/۲۴" value={draft} onChange={e=>setDraft(e.target.value)} onBlur={()=>{const parsed=parseJalali(draft);if(parsed){onChange(parsed);setDraft(jalaliParts(parsed));}else if(!draft.trim()){onChange("");setDraft("");}else setDraft(jalaliParts(value));}}/><small className="product-form-hint">تقویم شمسی · سال/ماه/روز</small></label>;
 }
 export default function ManufacturerProductForm({onClose,onSubmit,initialDraft}:{onClose:()=>void;onSubmit:(draft:ManufacturerProductDraft)=>void;initialDraft?:Partial<ManufacturerProductDraft>}){
+  const dialogRef=useRef<HTMLElement>(null);
+  useEffect(()=>{
+    const previous=document.activeElement as HTMLElement|null;
+    const previousOverflow=document.body.style.overflow;
+    document.body.style.overflow="hidden";
+    const onKeyDown=(event:KeyboardEvent)=>{
+      if(event.key==="Escape"){event.preventDefault();onClose();return;}
+      if(event.key!=="Tab"||!dialogRef.current)return;
+      const focusable=Array.from(dialogRef.current.querySelectorAll<HTMLElement>('button:not([disabled]),input:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])'));
+      if(!focusable.length)return;
+      const first=focusable[0],last=focusable[focusable.length-1];
+      if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
+      else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+    };
+    window.addEventListener("keydown",onKeyDown);
+    return ()=>{document.body.style.overflow=previousOverflow;window.removeEventListener("keydown",onKeyDown);previous?.focus();};
+  },[onClose]);
   const [step,setStep]=useState<1|2|3>(1);
   const [name,setName]=useState(initialDraft?.name||"");const [barcode,setBarcode]=useState(initialDraft?.barcode||"");const [category,setCategory]=useState(initialDraft?.category||"لبنیات");const [packaging,setPackaging]=useState(initialDraft?.packaging||"");const [price,setPrice]=useState(initialDraft?.basePrice?moneyInput(String(initialDraft.basePrice)):"");
   const [description,setDescription]=useState(initialDraft?.description||"");const [images,setImages]=useState<ManufacturerProductImageDraft[]>(initialDraft?.images||[]);const [primaryImageId,setPrimaryImageId]=useState(initialDraft?.primaryImageId||initialDraft?.images?.[0]?.id||"");const [active,setActive]=useState(initialDraft?.active??true);const [preview,setPreview]=useState(false);
@@ -51,7 +68,7 @@ export default function ManufacturerProductForm({onClose,onSubmit,initialDraft}:
   const slug=useMemo(()=>makeSlug(name),[name]);
   const addImages=async(files:FileList|null)=>{if(!files)return;const accepted=Array.from(files).filter(f=>f.type.startsWith("image/")&&f.size<=10*1024*1024).slice(0,6-images.length);const converted=await Promise.all(accepted.map(file=>new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>{const img=new Image();img.onload=()=>{const scale=Math.min(1,1200/Math.max(img.width,img.height));const canvas=document.createElement("canvas");canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);const ctx=canvas.getContext("2d");if(!ctx){reject(new Error("Image compression failed"));return;}ctx.drawImage(img,0,0,canvas.width,canvas.height);resolve(canvas.toDataURL("image/jpeg",.78));};img.onerror=reject;img.src=String(reader.result);};reader.onerror=reject;reader.readAsDataURL(file);})));setImages(prev=>{const next=[...prev,...converted.map(dataUrl=>({id:uid(),dataUrl,alt:name.trim()}))];if(!primaryImageId&&next.length)setPrimaryImageId(next[0].id);return next;});};
   const submit=()=>{const basePrice=numberValue(price);if(!name.trim()||!packaging.trim()||!Number.isFinite(basePrice)||basePrice<=0){setError("نام محصول، بسته‌بندی و قیمت معتبر را وارد کن.");setStep(1);return;}if(images.length===0||!images.some(image=>image.id===primaryImageId)){setError("برای ثبت محصول حداقل یک تصویر انتخاب کن و تصویر اصلی را مشخص کن.");setStep(3);return;}if(validUntil&&validUntil<validFrom){setError("پایان اعتبار نمی‌تواند قبل از شروع اعتبار باشد.");setStep(2);return;}if(productionDate&&expiryDate&&expiryDate<productionDate){setError("تاریخ انقضا نمی‌تواند قبل از تاریخ تولید باشد.");setStep(2);return;}if(tiersEnabled){const sorted=[...tiers].sort((a,b)=>a.minQuantity-b.minQuantity);if(!sorted.length||sorted.some(t=>t.minQuantity<2||t.unitPrice<=0)||new Set(sorted.map(t=>t.minQuantity)).size!==sorted.length){setError("حداقل تعدادها باید یکتا و قیمت هر پله معتبر باشد.");setStep(2);return;}}setError("");onSubmit({name,barcode,category,packaging,basePrice,description,images:images.map(i=>({...i,alt:name.trim()})),primaryImageId,active,slug,priceTiersEnabled:tiersEnabled,priceTiers:tiersEnabled?[...tiers].sort((a,b)=>a.minQuantity-b.minQuantity):[],priceValidFrom:validFrom,priceValidUntil:validUntil,productionDate,expiryDate});};
-  return <div className="product-form-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget)onClose();}}><section className="product-form product-form-wizard" role="dialog" aria-modal="true" aria-labelledby="product-form-title" dir="rtl">
+  return <div className="product-form-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget)onClose();}}><section ref={dialogRef} className="product-form product-form-wizard" role="dialog" aria-modal="true" aria-labelledby="product-form-title" dir="rtl">
     <div className="product-form-head"><div><span className="manufacturer-kicker">{step===1?"اطلاعات ضروری":step===2?"اطلاعات اختیاری":"تصاویر و پیش‌نمایش"}</span><h2 id="product-form-title">{initialDraft?"ویرایش محصول":"افزودن محصول جدید"}</h2><p>{step===1?"":step===2?"مواردی که تکمیلشان اختیاری است.":"تصویر اصلی را انتخاب کن و نتیجه را قبل از ثبت ببین."}</p></div><button className="modal-close" onClick={onClose} aria-label="بستن"><X size={19}/></button></div>
     <nav className="product-wizard-progress" aria-label="مراحل ثبت محصول">
       {[1,2,3].map((target)=><React.Fragment key={target}>{target>1&&<i className={step>=target?"filled":""}/>}<button type="button" className={step===target?"active":step>target?"done":""} aria-current={step===target?"step":undefined} aria-label={"رفتن به مرحله "+target} onClick={()=>{setError("");setStep(target as 1|2|3);}}>{target}</button></React.Fragment>)}
