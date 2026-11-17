@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, ShoppingCart, RotateCcw } from "lucide-react";
+import { ArrowLeft, ArrowRight, ShoppingCart, RotateCcw, Pause, Play } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { setActiveCategory, setSearch } from "../store/uiSlice";
@@ -77,6 +77,7 @@ export default function Marketplace() {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(3);
   const [isPaused, setIsPaused] = useState(false);
+  const [userPaused, setUserPaused] = useState(false);
   const touchStartX = useRef<number | null>(null);
   const pageCount = Math.max(1, Math.ceil(products.length / pageSize));
   const visibleProducts = products.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize);
@@ -92,10 +93,10 @@ export default function Marketplace() {
   useEffect(() => { if (pageIndex >= pageCount) setPageIndex(0); }, [pageCount, pageIndex]);
 
   useEffect(() => {
-    if (isPaused || pageCount <= 1) return;
+    if (isPaused || userPaused || pageCount <= 1) return;
     const timer = window.setInterval(() => setPageIndex(current => (current + 1) % pageCount), AUTOPLAY_INTERVAL);
     return () => window.clearInterval(timer);
-  }, [isPaused, pageCount]);
+  }, [isPaused, userPaused, pageCount]);
 
   const goToPage = (nextPage: number) => setPageIndex((nextPage + pageCount) % pageCount);
   const handleTouchStart = (event: React.TouchEvent<HTMLDivElement>) => { touchStartX.current = event.touches[0]?.clientX ?? null; };
@@ -136,7 +137,8 @@ export default function Marketplace() {
           <button className="filter-reset" type="button" onClick={resetFilters} disabled={!hasFilters} aria-label="حذف فیلترها"><RotateCcw size={15} /> پاک‌کردن</button>
         </div>
 
-        <div className="product-carousel" onMouseEnter={() => setIsPaused(true)} onMouseLeave={() => setIsPaused(false)} onFocusCapture={() => setIsPaused(true)} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setIsPaused(false); }} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} aria-roledescription="اسلایدر محصولات">
+        <div className="product-carousel" onMouseEnter={() => setIsPaused(true)} onMouseLeave={() => setIsPaused(false)} onFocusCapture={() => setIsPaused(true)} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setIsPaused(false); }} onTouchStart={event => { setUserPaused(true); handleTouchStart(event); }} onTouchEnd={handleTouchEnd} aria-roledescription="اسلایدر محصولات">
+          <button type="button" className="carousel-autoplay-toggle" onClick={() => setUserPaused(paused => !paused)} aria-pressed={userPaused} aria-label={userPaused ? "ادامه پخش خودکار محصولات" : "توقف پخش خودکار محصولات"}>{userPaused ? <Play size={14} /> : <Pause size={14} />}{userPaused ? "ادامه پخش" : "توقف پخش"}</button>
           {products.length > 0 ? (
             <div className="product-grid" aria-live="polite">
               {visibleProducts.map(product => (
