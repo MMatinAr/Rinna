@@ -21,18 +21,6 @@ export default function Marketplace() {
   const { activeCategory, search } = useAppSelector((s) => s.ui);
   const [catalog, setCatalog] = useState<DemoNetwork>(readDemoNetwork);
   const [sortMode, setSortMode] = useState<SortMode>("recommended");
-  const priceBounds = useMemo(() => {
-    const prices = allProducts.map(product => Number(product.price)).filter(price => Number.isFinite(price) && price >= 0);
-    return { min: prices.length ? Math.min(...prices) : 0, max: prices.length ? Math.max(...prices) : 1000000 };
-  }, [allProducts]);
-  const [minPrice, setMinPrice] = useState<number | null>(null);
-  const [maxPrice, setMaxPrice] = useState<number | null>(null);
-  const selectedMinPrice = minPrice ?? priceBounds.min;
-  const selectedMaxPrice = maxPrice ?? priceBounds.max;
-  useEffect(() => {
-    setMinPrice(current => current === null ? null : Math.min(current, priceBounds.max));
-    setMaxPrice(current => current === null ? null : Math.max(current, priceBounds.min));
-  }, [priceBounds.min, priceBounds.max]);
 
   useEffect(() => {
     const sync = (event?: Event) => setCatalog((event as CustomEvent<DemoNetwork> | undefined)?.detail || readDemoNetwork());
@@ -61,6 +49,18 @@ export default function Marketplace() {
     });
     return activeCatalog.length ? activeCatalog : (data?.length ? data : demoProducts);
   }, [catalog, data]);
+  const priceBounds = useMemo(() => {
+    const prices = allProducts.map(product => Number(product.price)).filter(price => Number.isFinite(price) && price >= 0);
+    return { min: prices.length ? Math.min(...prices) : 0, max: prices.length ? Math.max(...prices) : 1000000 };
+  }, [allProducts]);
+  const [minPrice, setMinPrice] = useState<number | null>(null);
+  const [maxPrice, setMaxPrice] = useState<number | null>(null);
+  const selectedMinPrice = minPrice ?? priceBounds.min;
+  const selectedMaxPrice = maxPrice ?? priceBounds.max;
+  useEffect(() => {
+    setMinPrice(current => current === null ? null : Math.min(current, priceBounds.max));
+    setMaxPrice(current => current === null ? null : Math.max(current, priceBounds.min));
+  }, [priceBounds.min, priceBounds.max]);
 
   const categories = useMemo(
     () => ["همه", ...Array.from(new Set(allProducts.map(product => product.category).filter(Boolean))).sort((a, b) => a.localeCompare(b, "fa"))],
