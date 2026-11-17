@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import {
   Activity, ArrowDownLeft, ArrowUpLeft, Bell, Boxes, Check, CheckCheck,
@@ -34,6 +34,7 @@ export default function ManufacturerDashboard() {
   const [section, setSection] = useState<Section>("overview");
   const [mobileNav, setMobileNav] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const notificationWrapRef = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState("");
   const [notice, setNotice] = useState("");
   const [showAdd, setShowAdd] = useState(false);
@@ -71,6 +72,22 @@ export default function ManufacturerDashboard() {
       window.removeEventListener("keydown", closeOnEscape);
     };
   }, [profileDistributorId]);
+  useEffect(() => {
+    if (!showNotifications) return;
+    const closeOutside = (event: PointerEvent) => {
+      if (event.target instanceof Node && !notificationWrapRef.current?.contains(event.target)) setShowNotifications(false);
+    };
+    const closeEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setShowNotifications(false);
+    };
+    document.addEventListener("pointerdown", closeOutside);
+    document.addEventListener("keydown", closeEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOutside);
+      document.removeEventListener("keydown", closeEscape);
+    };
+  }, [showNotifications]);
+
   const manufacturerNotifications = [...(network.notifications || [])].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 12);
   const unreadManufacturerNotifications = manufacturerNotifications.filter((item) => !item.read).length;
   const markManufacturerNotificationRead = (id: string) => {
@@ -249,7 +266,7 @@ export default function ManufacturerDashboard() {
           <div className="breadcrumb"><span>پنل تولیدکننده</span><b>/</b><strong>{navItems.find((item) => item.id === section)?.label}</strong></div>
           <div className="topbar-actions">
             <span className="topbar-date">{data.isMock ? "حالت ارائه MVP" : "داده‌های سرویس"}</span>
-            <div className="manufacturer-notification-wrap">
+            <div className="manufacturer-notification-wrap" ref={notificationWrapRef}>
               <button className="notification-button" aria-label="اعلان‌ها" aria-expanded={showNotifications} aria-controls="manufacturer-notifications" onClick={() => setShowNotifications((open) => !open)}><Bell size={18} />{unreadManufacturerNotifications > 0 && <i>{fa(unreadManufacturerNotifications)}</i>}</button>
               {showNotifications && <div className="manufacturer-notification-popover" id="manufacturer-notifications">
                 <div className="manufacturer-notification-heading"><div><b>اعلان‌های شبکه</b><small>{fa(unreadManufacturerNotifications)} خوانده‌نشده</small></div>{unreadManufacturerNotifications > 0 && <button type="button" onClick={markAllManufacturerNotificationsRead}><CheckCheck size={14}/> خواندن همه</button>}</div>
