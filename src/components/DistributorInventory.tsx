@@ -36,6 +36,17 @@ export default function DistributorInventory({ products, movements, onProductsCh
   useEffect(() => { setActiveArea(zones[0] || ""); }, [distributorId, zones.join("|")]);
   const [activeProduct, setActiveProduct] = useState<Product | null>(null);
   const [mode, setMode] = useState<"receipt" | "adjustment" | null>(null);
+  useEffect(() => {
+    if (!mode) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeMovement();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [mode]);
   const [quantity, setQuantity] = useState("");
   const [reason, setReason] = useState("");
   const [error, setError] = useState("");
@@ -187,10 +198,10 @@ export default function DistributorInventory({ products, movements, onProductsCh
           </div>)}</div>}
       </section>
 
-      {mode && activeProduct && <div className="dist-modal-backdrop" onClick={closeMovement}><div className="dist-modal dist-inv-modal" onClick={(event) => event.stopPropagation()}>
+      {mode && activeProduct && <div className="dist-modal-backdrop" onClick={closeMovement}><section className="dist-modal dist-inv-modal" role="dialog" aria-modal="true" aria-labelledby="inventory-movement-title" onClick={(event) => event.stopPropagation()}>
         <button className="dist-modal-close" onClick={closeMovement} aria-label="بستن"><X size={18}/></button>
         <span className="dist-eyebrow">{mode === "receipt" ? "GOODS RECEIPT" : "STOCK ADJUSTMENT"}</span>
-        <h2>{mode === "receipt" ? "ثبت ورود کالا" : "اصلاح موجودی فیزیکی"}</h2>
+        <h2 id="inventory-movement-title">{mode === "receipt" ? "ثبت ورود کالا" : "اصلاح موجودی فیزیکی"}</h2>
         <p>{activeProduct.name} · {activeProduct.sku}</p>
         <div className="dist-inv-modal-summary"><span>فیزیکی فعلی <b>{fa(activeProduct.stock)}</b></span><span>رزروشده <b>{fa(activeProduct.reserved)}</b></span><span>قابل فروش <b>{fa(activeProduct.stock - activeProduct.reserved)}</b></span></div>
         <label className="dist-form-label">{mode === "receipt" ? "تعداد ورودی" : "موجودی فیزیکی جدید"}<input type="text" inputMode="numeric" dir="ltr" value={formatQuantity(quantity)} onChange={(event) => setQuantity(formatQuantity(event.target.value))} placeholder="تعداد را وارد کن"/></label>
@@ -199,7 +210,7 @@ export default function DistributorInventory({ products, movements, onProductsCh
         <label className="dist-form-label">دلیل عملیات<textarea rows={3} value={reason} onChange={(event) => setReason(event.target.value)} placeholder="مثلاً رسید خرید شماره ۱۲۳ یا مغایرت شمارش انبار"/></label>
         {error && <div className="dist-inv-error">{error}</div>}
         <button className="dist-btn dist-btn-primary dist-btn-full" onClick={saveMovement}>{mode === "receipt" ? "ثبت ورود کالا" : "ثبت اصلاح موجودی"}</button>
-      </div></div>}
+      </section></div>}
     </div>
   );
 }
