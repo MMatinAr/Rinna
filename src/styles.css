@@ -592,3 +592,16 @@ select:focus-visible{outline:0;border-color:#b58a66;box-shadow:0 0 0 3px rgba(16
   .market-filter-bar .sort-caption { display: none; }
   .market-filter-bar .filter-reset { margin-inline-start: auto; }
 }
+
+
+/* Accessible autoplay control for the marketplace carousel */
+.product-carousel{position:relative}
+.carousel-autoplay-toggle{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  min-height:32px;margin:0 0 12px;padding:0 10px;
+  border:1px solid #e4e9e2;border-radius:7px;background:#fff;
+  color:#66746a;font:inherit;font-size:10px;cursor:pointer;
+  transition:background .18s ease,border-color .18s ease,color .18s ease;
+}
+.carousel-autoplay-toggle:hover{border-color:#b9c7b9;background:#f5f7f2;color:#263d36}
+.carousel-autoplay-toggle:focus-visible{outline:2px solid #718b78;outline-offset:2px}
