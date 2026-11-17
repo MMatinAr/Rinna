@@ -583,6 +583,7 @@ select:focus-visible{outline:0;border-color:#b58a66;box-shadow:0 0 0 3px rgba(16
 }
 .market-range-wrap input[type=range]:first-of-type{z-index:3}
 .market-range-wrap input[type=range]:last-of-type{z-index:2}
+.market-range-wrap input[type=range]:focus{z-index:5}
 .market-range-wrap input[type=range]::-webkit-slider-runnable-track{height:4px;background:transparent}
 .market-range-wrap input[type=range]::-moz-range-track{height:4px;background:transparent}
 .market-range-wrap input[type=range]::-webkit-slider-thumb{
