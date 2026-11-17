@@ -49,18 +49,13 @@ export default function Marketplace() {
     });
     return activeCatalog.length ? activeCatalog : (data?.length ? data : demoProducts);
   }, [catalog, data]);
-  const priceBounds = useMemo(() => {
-    const prices = allProducts.map(product => Number(product.price)).filter(price => Number.isFinite(price) && price >= 0);
-    return { min: prices.length ? Math.min(...prices) : 0, max: prices.length ? Math.max(...prices) : 1000000 };
-  }, [allProducts]);
-  const [minPrice, setMinPrice] = useState<number | null>(null);
-  const [maxPrice, setMaxPrice] = useState<number | null>(null);
-  const selectedMinPrice = minPrice ?? priceBounds.min;
-  const selectedMaxPrice = maxPrice ?? priceBounds.max;
-  useEffect(() => {
-    setMinPrice(current => current === null ? null : Math.min(current, priceBounds.max));
-    setMaxPrice(current => current === null ? null : Math.max(current, priceBounds.min));
-  }, [priceBounds.min, priceBounds.max]);
+  const PRICE_MIN = 10_000;
+  const PRICE_MAX = 100_000_000;
+  const PRICE_STEP = 10_000;
+  const [minPrice, setMinPrice] = useState(PRICE_MIN);
+  const [maxPrice, setMaxPrice] = useState(PRICE_MAX);
+  const selectedMinPrice = minPrice;
+  const selectedMaxPrice = maxPrice;
 
   const categories = useMemo(
     () => ["همه", ...Array.from(new Set(allProducts.map(product => product.category).filter(Boolean))).sort((a, b) => a.localeCompare(b, "fa"))],
@@ -86,12 +81,12 @@ export default function Marketplace() {
     return filtered;
   }, [allProducts, activeCategory, search, selectedMinPrice, selectedMaxPrice, sortMode]);
 
-  const hasFilters = activeCategory !== "همه" || search.trim() !== "" || selectedMinPrice > priceBounds.min || selectedMaxPrice < priceBounds.max || sortMode !== "recommended";
+  const hasFilters = activeCategory !== "همه" || search.trim() !== "" || selectedMinPrice > PRICE_MIN || selectedMaxPrice < PRICE_MAX || sortMode !== "recommended";
   const resetFilters = () => {
     dispatch(setActiveCategory("همه"));
     dispatch(setSearch(""));
-    setMinPrice(null);
-    setMaxPrice(null);
+    setMinPrice(PRICE_MIN);
+    setMaxPrice(PRICE_MAX);
     setSortMode("recommended");
   };
 
@@ -142,32 +137,42 @@ export default function Marketplace() {
           </div>
         </div>
 
-        <div className="market-filter-bar" aria-label="فیلتر محصولات">
-          <label className="market-search-control">
-            <Search size={16} aria-hidden="true" />
-            <input type="search" value={search} onChange={event => dispatch(setSearch(event.target.value))} placeholder="جست‌وجوی نام محصول..." aria-label="جست‌وجوی محصولات" />
-          </label>
-          <div className="market-filter-group category-list" aria-label="دسته‌بندی محصولات">
-            {categories.map(category => (
-              <button key={category} className={activeCategory === category ? "chip active" : "chip"} onClick={() => dispatch(setActiveCategory(category))} aria-pressed={activeCategory === category}>{category}</button>
-            ))}
-          </div>
-          <span className="market-filter-divider" aria-hidden="true" />
-          <div className="market-price-filter" aria-label="محدوده قیمت">
-            <div className="market-price-heading"><span>محدوده قیمت</span><strong>{selectedMinPrice.toLocaleString("fa-IR")} تا {selectedMaxPrice.toLocaleString("fa-IR")} تومان</strong></div>
-            <div className="market-range-wrap" style={{"--range-start": priceBounds.max === priceBounds.min ? 0 : ((selectedMinPrice-priceBounds.min)/(priceBounds.max-priceBounds.min))*100+"%", "--range-end": priceBounds.max === priceBounds.min ? 100 : ((selectedMaxPrice-priceBounds.min)/(priceBounds.max-priceBounds.min))*100+"%"} as React.CSSProperties}>
-              <input aria-label="حداقل قیمت" type="range" min={priceBounds.min} max={priceBounds.max || priceBounds.min+1} step={Math.max(1, Math.round((priceBounds.max-priceBounds.min)/100))} value={Math.min(selectedMinPrice, selectedMaxPrice)} onChange={event => setMinPrice(Math.min(Number(event.target.value), selectedMaxPrice))} />
-              <input aria-label="حداکثر قیمت" type="range" min={priceBounds.min} max={priceBounds.max || priceBounds.min+1} step={Math.max(1, Math.round((priceBounds.max-priceBounds.min)/100))} value={Math.max(selectedMaxPrice, selectedMinPrice)} onChange={event => setMaxPrice(Math.max(Number(event.target.value), selectedMinPrice))} />
+        <div className="market-filter-panel" aria-label="فیلتر محصولات">
+          <div className="market-filter-top">
+            <label className="market-search-control">
+              <Search size={17} aria-hidden="true" />
+              <input type="search" value={search} onChange={event => dispatch(setSearch(event.target.value))} placeholder="دنبال چه محصولی می‌گردی؟" aria-label="جست‌وجوی محصولات" />
+              {search && <button type="button" className="market-search-clear" onClick={() => dispatch(setSearch(""))} aria-label="پاک کردن جست‌وجو">×</button>}
+            </label>
+            <div className="market-filter-group category-list" aria-label="دسته‌بندی محصولات">
+              {categories.map(category => (
+                <button key={category} className={activeCategory === category ? "chip active" : "chip"} onClick={() => dispatch(setActiveCategory(category))} aria-pressed={activeCategory === category}>{category}</button>
+              ))}
             </div>
           </div>
-          <span className="market-filter-divider" aria-hidden="true" />
-          <div className="market-filter-group sort-list" aria-label="مرتب‌سازی محصولات">
-            <span className="sort-caption">مرتب‌سازی:</span>
-            {sortOptions.map(option => (
-              <button key={option.value} type="button" className={sortMode === option.value ? "sort-chip active" : "sort-chip"} onClick={() => setSortMode(option.value)} aria-pressed={sortMode === option.value}>{option.label}</button>
-            ))}
+          <div className="market-filter-bottom">
+            <div className="market-price-filter" aria-label="محدوده قیمت">
+              <div className="market-price-heading"><span>محدوده قیمت</span><strong>تومان</strong></div>
+              <div className="market-price-inputs">
+                <label><span>از</span><input type="number" min={PRICE_MIN} max={selectedMaxPrice} step={PRICE_STEP} value={selectedMinPrice} onChange={event => setMinPrice(Math.min(selectedMaxPrice, Math.max(PRICE_MIN, Number(event.target.value) || PRICE_MIN)))} /></label>
+                <label><span>تا</span><input type="number" min={selectedMinPrice} max={PRICE_MAX} step={PRICE_STEP} value={selectedMaxPrice} onChange={event => setMaxPrice(Math.max(selectedMinPrice, Math.min(PRICE_MAX, Number(event.target.value) || PRICE_MAX)))} /></label>
+              </div>
+              <div className="market-range-wrap" style={{"--range-start": ((selectedMinPrice-PRICE_MIN)/(PRICE_MAX-PRICE_MIN))*100+"%", "--range-end": ((selectedMaxPrice-PRICE_MIN)/(PRICE_MAX-PRICE_MIN))*100+"%"} as React.CSSProperties}>
+                <input aria-label="حداقل قیمت" type="range" min={PRICE_MIN} max={PRICE_MAX} step={PRICE_STEP} value={selectedMinPrice} onChange={event => setMinPrice(Math.min(Number(event.target.value), selectedMaxPrice))} />
+                <input aria-label="حداکثر قیمت" type="range" min={PRICE_MIN} max={PRICE_MAX} step={PRICE_STEP} value={selectedMaxPrice} onChange={event => setMaxPrice(Math.max(Number(event.target.value), selectedMinPrice))} />
+              </div>
+              <div className="market-price-limits"><span>۱۰ هزار</span><span>۱۰۰ میلیون</span></div>
+            </div>
+            <div className="market-sort-block">
+              <span className="sort-caption">مرتب‌سازی</span>
+              <div className="market-filter-group sort-list" aria-label="مرتب‌سازی محصولات">
+                {sortOptions.map(option => (
+                  <button key={option.value} type="button" className={sortMode === option.value ? "sort-chip active" : "sort-chip"} onClick={() => setSortMode(option.value)} aria-pressed={sortMode === option.value}>{option.label}</button>
+                ))}
+              </div>
+            </div>
+            <button className="filter-reset" type="button" onClick={resetFilters} disabled={!hasFilters} aria-label="حذف فیلترها"><RotateCcw size={15} /> پاک‌کردن فیلترها</button>
           </div>
-          <button className="filter-reset" type="button" onClick={resetFilters} disabled={!hasFilters} aria-label="حذف فیلترها"><RotateCcw size={15} /> پاک‌کردن</button>
         </div>
 
         <div className="product-carousel" onMouseEnter={() => setIsPaused(true)} onMouseLeave={() => setIsPaused(false)} onFocusCapture={event => { if (!(event.target as HTMLElement).closest(".carousel-autoplay-toggle")) setIsPaused(true); }} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setIsPaused(false); }} onTouchStart={event => { if (!(event.target as HTMLElement).closest(".carousel-autoplay-toggle")) { setUserPaused(true); handleTouchStart(event); } }} onTouchEnd={handleTouchEnd} aria-roledescription="اسلایدر محصولات">
