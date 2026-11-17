@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, ShoppingCart, RotateCcw, Pause, Play } from "lucide-react";
+import { ArrowLeft, ArrowRight, ShoppingCart, RotateCcw, Pause, Play, Search } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { setActiveCategory, setSearch } from "../store/uiSlice";
@@ -18,9 +18,21 @@ const sortOptions: { value: SortMode; label: string }[] = [
 
 export default function Marketplace() {
   const dispatch = useAppDispatch();
-  const { activeCategory } = useAppSelector((s) => s.ui);
+  const { activeCategory, search } = useAppSelector((s) => s.ui);
   const [catalog, setCatalog] = useState<DemoNetwork>(readDemoNetwork);
   const [sortMode, setSortMode] = useState<SortMode>("recommended");
+  const priceBounds = useMemo(() => {
+    const prices = allProducts.map(product => Number(product.price)).filter(price => Number.isFinite(price) && price >= 0);
+    return { min: prices.length ? Math.min(...prices) : 0, max: prices.length ? Math.max(...prices) : 1000000 };
+  }, [allProducts]);
+  const [minPrice, setMinPrice] = useState<number | null>(null);
+  const [maxPrice, setMaxPrice] = useState<number | null>(null);
+  const selectedMinPrice = minPrice ?? priceBounds.min;
+  const selectedMaxPrice = maxPrice ?? priceBounds.max;
+  useEffect(() => {
+    setMinPrice(current => current === null ? null : Math.min(current, priceBounds.max));
+    setMaxPrice(current => current === null ? null : Math.max(current, priceBounds.min));
+  }, [priceBounds.min, priceBounds.max]);
 
   useEffect(() => {
     const sync = (event?: Event) => setCatalog((event as CustomEvent<DemoNetwork> | undefined)?.detail || readDemoNetwork());
@@ -60,17 +72,26 @@ export default function Marketplace() {
   }, [categories, activeCategory, dispatch]);
 
   const products = useMemo(() => {
-    const filtered = allProducts.filter(product => activeCategory === "همه" || product.category === activeCategory);
+    const normalizedSearch = search.trim().toLocaleLowerCase("fa");
+    const filtered = allProducts.filter(product => {
+      const matchesCategory = activeCategory === "همه" || product.category === activeCategory;
+      const matchesSearch = !normalizedSearch || product.name.toLocaleLowerCase("fa").includes(normalizedSearch) || product.category.toLocaleLowerCase("fa").includes(normalizedSearch) || product.supplier_name.toLocaleLowerCase("fa").includes(normalizedSearch);
+      const price = Number(product.price);
+      const matchesPrice = price >= selectedMinPrice && price <= selectedMaxPrice;
+      return matchesCategory && matchesSearch && matchesPrice;
+    });
     if (sortMode === "price-asc") return [...filtered].sort((a, b) => a.price - b.price);
     if (sortMode === "price-desc") return [...filtered].sort((a, b) => b.price - a.price);
     if (sortMode === "name") return [...filtered].sort((a, b) => a.name.localeCompare(b.name, "fa"));
     return filtered;
-  }, [allProducts, activeCategory, sortMode]);
+  }, [allProducts, activeCategory, search, selectedMinPrice, selectedMaxPrice, sortMode]);
 
-  const hasFilters = activeCategory !== "همه" || sortMode !== "recommended";
+  const hasFilters = activeCategory !== "همه" || search.trim() !== "" || selectedMinPrice > priceBounds.min || selectedMaxPrice < priceBounds.max || sortMode !== "recommended";
   const resetFilters = () => {
     dispatch(setActiveCategory("همه"));
     dispatch(setSearch(""));
+    setMinPrice(null);
+    setMaxPrice(null);
     setSortMode("recommended");
   };
 
@@ -89,7 +110,7 @@ export default function Marketplace() {
     return () => window.removeEventListener("resize", updatePageSize);
   }, []);
 
-  useEffect(() => { setPageIndex(0); }, [activeCategory, sortMode]);
+  useEffect(() => { setPageIndex(0); }, [activeCategory, search, selectedMinPrice, selectedMaxPrice, sortMode]);
   useEffect(() => { if (pageIndex >= pageCount) setPageIndex(0); }, [pageCount, pageIndex]);
 
   useEffect(() => {
@@ -122,10 +143,22 @@ export default function Marketplace() {
         </div>
 
         <div className="market-filter-bar" aria-label="فیلتر محصولات">
+          <label className="market-search-control">
+            <Search size={16} aria-hidden="true" />
+            <input type="search" value={search} onChange={event => dispatch(setSearch(event.target.value))} placeholder="جست‌وجوی نام محصول..." aria-label="جست‌وجوی محصولات" />
+          </label>
           <div className="market-filter-group category-list" aria-label="دسته‌بندی محصولات">
             {categories.map(category => (
               <button key={category} className={activeCategory === category ? "chip active" : "chip"} onClick={() => dispatch(setActiveCategory(category))} aria-pressed={activeCategory === category}>{category}</button>
             ))}
+          </div>
+          <span className="market-filter-divider" aria-hidden="true" />
+          <div className="market-price-filter" aria-label="محدوده قیمت">
+            <div className="market-price-heading"><span>محدوده قیمت</span><strong>{selectedMinPrice.toLocaleString("fa-IR")} تا {selectedMaxPrice.toLocaleString("fa-IR")} تومان</strong></div>
+            <div className="market-range-wrap" style={{"--range-start": priceBounds.max === priceBounds.min ? 0 : ((selectedMinPrice-priceBounds.min)/(priceBounds.max-priceBounds.min))*100+"%", "--range-end": priceBounds.max === priceBounds.min ? 100 : ((selectedMaxPrice-priceBounds.min)/(priceBounds.max-priceBounds.min))*100+"%"} as React.CSSProperties}>
+              <input aria-label="حداقل قیمت" type="range" min={priceBounds.min} max={priceBounds.max || priceBounds.min+1} step={Math.max(1, Math.round((priceBounds.max-priceBounds.min)/100))} value={Math.min(selectedMinPrice, selectedMaxPrice)} onChange={event => setMinPrice(Math.min(Number(event.target.value), selectedMaxPrice))} />
+              <input aria-label="حداکثر قیمت" type="range" min={priceBounds.min} max={priceBounds.max || priceBounds.min+1} step={Math.max(1, Math.round((priceBounds.max-priceBounds.min)/100))} value={Math.max(selectedMaxPrice, selectedMinPrice)} onChange={event => setMaxPrice(Math.max(Number(event.target.value), selectedMinPrice))} />
+            </div>
           </div>
           <span className="market-filter-divider" aria-hidden="true" />
           <div className="market-filter-group sort-list" aria-label="مرتب‌سازی محصولات">
@@ -150,7 +183,7 @@ export default function Marketplace() {
               ))}
             </div>
           ) : (
-            <div className="product-empty"><strong>محصولی در این دسته‌بندی پیدا نشد.</strong><span>یک دسته‌بندی دیگر انتخاب کن یا فیلترها را پاک کن.</span><button type="button" className="text-link" onClick={resetFilters}>نمایش همه محصولات <ArrowLeft size={15} /></button></div>
+            <div className="product-empty"><strong>محصولی با این مشخصات پیدا نشد.</strong><span>عبارت جست‌وجو یا محدوده قیمت را تغییر بده، یا همه فیلترها را پاک کن.</span><button type="button" className="text-link" onClick={resetFilters}>نمایش همه محصولات <ArrowLeft size={15} /></button></div>
           )}
           {pageCount > 1 && (
             <div className="carousel-controls" dir="ltr">
