@@ -262,3 +262,25 @@
  .product-form-wizard>.product-form-section{padding:12px 3px}
  .product-form-wizard .product-form-field textarea{min-height:110px}
 }
+
+
+/* Manufacturer notification popover */
+.manufacturer-notification-wrap{position:relative;display:flex;align-items:center}
+.manufacturer-notification-wrap .notification-button{position:relative}
+.manufacturer-notification-wrap .notification-button i{position:absolute;top:-5px;right:-5px;min-width:16px;height:16px;padding:0 4px;border-radius:20px;background:#d96f4d;color:#fff;font-size:9px;font-style:normal;display:grid;place-items:center;border:2px solid #fff}
+.manufacturer-notification-popover{position:absolute;z-index:150;top:calc(100% + 12px);left:0;width:min(360px,calc(100vw - 28px));max-height:min(420px,calc(100dvh - 110px));overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;background:#fff;border:1px solid #e8eaf0;border-radius:12px;box-shadow:0 18px 50px #18243220;padding:0 14px}
+.manufacturer-notification-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 0;border-bottom:1px solid #edf0f3}
+.manufacturer-notification-heading b,.manufacturer-notification-heading small{display:block}
+.manufacturer-notification-heading b{font-size:12px;color:#354150}
+.manufacturer-notification-heading small{font-size:9px;color:#8b97a3;margin-top:3px}
+.manufacturer-notification-heading button,.manufacturer-notification-item>button{display:inline-flex;align-items:center;gap:5px;border:0;background:transparent;color:#536c5b;font:inherit;font-size:10px;cursor:pointer}
+.manufacturer-notification-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 2px;border-bottom:1px solid #f0f2f5}
+.manufacturer-notification-item:last-child{border-bottom:0}
+.manufacturer-notification-item.unread{background:#f8faf7;margin-inline:-14px;padding-inline:16px}
+.manufacturer-notification-item b{font-size:10px;color:#354150}
+.manufacturer-notification-item p{font-size:10px;color:#687582;margin:4px 0}
+.manufacturer-notification-item time{font-size:9px;color:#98a2ad}
+.manufacturer-notification-empty{padding:24px 8px;text-align:center;color:#98a2ad;font-size:10px}
+.manufacturer-coming-soon{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;color:#aab2bb;font-size:10px}
+.manufacturer-coming-soon small{font-size:9px;color:#aab2bb}
+@media(max-width:760px){.manufacturer-notification-popover{left:auto;right:-55px;width:min(340px,calc(100vw - 28px))}}
