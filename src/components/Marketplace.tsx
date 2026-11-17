@@ -137,7 +137,7 @@ export default function Marketplace() {
           <button className="filter-reset" type="button" onClick={resetFilters} disabled={!hasFilters} aria-label="حذف فیلترها"><RotateCcw size={15} /> پاک‌کردن</button>
         </div>
 
-        <div className="product-carousel" onMouseEnter={() => setIsPaused(true)} onMouseLeave={() => setIsPaused(false)} onFocusCapture={() => setIsPaused(true)} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setIsPaused(false); }} onTouchStart={event => { setUserPaused(true); handleTouchStart(event); }} onTouchEnd={handleTouchEnd} aria-roledescription="اسلایدر محصولات">
+        <div className="product-carousel" onMouseEnter={() => setIsPaused(true)} onMouseLeave={() => setIsPaused(false)} onFocusCapture={event => { if (!(event.target as HTMLElement).closest(".carousel-autoplay-toggle")) setIsPaused(true); }} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setIsPaused(false); }} onTouchStart={event => { if (!(event.target as HTMLElement).closest(".carousel-autoplay-toggle")) { setUserPaused(true); handleTouchStart(event); } }} onTouchEnd={handleTouchEnd} aria-roledescription="اسلایدر محصولات">
           <button type="button" className="carousel-autoplay-toggle" onClick={() => setUserPaused(paused => !paused)} aria-pressed={userPaused} aria-label={userPaused ? "ادامه پخش خودکار محصولات" : "توقف پخش خودکار محصولات"}>{userPaused ? <Play size={14} /> : <Pause size={14} />}{userPaused ? "ادامه پخش" : "توقف پخش"}</button>
           {products.length > 0 ? (
             <div className="product-grid" aria-live="polite">
