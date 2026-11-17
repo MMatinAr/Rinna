@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowDownLeft, ArrowUpLeft, ClipboardList, PackagePlus, PencilLine, Search, X } from "lucide-react";
 import RinnaSelect from "./RinnaSelect";
 
@@ -35,18 +35,9 @@ export default function DistributorInventory({ products, movements, onProductsCh
   const [activeArea, setActiveArea] = useState(zones[0] || "");
   useEffect(() => { setActiveArea(zones[0] || ""); }, [distributorId, zones.join("|")]);
   const [activeProduct, setActiveProduct] = useState<Product | null>(null);
+  const movementDialogRef = useRef<HTMLElement>(null);
+  const previousMovementFocus = useRef<HTMLElement | null>(null);
   const [mode, setMode] = useState<"receipt" | "adjustment" | null>(null);
-  useEffect(() => {
-    if (!mode) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        closeMovement();
-      }
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [mode]);
   const [quantity, setQuantity] = useState("");
   const [reason, setReason] = useState("");
   const [error, setError] = useState("");
@@ -64,6 +55,7 @@ export default function DistributorInventory({ products, movements, onProductsCh
   const lowCount = products.filter((product) => product.stock - product.reserved <= product.lowAt).length;
 
   const openMovement = (product: Product, nextMode: "receipt" | "adjustment") => {
+    previousMovementFocus.current = document.activeElement as HTMLElement | null;
     setActiveProduct(product);
     setMode(nextMode);
     setQuantity(nextMode === "adjustment" ? String(product.stock) : "");
@@ -78,6 +70,30 @@ export default function DistributorInventory({ products, movements, onProductsCh
     setReason("");
     setError("");
   };
+  useEffect(() => {
+    if (!mode) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    movementDialogRef.current?.querySelector<HTMLElement>("button, input, textarea")?.focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeMovement();
+        return;
+      }
+      if (event.key !== "Tab" || !movementDialogRef.current) return;
+      const items = Array.from(movementDialogRef.current.querySelectorAll<HTMLElement>('button:not([disabled]),input:not([disabled]),textarea:not([disabled])'));
+      if (!items.length) return;
+      if (event.shiftKey && document.activeElement === items[0]) { event.preventDefault(); items[items.length - 1].focus(); }
+      else if (!event.shiftKey && document.activeElement === items[items.length - 1]) { event.preventDefault(); items[0].focus(); }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+      if (!mode) previousMovementFocus.current?.focus();
+    };
+  }, [mode]);
 
   const saveMovement = () => {
     if (!activeProduct || !mode) return;
@@ -198,7 +214,7 @@ export default function DistributorInventory({ products, movements, onProductsCh
           </div>)}</div>}
       </section>
 
-      {mode && activeProduct && <div className="dist-modal-backdrop" onClick={closeMovement}><section className="dist-modal dist-inv-modal" role="dialog" aria-modal="true" aria-labelledby="inventory-movement-title" onClick={(event) => event.stopPropagation()}>
+      {mode && activeProduct && <div className="dist-modal-backdrop" onClick={closeMovement}><section ref={movementDialogRef} className="dist-modal dist-inv-modal" role="dialog" aria-modal="true" aria-labelledby="inventory-movement-title" onClick={(event) => event.stopPropagation()}>
         <button className="dist-modal-close" onClick={closeMovement} aria-label="بستن"><X size={18}/></button>
         <span className="dist-eyebrow">{mode === "receipt" ? "GOODS RECEIPT" : "STOCK ADJUSTMENT"}</span>
         <h2 id="inventory-movement-title">{mode === "receipt" ? "ثبت ورود کالا" : "اصلاح موجودی فیزیکی"}</h2>
