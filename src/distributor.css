@@ -256,3 +256,7 @@ html{max-width:100%;overflow-x:clip}
 /* Three-second stacked feedback notifications */
 .dist-toast-stack{transition:bottom .2s ease,opacity .2s ease;max-width:min(440px,calc(100vw - 28px));box-sizing:border-box;overflow-wrap:anywhere}
 @media(max-width:520px){.dist-toast-stack{left:12px;right:12px;width:auto;max-width:none;font-size:10px;padding:11px 12px;gap:8px}}
+
+
+.dist-search:focus-within{border-color:#a99a7c;box-shadow:0 0 0 3px #a99a7c22}
+.dist-search input:focus-visible{outline:0}
