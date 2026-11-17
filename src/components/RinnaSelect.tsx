@@ -47,7 +47,11 @@ export default function RinnaSelect({
       }
     };
     const closeEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setOpen(false);
+        triggerRef.current?.focus();
+      }
     };
     document.addEventListener("pointerdown", closeOutside);
     document.addEventListener("keydown", closeEscape);
@@ -83,7 +87,9 @@ export default function RinnaSelect({
   }, [open]);
 
   useEffect(() => {
-    if (open) optionRefs.current[activeIndex]?.scrollIntoView({ block: "nearest" });
+    if (!open) return;
+    optionRefs.current[activeIndex]?.focus();
+    optionRefs.current[activeIndex]?.scrollIntoView({ block: "nearest" });
   }, [activeIndex, open]);
 
   const openAt = (index = options.findIndex((option) => option.value === value)) => {
@@ -146,11 +152,13 @@ export default function RinnaSelect({
           id={listboxId}
           role="listbox"
           aria-label={ariaLabel}
+          aria-activedescendant={options[activeIndex] ? `${listboxId}-option-${activeIndex}` : undefined}
           style={{ top: menuPosition.top, left: menuPosition.left, width: menuPosition.width, maxHeight: menuPosition.maxHeight }}
         >
           {options.map((option, index) => (
             <button
               type="button"
+              id={`${listboxId}-option-${index}`}
               role="option"
               aria-selected={option.value === value}
               aria-disabled={option.disabled || undefined}
@@ -168,9 +176,21 @@ export default function RinnaSelect({
                 if (event.key === "ArrowDown" || event.key === "ArrowUp") {
                   event.preventDefault();
                   moveActive(event.key === "ArrowDown" ? 1 : -1);
-                } else if (event.key === "Enter") {
+                } else if (event.key === "Enter" || event.key === " ") {
                   event.preventDefault();
                   choose(option);
+                } else if (event.key === "Escape") {
+                  event.preventDefault();
+                  setOpen(false);
+                  triggerRef.current?.focus();
+                } else if (event.key === "Home" || event.key === "End") {
+                  event.preventDefault();
+                  const enabled = options.map((item, itemIndex) => ({ item, itemIndex })).filter(({ item }) => !item.disabled);
+                  const target = event.key === "Home" ? enabled[0] : enabled[enabled.length - 1];
+                  if (target) {
+                    setActiveIndex(target.itemIndex);
+                    optionRefs.current[target.itemIndex]?.focus();
+                  }
                 }
               }}
             >
