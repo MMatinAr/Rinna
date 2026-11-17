@@ -284,3 +284,7 @@
 .manufacturer-coming-soon{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;color:#aab2bb;font-size:10px}
 .manufacturer-coming-soon small{font-size:9px;color:#aab2bb}
 @media(max-width:760px){.manufacturer-notification-popover{left:auto;right:-55px;width:min(340px,calc(100vw - 28px))}}
+
+
+.manufacturer-search:focus-within{border-color:#8da4ed;box-shadow:0 0 0 3px rgba(49,94,232,.10)}
+.manufacturer-search input:focus-visible{outline:0}
