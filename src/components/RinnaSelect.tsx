@@ -152,13 +152,14 @@ export default function RinnaSelect({
           id={listboxId}
           role="listbox"
           aria-label={ariaLabel}
-          aria-activedescendant={options[activeIndex] ? `${listboxId}-option-${activeIndex}` : undefined}
+          tabIndex={-1}
           style={{ top: menuPosition.top, left: menuPosition.left, width: menuPosition.width, maxHeight: menuPosition.maxHeight }}
         >
           {options.map((option, index) => (
             <button
               type="button"
               id={`${listboxId}-option-${index}`}
+              tabIndex={index === activeIndex ? 0 : -1}
               role="option"
               aria-selected={option.value === value}
               aria-disabled={option.disabled || undefined}
@@ -183,6 +184,8 @@ export default function RinnaSelect({
                   event.preventDefault();
                   setOpen(false);
                   triggerRef.current?.focus();
+                } else if (event.key === "Tab") {
+                  setOpen(false);
                 } else if (event.key === "Home" || event.key === "End") {
                   event.preventDefault();
                   const enabled = options.map((item, itemIndex) => ({ item, itemIndex })).filter(({ item }) => !item.disabled);
