@@ -44,12 +44,14 @@ function DateField({label,value,onChange}:{label:string;value:string;onChange:(v
 }
 export default function ManufacturerProductForm({onClose,onSubmit,initialDraft}:{onClose:()=>void;onSubmit:(draft:ManufacturerProductDraft)=>void;initialDraft?:Partial<ManufacturerProductDraft>}){
   const dialogRef=useRef<HTMLElement>(null);
+  const onCloseRef=useRef(onClose);
+  useEffect(()=>{onCloseRef.current=onClose;},[onClose]);
   useEffect(()=>{
     const previous=document.activeElement as HTMLElement|null;
     const previousOverflow=document.body.style.overflow;
     document.body.style.overflow="hidden";
     const onKeyDown=(event:KeyboardEvent)=>{
-      if(event.key==="Escape"){event.preventDefault();onClose();return;}
+      if(event.key==="Escape"){event.preventDefault();onCloseRef.current();return;}
       if(event.key!=="Tab"||!dialogRef.current)return;
       const focusable=Array.from(dialogRef.current.querySelectorAll<HTMLElement>('button:not([disabled]),input:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])'));
       if(!focusable.length)return;
@@ -59,7 +61,7 @@ export default function ManufacturerProductForm({onClose,onSubmit,initialDraft}:
     };
     window.addEventListener("keydown",onKeyDown);
     return ()=>{document.body.style.overflow=previousOverflow;window.removeEventListener("keydown",onKeyDown);previous?.focus();};
-  },[onClose]);
+  },[]);
   const [step,setStep]=useState<1|2|3>(1);
   const [name,setName]=useState(initialDraft?.name||"");const [barcode,setBarcode]=useState(initialDraft?.barcode||"");const [category,setCategory]=useState(initialDraft?.category||"لبنیات");const [packaging,setPackaging]=useState(initialDraft?.packaging||"");const [price,setPrice]=useState(initialDraft?.basePrice?moneyInput(String(initialDraft.basePrice)):"");
   const [description,setDescription]=useState(initialDraft?.description||"");const [images,setImages]=useState<ManufacturerProductImageDraft[]>(initialDraft?.images||[]);const [primaryImageId,setPrimaryImageId]=useState(initialDraft?.primaryImageId||initialDraft?.images?.[0]?.id||"");const [active,setActive]=useState(initialDraft?.active??true);const [preview,setPreview]=useState(false);
