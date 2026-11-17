@@ -40,6 +40,7 @@ export type DemoPriceNotification = {
   scope?: string;
   createdAt: string;
   read: boolean;
+  manufacturerRead?: boolean;
   kind?: "price" | "product";
 };
 
