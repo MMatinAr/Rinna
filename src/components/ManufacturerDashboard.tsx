@@ -89,15 +89,15 @@ export default function ManufacturerDashboard() {
   }, [showNotifications]);
 
   const manufacturerNotifications = [...(network.notifications || [])].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 12);
-  const unreadManufacturerNotifications = manufacturerNotifications.filter((item) => !item.read).length;
+  const unreadManufacturerNotifications = manufacturerNotifications.filter((item) => !item.manufacturerRead).length;
   const markManufacturerNotificationRead = (id: string) => {
     const latest = readDemoNetwork();
-    const next = { ...latest, notifications: (latest.notifications || []).map((item) => item.id === id ? { ...item, read: true } : item) };
+    const next = { ...latest, notifications: (latest.notifications || []).map((item) => item.id === id ? { ...item, manufacturerRead: true } : item) };
     setNetwork(next); writeDemoNetwork(next);
   };
   const markAllManufacturerNotificationsRead = () => {
     const latest = readDemoNetwork();
-    const next = { ...latest, notifications: (latest.notifications || []).map((item) => ({ ...item, read: true })) };
+    const next = { ...latest, notifications: (latest.notifications || []).map((item) => ({ ...item, manufacturerRead: true })) };
     setNetwork(next); writeDemoNetwork(next);
   };
 
@@ -270,7 +270,7 @@ export default function ManufacturerDashboard() {
               <button className="notification-button" aria-label="اعلان‌ها" aria-expanded={showNotifications} aria-controls="manufacturer-notifications" onClick={() => setShowNotifications((open) => !open)}><Bell size={18} />{unreadManufacturerNotifications > 0 && <i>{fa(unreadManufacturerNotifications)}</i>}</button>
               {showNotifications && <div className="manufacturer-notification-popover" id="manufacturer-notifications">
                 <div className="manufacturer-notification-heading"><div><b>اعلان‌های شبکه</b><small>{fa(unreadManufacturerNotifications)} خوانده‌نشده</small></div>{unreadManufacturerNotifications > 0 && <button type="button" onClick={markAllManufacturerNotificationsRead}><CheckCheck size={14}/> خواندن همه</button>}</div>
-                {manufacturerNotifications.length === 0 ? <div className="manufacturer-notification-empty">هنوز اعلانی برای شبکه ثبت نشده است.</div> : manufacturerNotifications.map((item) => <div className={"manufacturer-notification-item " + (!item.read ? "unread" : "")} key={item.id}><div><b>{item.kind === "product" ? "محصول جدید" : "تغییر قیمت"}</b><p>{item.productName} · {item.scope || "قیمت پایه"}</p><time>{new Intl.DateTimeFormat("fa-IR", { dateStyle: "short", timeStyle: "short" }).format(new Date(item.createdAt))}</time></div>{!item.read && <button type="button" onClick={() => markManufacturerNotificationRead(item.id)} aria-label="خواندن اعلان"><Check size={14}/></button>}</div>)}
+                {manufacturerNotifications.length === 0 ? <div className="manufacturer-notification-empty">هنوز اعلانی برای شبکه ثبت نشده است.</div> : manufacturerNotifications.map((item) => <div className={"manufacturer-notification-item " + (!item.manufacturerRead ? "unread" : "")} key={item.id}><div><b>{item.kind === "product" ? "محصول جدید" : "تغییر قیمت"}</b><p>{item.productName} · {item.scope || "قیمت پایه"}</p><time>{new Intl.DateTimeFormat("fa-IR", { dateStyle: "short", timeStyle: "short" }).format(new Date(item.createdAt))}</time></div>{!item.manufacturerRead && <button type="button" onClick={() => markManufacturerNotificationRead(item.id)} aria-label="خواندن اعلان"><Check size={14}/></button>}</div>)}
               </div>}
             </div>
             <span className="topbar-user">م</span>
