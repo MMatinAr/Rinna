@@ -82,8 +82,8 @@ export default function Marketplace() {
   const PRICE_STEP = 10_000;
   const [minPrice, setMinPrice] = useState(PRICE_MIN);
   const [maxPrice, setMaxPrice] = useState(PRICE_MAX);
-  const [minPriceInput, setMinPriceInput] = useState(String(PRICE_MIN));
-  const [maxPriceInput, setMaxPriceInput] = useState(String(PRICE_MAX));
+  const [minPriceInput, setMinPriceInput] = useState(formatGroupedPrice(String(PRICE_MIN)));
+  const [maxPriceInput, setMaxPriceInput] = useState(formatGroupedPrice(String(PRICE_MAX)));
   const selectedMinPrice = minPrice;
   const selectedMaxPrice = maxPrice;
 
@@ -101,14 +101,14 @@ export default function Marketplace() {
     const parsed = parsePriceInput(minPriceInput, selectedMinPrice);
     const next = Math.min(selectedMaxPrice - PRICE_STEP, Math.max(PRICE_MIN, parsed));
     setMinPrice(next);
-    setMinPriceInput(String(next));
+    setMinPriceInput(formatGroupedPrice(String(next)));
   };
 
   const commitMaxPrice = () => {
     const parsed = parsePriceInput(maxPriceInput, selectedMaxPrice);
     const next = Math.max(selectedMinPrice + PRICE_STEP, Math.min(PRICE_MAX, parsed));
     setMaxPrice(next);
-    setMaxPriceInput(String(next));
+    setMaxPriceInput(formatGroupedPrice(String(next)));
   };
 
   const changeMinPrice = (value: number) => {
@@ -153,8 +153,8 @@ export default function Marketplace() {
     dispatch(setSearch(""));
     setMinPrice(PRICE_MIN);
     setMaxPrice(PRICE_MAX);
-    setMinPriceInput(String(PRICE_MIN));
-    setMaxPriceInput(String(PRICE_MAX));
+    setMinPriceInput(formatGroupedPrice(String(PRICE_MIN)));
+    setMaxPriceInput(formatGroupedPrice(String(PRICE_MAX)));
     setSortMode("recommended");
   };
 
