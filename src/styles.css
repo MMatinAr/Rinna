@@ -555,7 +555,8 @@ select:focus-visible{outline:0;border-color:#b58a66;box-shadow:0 0 0 3px rgba(16
 .market-filter-panel .market-price-filter{display:grid;gap:9px;width:100%;min-width:0;max-width:none}
 .market-filter-panel .market-price-heading{display:flex;align-items:center;justify-content:space-between;color:#52675a;font-size:11px}
 .market-filter-panel .market-price-heading strong{color:#89968b;font-size:10px;font-weight:500}
-.market-price-inputs{display:grid;grid-template-columns:1fr 1fr;gap:8px;direction:rtl}
+.market-price-inputs{display:grid;grid-template-columns:1fr 1fr;gap:8px;direction:ltr}
+.market-price-inputs label{direction:rtl}
 .market-price-inputs label{
   height:36px;display:flex;align-items:center;gap:8px;min-width:0;padding:0 10px;
   border:1px solid #e2e9e1;border-radius:8px;background:#fbfcfa;color:#879389;font-size:10px;
