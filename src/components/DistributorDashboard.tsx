@@ -306,7 +306,7 @@ export default function DistributorDashboard() {
           <button className="dist-mobile-menu" onClick={() => setMobileNav(true)} aria-label="باز کردن منو"><Menu size={20} /></button>
           <div className="dist-breadcrumb"><span>فضای همکاران</span><ChevronLeft size={14} /><b>{title}</b></div>
           <div className="dist-top-actions">
-            <span className="dist-date"><CalendarDays size={15} /> سه‌شنبه، ۱۹ آبان ۱۴۰۵</span>
+            <span className="dist-date"><CalendarDays size={15} /> {new Intl.DateTimeFormat("fa-IR", { weekday: "long", year: "numeric", month: "long", day: "numeric" }).format(new Date())}</span>
             <div className="dist-notification-wrap">
               <button className="dist-icon-btn" onClick={() => setShowNotifications((open) => !open)} aria-expanded={showNotifications} aria-label="اعلان‌ها"><Bell size={18}/>{unreadPriceNotifications > 0 && <i>{fa(unreadPriceNotifications)}</i>}</button>
               {showNotifications && <div className="dist-notification-popover">
