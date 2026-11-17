@@ -92,7 +92,7 @@ export default function Marketplace() {
     const normalized = value
       .replace(/[۰-۹]/g, digit => String("۰۱۲۳۴۵۶۷۸۹".indexOf(digit)))
       .replace(/[٠-٩]/g, digit => String("٠١٢٣٤٥٦٧٨٩".indexOf(digit)))
-      .replace(/[\\s٬,،]/g, "");
+      .replace(/[\s٬,،]/g, "");
     const parsed = Number(normalized);
     return Number.isFinite(parsed) && normalized !== "" ? parsed : fallback;
   };
@@ -114,13 +114,13 @@ export default function Marketplace() {
   const changeMinPrice = (value: number) => {
     const next = Math.min(selectedMaxPrice - PRICE_STEP, Math.max(PRICE_MIN, value));
     setMinPrice(next);
-    setMinPriceInput(String(next));
+    setMinPriceInput(formatGroupedPrice(String(next)));
   };
 
   const changeMaxPrice = (value: number) => {
     const next = Math.max(selectedMinPrice + PRICE_STEP, Math.min(PRICE_MAX, value));
     setMaxPrice(next);
-    setMaxPriceInput(String(next));
+    setMaxPriceInput(formatGroupedPrice(String(next)));
   };
 
   const categories = useMemo(
