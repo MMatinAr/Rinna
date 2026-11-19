@@ -689,3 +689,7 @@ select:focus-visible{outline:0;border-color:#b58a66;box-shadow:0 0 0 3px rgba(16
   .rinna-info-content{width:calc(100% - 30px);padding:22px 18px}
   .rinna-not-found>div{flex-direction:column;gap:8px}
 }
+
+.rinna-account-switch{margin-top:22px;color:#89958b;font-size:11px}
+.rinna-account-switch a{margin-right:5px;color:#527565;font-weight:700;text-decoration:none}
+.rinna-account-switch a:hover{text-decoration:underline}
