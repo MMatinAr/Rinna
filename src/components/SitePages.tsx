@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Building2, CircleHelp, Factory, ShieldCheck, Store } from "lucide-react";
+import { ArrowLeft, ArrowRight, Building2, Factory, ShieldCheck, Store } from "lucide-react";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import Marketplace from "./Marketplace";
@@ -14,7 +14,6 @@ export function ContactPage() {
 
 export function AccountPage({ mode = "login" }: { mode?: "login" | "register" }) {
   const isRegister = mode === "register";
-  const role = new URLSearchParams(window.location.search).get("role");
   return <><Navbar /><main className="rinna-route rinna-account-route" dir="rtl">
     <div className="rinna-account-card">
       <span className="eyebrow">{isRegister ? "شروع همکاری" : "ورود به فضای همکاران"}</span>
