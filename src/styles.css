@@ -1149,3 +1149,20 @@ select:focus-visible{outline:0;border-color:#b58a66;box-shadow:0 0 0 3px rgba(16
 .seller-store-favorites b{color:#405b47;font-size:11px}
 .seller-store-favorites small{color:#8b978d;font-size:9px}
 @media(max-width:620px){.seller-store-favorites{grid-template-columns:1fr}}
+
+.nav-location{display:flex;align-items:center}
+.rinna-city-control{display:flex;align-items:center;gap:6px;padding:8px 10px;border:1px solid #dbe4d9;border-radius:9px;background:#f7f8f3;color:#66806b;font-size:10px;white-space:nowrap}
+.rinna-city-control select{max-width:125px;border:0;outline:0;background:transparent;color:#344e3a;font:inherit;font-weight:700;cursor:pointer}
+.rinna-location-backdrop{position:fixed;inset:0;z-index:3000;display:grid;place-items:center;padding:16px;background:#18271f99;backdrop-filter:blur(5px)}
+.rinna-location-modal{position:relative;width:min(440px,100%);padding:31px 28px 23px;border:1px solid #dbe4d9;border-radius:20px;background:#f8f8f2;box-shadow:0 30px 100px #17271d55;text-align:center}
+.rinna-location-close{position:absolute;top:13px;left:13px;width:31px;height:31px;display:grid;place-items:center;border:1px solid #e1e7dd;border-radius:50%;background:#fff;color:#718174;cursor:pointer}
+.rinna-location-icon{width:55px;height:55px;display:grid;place-items:center;margin:0 auto 14px;border-radius:17px;background:#e5ede1;color:#55785d}
+.rinna-location-modal h2{margin:0 0 10px;color:#2e4938;font-size:19px;line-height:1.7}
+.rinna-location-modal p{margin:0 0 19px;color:#7b897d;font-size:11px;line-height:2}
+.rinna-location-allow{width:100%;min-height:44px;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 15px;border:0;border-radius:9px;background:#294638;color:#fff;font:inherit;font-size:11px;cursor:pointer}
+.rinna-location-allow:disabled{opacity:.6;cursor:wait}
+.rinna-location-cancel{width:100%;margin-top:7px;padding:10px;border:0;background:transparent;color:#788779;font:inherit;font-size:11px;cursor:pointer}
+.rinna-location-modal>small{display:block;margin-top:12px;color:#9aa397;font-size:9px;line-height:1.9}
+.rinna-location-message{position:fixed;z-index:3001;right:20px;bottom:20px;display:flex;align-items:center;gap:12px;max-width:min(440px,calc(100% - 40px));padding:12px 15px;border:1px solid #dce7dc;border-radius:10px;background:#f8f8f1;color:#4d6c53;box-shadow:0 10px 35px #263d3620;font-size:10px}
+.rinna-location-message button{border:0;background:transparent;color:#345d41;font:inherit;font-weight:700;cursor:pointer}
+@media(max-width:900px){.nav-location{order:4;width:100%;justify-content:center}.rinna-city-control{width:100%;justify-content:center}.rinna-city-control select{max-width:none}}
