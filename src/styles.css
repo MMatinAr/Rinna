@@ -1024,3 +1024,32 @@ select:focus-visible{outline:0;border-color:#b58a66;box-shadow:0 0 0 3px rgba(16
 /* RTL dual range: "from" handle stays on the right, "to" on the left */
 .wh-price-filter .market-range-wrap{direction:rtl}
 .wh-price-filter .market-range-wrap:after{left:calc(100% - var(--range-end));right:var(--range-start)}
+
+
+/* City discovery and location opt-in */
+.wh-top{flex-wrap:wrap}
+.wh-city-picker{display:flex;align-items:center;gap:7px;margin-inline:auto;padding:7px 10px;border:1px solid #d8e2d6;border-radius:9px;background:#f4f6ef;color:#5b735f;font-size:10px;white-space:nowrap}
+.wh-city-picker select{max-width:145px;border:0;outline:0;background:transparent;color:#314b3b;font:inherit;font-weight:700;cursor:pointer}
+.wh-location-modal{width:min(430px,calc(100% - 30px));padding:30px 28px 24px;border:1px solid #d8e2d6;border-radius:19px;background:#f7f7f0;box-shadow:0 28px 90px #17271d55;text-align:center}
+.wh-location-icon{width:54px;height:54px;display:grid;place-items:center;margin:0 auto 14px;border-radius:16px;background:#e4ecdf;color:#52765b}
+.wh-location-modal h2{margin:0 0 10px;color:#2e4938;font-size:19px}
+.wh-location-modal p{margin:0 0 19px;color:#7b897d;font-size:11px;line-height:2}
+.wh-location-modal .wh-primary{justify-content:center}
+.wh-location-cancel{display:block;width:100%;margin-top:10px;padding:10px;border:0;background:transparent;color:#788779;font:inherit;font-size:11px;cursor:pointer}
+.wh-location-modal>small{display:block;margin-top:13px;color:#9aa397;font-size:9px;line-height:1.8}
+.wh-location-feedback{position:fixed;z-index:1100;right:20px;bottom:20px;display:flex;align-items:center;gap:12px;max-width:min(440px,calc(100% - 40px));padding:12px 15px;border:1px solid #dce7dc;border-radius:10px;background:#f8f8f1;color:#4d6c53;box-shadow:0 10px 35px #263d3620;font-size:10px}
+.wh-location-feedback button{border:0;background:transparent;color:#345d41;font:inherit;font-weight:700;cursor:pointer}
+.wh-card{position:relative}
+.wh-card-hit{position:absolute;inset:0;z-index:1;border-radius:inherit}
+.wh-card .wh-heart,.wh-card .wh-compare,.wh-card .wh-card-foot button{position:relative;z-index:2}
+.wh-card .wh-photo[role=button],.wh-card .wh-name{pointer-events:none}
+.wh-card .wh-heart,.wh-card .wh-compare,.wh-card .wh-card-foot button{pointer-events:auto}
+.wh-seller-card-link{display:block;color:inherit;text-decoration:none}
+.wh-seller-card-link article{height:100%;cursor:pointer;transition:transform .18s,border-color .18s}
+.wh-seller-card-link:hover article{transform:translateY(-2px);border-color:#9db59e}
+.wh-seller-search-card{display:flex;align-items:center;gap:12px;min-width:0;padding:13px;border:1px solid #d2ddcf;border-radius:10px;background:#f0f2eb;color:#52705a;text-decoration:none}
+.wh-seller-search-card>span{display:grid;gap:5px;min-width:0;flex:1}
+.wh-seller-search-card b{color:#354f3d;font-size:11px}
+.wh-seller-search-card small{color:#879386;font-size:9px}
+.wh-seller-search-card>svg:last-child{width:15px}
+@media(max-width:700px){.wh-top{height:auto;min-height:66px;padding:9px 0}.wh-city-picker{order:3;width:100%;justify-content:center}.wh-city-picker select{max-width:none}.wh-location-modal{padding:25px 19px}.wh-location-modal h2{font-size:17px}}
