@@ -28,7 +28,7 @@ export default function InstantCost() {
             <div className="price-change"><div><small>قبل از خرید</small><strong>۴۲٬۰۰۰</strong></div><ArrowLeft size={19} /><div><small>بعد از خرید</small><strong className="new-price">۴۵٬۵۰۰ <TrendingUp size={15} /></strong></div></div>
             <div className="result-foot"><span>افزایش هزینه: ۸٫۳٪</span><span>قیمت فروش بدون تأیید تغییر نمی‌کند</span></div>
           </div>
-          <div className="manager-approval"><span className="approval-icon"><Check size={16} /></span><div><b>تصمیم نهایی با مدیر مجموعه است</b><small>قیمت فروش فقط پس از تأیید مدیر تغییر می‌کند.</small></div><button>بررسی پیشنهاد</button></div>
+          <div className="manager-approval"><span className="approval-icon"><Check size={16} /></span><div><b>تصمیم نهایی با مدیر مجموعه است</b><small>قیمت فروش فقط پس از تأیید مدیر تغییر می‌کند.</small></div><a className="manager-approval-link" href="/login?role=cafe">بررسی پیشنهاد</a></div>
         </div>
       </div>
     </section>
