@@ -42,6 +42,7 @@ export default function WholesaleMarketplace(){
  const PRICE_MIN=10_000,PRICE_MAX=100_000_000,PRICE_STEP=10_000;
  const formatPrice=(value:string)=>value.replace(/[^0-9۰-۹٠-٩]/g,"").replace(/\B(?=(?:[0-9۰-۹٠-٩]{3})+(?![0-9۰-۹٠-٩]))/g,",");
  const parsePrice=(value:string,fallback:number)=>{const normalized=value.replace(/[۰-۹]/g,d=>String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))).replace(/[٠-٩]/g,d=>String("٠١٢٣٤٥٦٧٨٩".indexOf(d))).replace(/[\s٬,،]/g,"");const n=Number(normalized);return Number.isFinite(n)&&normalized!==""?n:fallback;};
+ const handlePriceInputChange=(event:React.ChangeEvent<HTMLInputElement>,setValue:(value:string)=>void)=>{const input=event.currentTarget,raw=input.value,caret=input.selectionStart??raw.length,digitsBefore=raw.slice(0,caret).replace(/[^0-9۰-۹٠-٩]/g,"").length,formatted=formatPrice(raw);setValue(formatted);requestAnimationFrame(()=>{const nextCaret=digitsBefore===0?0:[...formatted].reduce((position,char,index)=>/[0-9۰-۹٠-٩]/.test(char)&&[...formatted.slice(0,index+1)].filter(item=>/[0-9۰-۹٠-٩]/.test(item)).length===digitsBefore?index+1:position,formatted.length);input.setSelectionRange(nextCaret,nextCaret);});};
  const [minPrice,setMinPrice]=useState(PRICE_MIN),[maxPrice,setMaxPrice]=useState(PRICE_MAX);
  const [minPriceInput,setMinPriceInput]=useState(formatPrice(String(PRICE_MIN))),[maxPriceInput,setMaxPriceInput]=useState(formatPrice(String(PRICE_MAX)));
  const [reviewOrderId,setReviewOrderId]=useState<string|null>(null),[reviewRating,setReviewRating]=useState(5),[reviewComment,setReviewComment]=useState("");
@@ -98,8 +99,8 @@ export default function WholesaleMarketplace(){
     <div className="wh-price-filter">
      <div className="wh-price-head"><b>بازه قیمت</b><span>تومان</span></div>
      <div className="wh-price-inputs">
-      <label><span>از</span><input value={minPriceInput} inputMode="numeric" dir="ltr" onChange={e=>setMinPriceInput(formatPrice(e.target.value))} onBlur={commitMinPrice} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();commitMinPrice();e.currentTarget.blur();}}}/></label>
-      <label><span>تا</span><input value={maxPriceInput} inputMode="numeric" dir="ltr" onChange={e=>setMaxPriceInput(formatPrice(e.target.value))} onBlur={commitMaxPrice} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();commitMaxPrice();e.currentTarget.blur();}}}/></label>
+      <label><span>از</span><input value={minPriceInput} inputMode="numeric" dir="ltr" onChange={e=>handlePriceInputChange(e,setMinPriceInput)} onBlur={commitMinPrice} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();commitMinPrice();e.currentTarget.blur();}}}/></label>
+      <label><span>تا</span><input value={maxPriceInput} inputMode="numeric" dir="ltr" onChange={e=>handlePriceInputChange(e,setMaxPriceInput)} onBlur={commitMaxPrice} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();commitMaxPrice();e.currentTarget.blur();}}}/></label>
      </div>
      <div className="market-range-wrap" style={{"--range-start":((minPrice-PRICE_MIN)/(PRICE_MAX-PRICE_MIN))*100+"%","--range-end":((maxPrice-PRICE_MIN)/(PRICE_MAX-PRICE_MIN))*100+"%"} as React.CSSProperties}>
       <input aria-label="حداقل قیمت" type="range" min={PRICE_MIN} max={PRICE_MAX} step={1} value={minPrice} onChange={e=>changeMinPrice(Number(e.target.value))}/>
