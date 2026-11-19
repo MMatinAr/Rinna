@@ -1,0 +1,143 @@
+import { useEffect, useMemo, useState } from "react";
+import {
+  Activity, AlertTriangle, ArrowDownToLine, ArrowUpRight, BarChart3, Bell, Boxes, Building2,
+  CalendarDays, CheckCircle2, ChevronLeft, CircleDollarSign, ClipboardList, Clock3, Database,
+  Download, FileText, Filter, Globe2, Headphones, LayoutDashboard, LockKeyhole, MapPin,
+  Megaphone, Package, Search, Settings, ShieldCheck, ShoppingCart, Store, Truck, Users, Wallet,
+  X, Zap
+} from "lucide-react";
+import Navbar from "./Navbar";
+import { readDemoNetwork, writeDemoNetwork, type DemoNetwork } from "../data/demoNetwork";
+
+type ModuleItem = { id: string; label: string; group: string; icon: typeof LayoutDashboard; description: string };
+const modules: ModuleItem[] = [
+  {id:"overview",label:"نمای کلی",group:"مرکز فرماندهی",icon:LayoutDashboard,description:"سلامت کلی پلتفرم، شاخص‌ها و اتفاقات مهم"},
+  {id:"users",label:"مدیریت کاربران",group:"مدیریت کاربران",icon:Users,description:"مشاهده، جست‌وجو و مدیریت حساب‌های کاربری"},
+  {id:"roles",label:"نقش‌ها و دسترسی‌ها",group:"مدیریت کاربران",icon:LockKeyhole,description:"مدیریت نقش‌ها، مجوزها و دسترسی کارکنان"},
+  {id:"sessions",label:"نشست‌ها و ورودها",group:"مدیریت کاربران",icon:ShieldCheck,description:"نشست‌های فعال و رویدادهای ورود"},
+  {id:"buyers",label:"خریداران سازمانی",group:"مدیریت کاربران",icon:Building2,description:"کافه‌ها، رستوران‌ها و حساب‌های تجاری"},
+  {id:"sellers",label:"فروشندگان",group:"تجارت و تأمین",icon:Store,description:"مدیریت فروشندگان شرکتی و محلی"},
+  {id:"seller-verify",label:"احراز هویت فروشندگان",group:"تجارت و تأمین",icon:ShieldCheck,description:"بررسی مدارک و تأیید حساب فروشنده"},
+  {id:"seller-rating",label:"اعتبار و امتیاز فروشنده",group:"تجارت و تأمین",icon:Activity,description:"کیفیت، امتیازها، شکایت‌ها و عملکرد فروشندگان"},
+  {id:"products",label:"کاتالوگ محصولات",group:"تجارت و تأمین",icon:Package,description:"مدیریت محصولات، دسته‌بندی و وضعیت انتشار"},
+  {id:"categories",label:"دسته‌بندی‌ها",group:"تجارت و تأمین",icon:Boxes,description:"ساختار دسته‌بندی و ویژگی‌های کالا"},
+  {id:"pricing",label:"قیمت‌گذاری",group:"تجارت و تأمین",icon:CircleDollarSign,description:"قیمت پایه، منطقه‌ای و پلکانی"},
+  {id:"discounts",label:"تخفیف‌ها و کمپین‌ها",group:"تجارت و تأمین",icon:Megaphone,description:"تخفیف حجمی، کد تخفیف و کمپین‌های فروش"},
+  {id:"stock",label:"موجودی و انبار",group:"تجارت و تأمین",icon:Boxes,description:"موجودی، رزرو کالا و هشدار کمبود"},
+  {id:"orders",label:"سفارش‌ها",group:"سفارش و لجستیک",icon:ShoppingCart,description:"تمام سفارش‌ها، وضعیت‌ها و جزئیات خرید"},
+  {id:"returns",label:"مرجوعی و لغو",group:"سفارش و لجستیک",icon:ArrowDownToLine,description:"درخواست‌های لغو، مرجوعی و اختلاف"},
+  {id:"distributors",label:"شبکه پخش",group:"سفارش و لجستیک",icon:Truck,description:"مدیریت پخش‌کننده‌های وابسته به شرکت‌ها"},
+  {id:"coverage",label:"محدوده‌های پوشش",group:"سفارش و لجستیک",icon:MapPin,description:"شهرها، مناطق و محدوده ارسال"},
+  {id:"delivery",label:"عملیات تحویل",group:"سفارش و لجستیک",icon:CalendarDays,description:"تخصیص پخش‌کننده، زمان تخمینی و رهگیری"},
+  {id:"shipping-fees",label:"هزینه‌های ارسال",group:"سفارش و لجستیک",icon:Wallet,description:"تعرفه‌ها، حداقل سفارش و ارسال رایگان"},
+  {id:"payments",label:"پرداخت‌ها",group:"مالی",icon:Wallet,description:"تراکنش‌ها، پرداخت‌های موفق و ناموفق"},
+  {id:"settlements",label:"تسویه با فروشندگان",group:"مالی",icon:CircleDollarSign,description:"مانده حساب و چرخه تسویه"},
+  {id:"commissions",label:"کمیسیون پلتفرم",group:"مالی",icon:BarChart3,description:"قواعد کارمزد و سهم پلتفرم"},
+  {id:"invoices",label:"فاکتورها",group:"مالی",icon:FileText,description:"فاکتور خرید و اسناد مالی"},
+  {id:"refunds",label:"بازپرداخت‌ها",group:"مالی",icon:ArrowDownToLine,description:"مدیریت بازپرداخت و مغایرت مالی"},
+  {id:"reviews",label:"نظرات و امتیازها",group:"اعتماد و محتوا",icon:Activity,description:"نظرات خریداران و گزارش محتوای نامناسب"},
+  {id:"reports",label:"گزارش تخلف",group:"اعتماد و محتوا",icon:AlertTriangle,description:"گزارش کاربران، کالاها و فروشندگان"},
+  {id:"support",label:"مرکز پشتیبانی",group:"اعتماد و محتوا",icon:Headphones,description:"تیکت‌ها، درخواست‌ها و پاسخ‌گویی"},
+  {id:"tickets",label:"اختلافات سفارش",group:"اعتماد و محتوا",icon:ClipboardList,description:"رسیدگی به اختلاف خریدار و فروشنده"},
+  {id:"notifications",label:"اعلان‌ها",group:"ارتباطات",icon:Bell,description:"اعلان‌های درون‌برنامه‌ای و پیام‌های سیستمی"},
+  {id:"email-sms",label:"پیامک و ایمیل",group:"ارتباطات",icon:Megaphone,description:"قالب پیام‌ها و وضعیت ارسال"},
+  {id:"broadcast",label:"ارسال همگانی",group:"ارتباطات",icon:Globe2,description:"اطلاع‌رسانی هدفمند به گروه‌های کاربری"},
+  {id:"banners",label:"بنرها و ویترین",group:"رشد و بازاریابی",icon:Megaphone,description:"مدیریت بنرها، اسلایدرها و جایگاه‌های تبلیغاتی"},
+  {id:"seo",label:"سئو و صفحات",group:"رشد و بازاریابی",icon:Globe2,description:"عنوان‌ها، توضیحات و صفحات قابل ایندکس"},
+  {id:"analytics",label:"تحلیل رفتار",group:"رشد و بازاریابی",icon:BarChart3,description:"بازدید، جست‌وجو، قیف خرید و نرخ تبدیل"},
+  {id:"search-analytics",label:"گزارش جست‌وجو",group:"رشد و بازاریابی",icon:Search,description:"عبارت‌های پرجست‌وجو و جست‌وجوهای بی‌نتیجه"},
+  {id:"favorites",label:"علاقه‌مندی‌ها",group:"رشد و بازاریابی",icon:Activity,description:"فروشندگان و کالاهای ذخیره‌شده کاربران"},
+  {id:"cities",label:"مدیریت شهرها",group:"مکان و منطقه",icon:MapPin,description:"فهرست شهرها و فعال‌سازی مناطق"},
+  {id:"geolocation",label:"تنظیمات موقعیت مکانی",group:"مکان و منطقه",icon:MapPin,description:"دقت تشخیص موقعیت و پیشنهاد انتخاب شهر"},
+  {id:"regions",label:"استان‌ها و مناطق",group:"مکان و منطقه",icon:Globe2,description:"ساختار جغرافیایی و محدوده‌های سرویس‌دهی"},
+  {id:"integrations",label:"اتصال‌ها و API",group:"سیستم",icon:Zap,description:"وضعیت اتصال سرویس‌ها و وب‌هوک‌ها"},
+  {id:"database",label:"داده و پشتیبان‌گیری",group:"سیستم",icon:Database,description:"خروجی داده، نسخه پشتیبان و سلامت ذخیره‌سازی"},
+  {id:"audit",label:"گزارش فعالیت مدیران",group:"امنیت و نظارت",icon:ClipboardList,description:"ردیابی تغییرات و عملیات مدیریتی"},
+  {id:"security",label:"امنیت",group:"امنیت و نظارت",icon:ShieldCheck,description:"سیاست‌های امنیتی و رخدادهای مشکوک"},
+  {id:"fraud",label:"ضدتقلب",group:"امنیت و نظارت",icon:AlertTriangle,description:"الگوهای سفارش و رفتار غیرعادی"},
+  {id:"system-health",label:"سلامت سیستم",group:"سیستم",icon:Activity,description:"خطاها، کارایی و وضعیت سرویس‌ها"},
+  {id:"feature-flags",label:"قابلیت‌های آزمایشی",group:"سیستم",icon:Zap,description:"فعال‌سازی مرحله‌ای امکانات جدید"},
+  {id:"maintenance",label:"حالت تعمیر و نگهداری",group:"سیستم",icon:Settings,description:"کنترل دسترسی عمومی هنگام انتشار نسخه"},
+  {id:"config",label:"تنظیمات عمومی",group:"سیستم",icon:Settings,description:"تنظیمات پایه و اطلاعات پلتفرم"},
+  {id:"tax",label:"مالیات و عوارض",group:"مالی",icon:FileText,description:"قواعد مالیاتی و نحوه نمایش در فاکتور"},
+  {id:"exports",label:"خروجی و گزارش‌ساز",group:"گزارش‌ها",icon:Download,description:"خروجی CSV و JSON از داده‌های در دسترس"},
+  {id:"sales-report",label:"گزارش فروش",group:"گزارش‌ها",icon:BarChart3,description:"فروش بر اساس شهر، فروشنده و دسته"},
+  {id:"seller-report",label:"گزارش فروشندگان",group:"گزارش‌ها",icon:Store,description:"عملکرد و رشد فروشندگان"},
+  {id:"customer-report",label:"گزارش مشتریان",group:"گزارش‌ها",icon:Users,description:"فعالیت و ارزش طول عمر مشتری"},
+  {id:"activity",label:"رویدادهای پلتفرم",group:"گزارش‌ها",icon:Clock3,description:"تاریخچه رویدادهای ذخیره‌شده در مرورگر"},
+  {id:"workflow",label:"اتوماسیون‌ها",group:"ابزارهای پیشرفته",icon:Zap,description:"قواعد خودکارسازی و گردش کار"},
+  {id:"imports",label:"ورود گروهی اطلاعات",group:"ابزارهای پیشرفته",icon:ArrowDownToLine,description:"ورود گروهی کالاها و داده‌ها"},
+  {id:"experiments",label:"آزمایش A/B",group:"ابزارهای پیشرفته",icon:Activity,description:"مقایسه نسخه‌های تجربه کاربری"},
+  {id:"admin-team",label:"تیم مدیریت",group:"امنیت و نظارت",icon:Users,description:"مدیران، اپراتورها و مسئولیت‌ها"},
+  {id:"help-center",label:"محتوای راهنما",group:"اعتماد و محتوا",icon:FileText,description:"مقالات راهنما و پرسش‌های متداول"}
+];
+
+const fa = (n:number) => new Intl.NumberFormat("fa-IR").format(n);
+const toman = (n:number) => fa(n)+" تومان";
+const readJson = (key:string, fallback:any) => { try { const value=JSON.parse(localStorage.getItem(key)||"null"); return value ?? fallback; } catch { return fallback; } };
+const storeKeys = ["rinna-wholesale-v1","rinna-selected-city","rinna-distributor-v1","rinna-distributor-v1:SUP-1","rinna-distributor-v1:SUP-2","rinna-distributor-v1:SUP-3"];
+
+export default function AdminDashboard(){
+  const [network,setNetwork]=useState<DemoNetwork>(()=>readDemoNetwork());
+  const [section,setSection]=useState("overview");
+  const [query,setQuery]=useState("");
+  const [notice,setNotice]=useState("");
+  const [revision,setRevision]=useState(0);
+  const [maintenance,setMaintenance]=useState(()=>localStorage.getItem("rinna-admin-maintenance")==="true");
+  const [showAll,setShowAll]=useState(false);
+  useEffect(()=>{const sync=()=>{setNetwork(readDemoNetwork());setRevision(v=>v+1);};window.addEventListener("storage",sync);window.addEventListener("rinna-demo-network-updated",sync);return()=>{window.removeEventListener("storage",sync);window.removeEventListener("rinna-demo-network-updated",sync);};},[]);
+  const commerce=useMemo(()=>readJson("rinna-wholesale-v1",{cart:[],favorites:[],orders:[],reviews:[]}),[revision]);
+  const orders=Array.isArray(commerce.orders)?commerce.orders:[];
+  const reviews=Array.isArray(commerce.reviews)?commerce.reviews:[];
+  const activeSellers=network.sellers.filter(x=>x.active).length;
+  const activeProducts=network.products.filter(x=>x.active).length;
+  const activeDistributors=network.distributors.filter(x=>x.active).length;
+  const totalSales=orders.filter((x:any)=>x.status!=="cancelled").reduce((sum:number,x:any)=>sum+(Number(x.total)||0),0);
+  const selected=modules.find(x=>x.id===section)||modules[0];
+  const grouped=modules.reduce<Record<string,ModuleItem[]>>((acc,item)=>{(acc[item.group] ||= []).push(item);return acc;},{});
+  const visibleModules=modules.filter(item=>item.label.includes(query.trim())||item.description.includes(query.trim())||item.group.includes(query.trim()));
+  const announce=(s:string)=>{setNotice(s);window.setTimeout(()=>setNotice(""),2600);};
+  const toggleSeller=(id:string)=>{const next={...network,sellers:network.sellers.map(x=>x.id===id?{...x,active:!x.active}:x)};writeDemoNetwork(next);setNetwork(next);announce("وضعیت فروشنده به‌روزرسانی شد.");};
+  const toggleProduct=(id:string)=>{const next={...network,products:network.products.map(x=>x.id===id?{...x,active:!x.active}:x)};writeDemoNetwork(next);setNetwork(next);announce("وضعیت محصول به‌روزرسانی شد.");};
+  const toggleDistributor=(id:string)=>{const next={...network,distributors:network.distributors.map(x=>x.id===id?{...x,active:!x.active}:x)};writeDemoNetwork(next);setNetwork(next);announce("وضعیت پخش‌کننده به‌روزرسانی شد.");};
+  const updateOrder=(id:string,status:string)=>{const next={...commerce,orders:orders.map((x:any)=>x.id===id?{...x,status}:x)};localStorage.setItem("rinna-wholesale-v1",JSON.stringify(next));setRevision(v=>v+1);announce("وضعیت سفارش ذخیره شد.");};
+  const exportData=(format:"json"|"csv")=>{const payload={exportedAt:new Date().toISOString(),network,commerce,platform:{selectedCity:localStorage.getItem("rinna-selected-city"),distributorWorkspaces:Object.fromEntries(storeKeys.slice(2).map(k=>[k,readJson(k,null)]))}};const body=format==="json"?JSON.stringify(payload,null,2):["type,id,name,status,city,price","seller,"+network.sellers.map(x=>[x.id,x.name,x.active?"active":"inactive",x.city,""].join(",")).join("\nseller,"),"product,"+network.products.map(x=>[x.id,x.name,x.active?"active":"inactive","",x.basePrice].join(",")).join("\nproduct,"),"order,"+orders.map((x:any)=>[x.id,x.buyer,x.status,x.city||"",x.total].join(",")).join("\norder,")].join("\n");const blob=new Blob([body],{type:format==="json"?"application/json":"text/csv;charset=utf-8"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="rinna-admin-export."+format;a.click();URL.revokeObjectURL(url);announce("خروجی اطلاعات آماده شد.");};
+  const contentRows = section==="sellers"||section==="seller-verify"||section==="seller-rating"||section==="seller-report"
+    ? network.sellers.map(x=>({id:x.id,name:x.name,type:x.type==="corporate"?"شرکتی":"محلی",city:x.city,status:x.active?"فعال":"غیرفعال",action:()=>toggleSeller(x.id),actionLabel:x.active?"تعلیق":"فعال‌سازی"}))
+    : section==="products"||section==="categories"||section==="pricing"||section==="stock"||section==="discounts"
+    ? network.products.map(x=>({id:x.id,name:x.name,type:x.category,city:x.pack,status:x.active?"فعال":"غیرفعال",price:toman(x.basePrice),action:()=>toggleProduct(x.id),actionLabel:x.active?"غیرفعال‌سازی":"فعال‌سازی"}))
+    : section==="distributors"||section==="coverage"||section==="delivery"
+    ? network.distributors.map(x=>({id:x.id,name:x.name,type:x.areas.join("، "),city:x.city,status:x.active?"فعال":"غیرفعال",action:()=>toggleDistributor(x.id),actionLabel:x.active?"غیرفعال‌سازی":"فعال‌سازی"}))
+    : section==="orders"||section==="returns"||section==="invoices"||section==="refunds"
+    ? orders.map((x:any)=>({id:x.id,name:x.buyer||"خریدار",type:x.sellerName||"—",city:x.city||"—",status:x.status||"نامشخص",price:toman(Number(x.total)||0),action:()=>updateOrder(x.id,x.status==="cancelled"?"pending":"cancelled"),actionLabel:x.status==="cancelled"?"بازگردانی به انتظار":"لغو سفارش"}))
+    : section==="reviews"||section==="seller-rating"||section==="reports"
+    ? reviews.map((x:any)=>({id:x.id,name:x.sellerName||"فروشنده",type:x.comment||"بدون متن",city:x.rating+" از ۵",status:"ثبت‌شده",action:()=>announce("حذف نظر فقط پس از اتصال API امن فعال می‌شود."),actionLabel:"بررسی"}))
+    : [];
+  const rows=contentRows.filter((x:any)=>[x.id,x.name,x.type,x.city,x.status].join(" ").toLowerCase().includes(query.toLowerCase()));
+  const quickStats=[{label:"فروشندگان فعال",value:activeSellers,icon:Store},{label:"محصولات فعال",value:activeProducts,icon:Package},{label:"پخش‌کننده‌های فعال",value:activeDistributors,icon:Truck},{label:"سفارش‌های ثبت‌شده",value:orders.length,icon:ShoppingCart},{label:"مجموع ارزش سفارش‌ها",value:toman(totalSales),icon:Wallet},{label:"نظرات ثبت‌شده",value:reviews.length,icon:Activity}];
+  return <div className="rinna-admin" dir="rtl">
+    <Navbar/>
+    <div className="admin-shell">
+      <aside className="admin-sidebar">
+        <div className="admin-brand"><span className="admin-brand-mark">R</span><div><b>RINNA CONTROL</b><small>مرکز فرماندهی پلتفرم</small></div></div>
+        <div className="admin-search"><Search size={15}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="جست‌وجوی قابلیت یا داده..."/></div>
+        <nav>{Object.entries(grouped).map(([group,items])=><section key={group}><small className="admin-nav-group">{group}</small>{items.filter(item=>!query||visibleModules.some(v=>v.id===item.id)).map(item=><button key={item.id} className={section===item.id?"active":""} onClick={()=>setSection(item.id)}><item.icon size={16}/><span>{item.label}</span>{item.id==="orders"&&orders.length>0&&<i>{fa(orders.length)}</i>}</button>)}</section>)}</nav>
+        <div className="admin-sidebar-foot"><span className="admin-live-dot"/> محیط نمایشی / Local data</div>
+      </aside>
+      <main className="admin-main">
+        <header className="admin-topbar"><div><small>RINNA / CONTROL CENTER</small><h1>{selected.label}</h1><p>{selected.description}</p></div><div className="admin-top-actions"><span className="admin-status"><span/> داده‌های محلی</span><button onClick={()=>exportData("json")}><Download size={15}/> خروجی کامل</button></div></header>
+        {section==="overview"?<>
+          <div className="admin-welcome"><div><span>CONTROL ROOM / 01</span><h2>همه‌چیز زیر نظر توئه.</h2><p>نمای زنده از داده‌هایی که در نسخه فعلی RINNA روی این مرورگر ذخیره شده‌اند.</p></div><div className="admin-welcome-art"><Activity size={72}/><b>RINNA</b><small>OPERATIONS CORE</small></div></div>
+          <div className="admin-stat-grid">{quickStats.map((s,i)=><article key={s.label}><span className="admin-stat-icon"><s.icon size={18}/></span><small>{s.label}</small><strong>{s.value}</strong><em>{i===4?"جمع سفارش‌های غیرلغوشده":"مقدار خوانده‌شده از داده محلی"}</em></article>)}</div>
+          <div className="admin-overview-grid"><section className="admin-panel admin-wide"><div className="admin-panel-head"><div><h3>دسترسی سریع</h3><p>عملیات پرتکرار مدیریتی</p></div><Zap size={18}/></div><div className="admin-shortcuts">{[["orders","بررسی سفارش‌ها"],["sellers","مدیریت فروشندگان"],["products","مدیریت محصولات"],["distributors","شبکه پخش"],["reviews","نظرات کاربران"],["analytics","تحلیل عملکرد"],["database","خروجی داده‌ها"],["security","امنیت پلتفرم"]].map(([id,label])=><button key={id} onClick={()=>setSection(id)}><ArrowUpRight size={15}/>{label}<ChevronLeft size={14}/></button>)}</div></section><section className="admin-panel"><div className="admin-panel-head"><div><h3>وضعیت سامانه</h3><p>کنترل‌های محیط فعلی</p></div><Activity size={18}/></div><div className="admin-health-row"><span>ذخیره‌سازی مرورگر</span><b className="ok">در دسترس</b></div><div className="admin-health-row"><span>اتصال بک‌اند</span><b className="warn">متصل نشده</b></div><div className="admin-health-row"><span>احراز هویت مدیر</span><b className="warn">پیاده‌سازی نشده</b></div><div className="admin-health-row"><span>آخرین همگام‌سازی</span><b>همین لحظه</b></div></section></div>
+          <section className="admin-panel admin-module-directory"><div className="admin-panel-head"><div><h3>کتابخانه قابلیت‌ها</h3><p>{fa(modules.length)} ابزار و بخش مدیریتی در {fa(Object.keys(grouped).length)} گروه</p></div><span className="admin-count-pill">{fa(modules.length)} MODULES</span></div><div className="admin-module-grid">{modules.filter(x=>x.id!=="overview").map(item=><button key={item.id} onClick={()=>setSection(item.id)}><item.icon size={17}/><span>{item.label}</span><ChevronLeft size={14}/></button>)}</div></section>
+        </>:<>
+          <div className="admin-module-banner"><div className="admin-module-icon"><selected.icon size={24}/></div><div><h2>{selected.label}</h2><p>{selected.description}</p></div><span>{fa(modules.length)} ابزار فعال در پنل</span></div>
+          {contentRows.length>0?<section className="admin-panel admin-data-panel"><div className="admin-panel-head"><div><h3>اطلاعات ثبت‌شده</h3><p>{fa(rows.length)} نتیجه از داده‌های محلی</p></div><button className="admin-export-btn" onClick={()=>exportData("csv")}><Download size={14}/> خروجی CSV</button></div><div className="admin-table-wrap"><table><thead><tr><th>شناسه</th><th>عنوان</th><th>جزئیات</th><th>شهر / مشخصات</th><th>وضعیت</th><th>مبلغ</th><th>عملیات</th></tr></thead><tbody>{rows.map((row:any)=><tr key={row.id}><td>{row.id}</td><td>{row.name}</td><td>{row.type}</td><td>{row.city}</td><td><span className={row.status==="فعال"||row.status==="ثبت‌شده"?"admin-pill-ok":"admin-pill-muted"}>{row.status}</span></td><td>{row.price||"—"}</td><td><button className="admin-row-action" onClick={row.action}>{row.actionLabel}</button></td></tr>)}</tbody></table>{rows.length===0&&<div className="admin-empty"><Database size={25}/><b>داده‌ای برای نمایش وجود ندارد</b><span>با ثبت اطلاعات در بخش مربوطه، اینجا به‌روزرسانی می‌شود.</span></div>}</div></section>:<section className="admin-panel admin-placeholder"><div className="admin-placeholder-icon"><selected.icon size={28}/></div><h3>فضای مدیریت {selected.label}</h3><p>{selected.description}</p><div className="admin-placeholder-note"><AlertTriangle size={16}/> این ماژول در حال حاضر به داده یا API مستقل متصل نیست. ساختار دسترسی و جایگاه آن آماده است، اما برای عملیات واقعی باید سرویس بک‌اند مربوطه پیاده‌سازی شود.</div><button onClick={()=>exportData("json")}><Download size={15}/> دریافت داده‌های موجود</button></section>}
+        </>}
+        <footer className="admin-footer"><span>RINNA CONTROL CENTER</span><span>نسخه مدیریتی نمایشی · {fa(modules.length)} قابلیت تعریف‌شده</span></footer>
+      </main>
+    </div>
+    {notice&&<div className="admin-toast"><CheckCircle2 size={17}/>{notice}<button onClick={()=>setNotice("")}><X size={14}/></button></div>}
+  </div>;
+}
