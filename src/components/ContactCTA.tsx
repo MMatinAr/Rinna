@@ -3,7 +3,7 @@ import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import { useCreateLeadMutation } from "../services/cafeApi";
 
 export default function ContactCTA() {
-  const [role, setRole] = useState<"cafe" | "supplier">("cafe");
+  const [role, setRole] = useState<"cafe" | "supplier">(() => new URLSearchParams(window.location.search).get("role") === "supplier" ? "supplier" : "cafe");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [createLead, { isLoading, isSuccess, isError }] = useCreateLeadMutation();
