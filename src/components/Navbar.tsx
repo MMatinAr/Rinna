@@ -25,18 +25,18 @@ export default function Navbar() {
   return (
     <header className={`navbar ${scrolled ? "navbar-scrolled" : ""}`}>
       <div className="container nav-inner">
-        <a className="brand" href="#" aria-label="صفحه اصلی RINNA">
+        <a className="brand" href="/" aria-label="صفحه اصلی RINNA">
           <img className="brand-logo" src="/logo.png" alt="RINNA" />
         </a>
         <nav className={`nav-links ${open ? "nav-open" : ""}`}>
           {links.map(([label, href]) => (
-            <a key={href} href={href} onClick={() => dispatch(setMobileMenuOpen(false))}>{label}</a>
+            <a key={href} href={sectionHref(href)} onClick={() => dispatch(setMobileMenuOpen(false))}>{label}</a>
           ))}
-          <a className="mobile-only" href="#contact" onClick={() => dispatch(setMobileMenuOpen(false))}>شروع همکاری</a>
+          <a className="mobile-only" href={sectionHref("contact")} onClick={() => dispatch(setMobileMenuOpen(false))}>شروع همکاری</a>
         </nav>
         <div className="nav-actions">
           <a className="login-link" href="/login">ورود</a>
-          <a className="btn btn-small" href="#contact">درخواست همکاری</a>
+          <a className="btn btn-small" href={sectionHref("contact")}>درخواست همکاری</a>
         </div>
         <button className="icon-button menu-toggle" onClick={() => dispatch(setMobileMenuOpen(!open))} aria-label={open ? "بستن منو" : "باز کردن منو"}>
           {open ? <X /> : <Menu />}
