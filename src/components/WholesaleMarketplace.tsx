@@ -6,10 +6,10 @@ import { readDemoNetwork, type DemoCatalogProduct, type DemoNetwork } from "../d
 import { demoProducts } from "../data/demo";
 
 type Product = {id:string;name:string;sku:string;category:string;unit:string;image:string;description:string;basePrice:number;validUntil:string|null;priceTiers:{min:number;price:number}[]};
-type Offer = {id:string;productId:string;sellerId:string;sellerName:string;city:string;areas:string[];price:number;moq:number;stock:number;shipping:number;freeAt:number;days:number;tiers:{min:number;price:number}[];validUntil:string|null;updatedAt:string};
+type Offer = {id:string;productId:string;sellerId:string;sellerName:string;sellerType:"corporate"|"local";deliveryMode:"network"|"self"|"courier";serviceCities:string[];distributorIds:string[];city:string;areas:string[];price:number;moq:number;stock:number;shipping:number;freeAt:number;days:number;tiers:{min:number;price:number}[];validUntil:string|null;updatedAt:string};
 type CartLine = {offerId:string;productId:string;quantity:number};
 type OrderItem = {offerId:string;productName:string;unit:string;quantity:number;price:number;total:number};
-type Order = {id:string;date:string;status:string;sellerId:string;sellerName:string;buyer:string;phone:string;address:string;items:OrderItem[];subtotal:number;shipping:number;total:number;note:string};
+type Order = {id:string;date:string;status:string;sellerId:string;sellerName:string;sellerType?:"corporate"|"local";deliveryMode?:"network"|"self"|"courier";distributorName?:string;distributorPhone?:string;estimatedDelivery?:string;buyer:string;phone:string;address:string;city?:string;items:OrderItem[];subtotal:number;shipping:number;total:number;note:string};
 type Review = {id:string;orderId:string;sellerId:string;sellerName:string;rating:number;comment:string;createdAt:string};
 type State = {cart:CartLine[];favorites:string[];orders:Order[];reviews:Review[]};
 const KEY="rinna-wholesale-v1";
@@ -25,12 +25,15 @@ function productsFrom(network:DemoNetwork):Product[]{
  return live.length?live:demoProducts.map(p=>({id:String(p.id),name:p.name,sku:"DEMO-"+p.id,category:p.category,unit:p.unit,image:p.image_url,description:"کالای نمونه برای نمایش جریان خرید عمده RINNA.",basePrice:p.price,validUntil:null,priceTiers:[]}));
 }
 function offersFrom(products:Product[],network:DemoNetwork):Offer[]{
- const sellers=network.distributors.filter(x=>x.active);
- return products.flatMap((p,i)=>sellers.slice(0,3).map((s,j)=>{
-  const factor=[1,1.035,.982][j]||1;
+ const sellers=(network.sellers||[]).filter(x=>x.active);
+ return products.flatMap((p,i)=>{
+  const productRecord=network.products.find(item=>item.id===p.id);
+  const seller=sellers.find(item=>item.id===(productRecord?.sellerId||"SELL-KAL"))||sellers[0];
+  if(!seller)return [];
+  const factor=seller.type==="local"?1.025:1;
   const price=Math.round(p.basePrice*factor);
-  return {id:p.id+"::"+s.id,productId:p.id,sellerId:s.id,sellerName:s.name,city:s.city,areas:s.areas,price,moq:j===1?3:1,stock:[120,68,34][(i+j)%3],shipping:j===2?85000:60000,freeAt:j===1?5000000:3000000,days:j===2?2:1,tiers:(p.priceTiers.length?p.priceTiers.map(t=>({min:t.min,price:Math.round(t.price*factor)})):[{min:10,price:Math.round(price*([.98,.99,.97][j]||.98))},{min:25,price:Math.round(price*([.95,.96,.94][j]||.95))}]),validUntil:p.validUntil,updatedAt:new Date(Date.now()-(j*2+i%4)*3600000).toISOString()};
- }));
+  return [{id:p.id+"::"+seller.id,productId:p.id,sellerId:seller.id,sellerName:seller.name,sellerType:seller.type,deliveryMode:seller.deliveryMode,serviceCities:seller.serviceCities||[seller.city],distributorIds:seller.distributorIds||[],city:seller.city,areas:seller.areas||[],price,moq:1,stock:80+(i*13)%90,shipping:seller.type==="local"?65000:60000,freeAt:3000000,days:seller.type==="local"?1:((network.distributors.find(d=>d.sellerId===seller.id&&d.active)?.estimatedDays)||2),tiers:(p.priceTiers.length?p.priceTiers.map(t=>({min:t.min,price:Math.round(t.price*factor)})):[{min:10,price:Math.round(price*.98)},{min:25,price:Math.round(price*.95)}]),validUntil:p.validUntil,updatedAt:new Date(Date.now()-(i%4)*3600000).toISOString()}];
+ });
 }
 
 export default function WholesaleMarketplace(){
