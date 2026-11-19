@@ -44,7 +44,7 @@ const handlePriceInputChange = (
   });
 };
 
-export default function Marketplace() {
+export default function Marketplace({ fullPage = false }: { fullPage?: boolean } = {}) {
   const dispatch = useAppDispatch();
   const { activeCategory, search } = useAppSelector((s) => s.ui);
   const [catalog, setCatalog] = useState<DemoNetwork>(readDemoNetwork);
@@ -164,7 +164,7 @@ export default function Marketplace() {
   const [userPaused, setUserPaused] = useState(false);
   const touchStartX = useRef<number | null>(null);
   const pageCount = Math.max(1, Math.ceil(products.length / pageSize));
-  const visibleProducts = products.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize);
+  const visibleProducts = fullPage ? products : products.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize);
 
   useEffect(() => {
     const updatePageSize = () => setPageSize(window.matchMedia("(max-width: 720px)").matches ? 2 : 3);
@@ -201,7 +201,7 @@ export default function Marketplace() {
           </div>
           <div className="heading-side">
             <p>محصولات و تأمین‌کنندگان را بررسی کن، قیمت‌ها را مقایسه کن و متناسب با نیاز مجموعه‌ات سفارش بده.</p>
-            <a className="text-link" href="/marketplace">مشاهده همه محصولات <ArrowLeft size={16} /></a>
+            <a className="text-link" href={fullPage ? "/" : "/marketplace"}>{fullPage ? "بازگشت به صفحه اصلی" : "مشاهده همه محصولات"} <ArrowLeft size={16} /></a>
           </div>
         </div>
 
@@ -244,7 +244,7 @@ export default function Marketplace() {
         </div>
 
         <div className="product-carousel" onMouseEnter={() => setIsPaused(true)} onMouseLeave={() => setIsPaused(false)} onFocusCapture={event => { if (!(event.target as HTMLElement).closest(".carousel-autoplay-toggle")) setIsPaused(true); }} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setIsPaused(false); }} onTouchStart={event => { if (!(event.target as HTMLElement).closest(".carousel-autoplay-toggle")) { setUserPaused(true); handleTouchStart(event); } }} onTouchEnd={handleTouchEnd} aria-roledescription="اسلایدر محصولات">
-          <button type="button" className="carousel-autoplay-toggle" onClick={() => setUserPaused(paused => !paused)} aria-pressed={userPaused} aria-label={userPaused ? "ادامه پخش خودکار محصولات" : "توقف پخش خودکار محصولات"}>{userPaused ? <Play size={14} /> : <Pause size={14} />}{userPaused ? "ادامه پخش" : "توقف پخش"}</button>
+          {!fullPage && <button type="button" className="carousel-autoplay-toggle" onClick={() => setUserPaused(paused => !paused)} aria-pressed={userPaused} aria-label={userPaused ? "ادامه پخش خودکار محصولات" : "توقف پخش خودکار محصولات"}>{userPaused ? <Play size={14} /> : <Pause size={14} />}{userPaused ? "ادامه پخش" : "توقف پخش"}</button>}
           {products.length > 0 ? (
             <div className="product-grid" aria-live="polite">
               {visibleProducts.map(product => (
@@ -258,7 +258,7 @@ export default function Marketplace() {
           ) : (
             <div className="product-empty"><strong>محصولی با این مشخصات پیدا نشد.</strong><span>عبارت جست‌وجو یا محدوده قیمت را تغییر بده، یا همه فیلترها را پاک کن.</span><button type="button" className="text-link" onClick={resetFilters}>نمایش همه محصولات <ArrowLeft size={15} /></button></div>
           )}
-          {pageCount > 1 && (
+          {!fullPage && pageCount > 1 && (
             <div className="carousel-controls" dir="ltr">
               <button className="carousel-arrow" type="button" onClick={() => goToPage(pageIndex - 1)} aria-label="اسلاید قبلی"><ArrowLeft size={17} /></button>
               <div className="carousel-dots" aria-label="انتخاب صفحه محصولات">{Array.from({ length: pageCount }, (_, index) => <button key={index} type="button" className={index === pageIndex ? "carousel-dot active" : "carousel-dot"} onClick={() => goToPage(index)} aria-label={`رفتن به اسلاید ${index + 1}`} aria-current={index === pageIndex ? "true" : undefined} />)}</div>
