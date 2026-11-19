@@ -41,7 +41,7 @@ export default function WholesaleMarketplace(){
  const [state,setState]=useState<State>(read);
  const [query,setQuery]=useState(""); const [category,setCategory]=useState("همه");
  const [selectedCity,setSelectedCity]=useState(()=>localStorage.getItem("rinna-selected-city")||"تهران");
- const cities=["تهران","کرج","مشهد","اصفهان","شیراز","تبریز","قم","رشت","اهواز","تمام شهرها"];
+ const cities=["تهران","کرج","مشهد","اصفهان","شیراز","تبریز","قم","رشت","اهواز","کرمان","یزد","ارومیه","زنجان","قزوین","ساری","گرگان","بندرعباس","بوشهر","خرم‌آباد","سنندج","کرمانشاه","همدان","اراک","بجنورد","بیرجند","زاهدان","ایلام","شهرکرد","یاسوج","اردبیل","تمام شهرها"];
  const [sort,setSort]=useState("recommended"); const [seller,setSeller]=useState("همه فروشنده‌ها");
  const [stock,setStock]=useState("همه کالاها"); const [moq,setMoq]=useState("هر تعدادی");
  const PRICE_MIN=10_000,PRICE_MAX=100_000_000,PRICE_STEP=10_000;
