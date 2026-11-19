@@ -1020,3 +1020,7 @@ select:focus-visible{outline:0;border-color:#b58a66;box-shadow:0 0 0 3px rgba(16
 
 .wh-seller-review-preview{display:block;max-width:100%;overflow:hidden;color:#8c9588!important;text-overflow:ellipsis;white-space:nowrap}
 .wh-section-empty{margin:0;padding:17px;border:1px dashed #d5dfd1;border-radius:9px;color:#859184;font-size:10px;text-align:center}
+
+/* RTL dual range: "from" handle stays on the right, "to" on the left */
+.wh-price-filter .market-range-wrap{direction:rtl}
+.wh-price-filter .market-range-wrap:after{left:calc(100% - var(--range-end));right:var(--range-start)}
