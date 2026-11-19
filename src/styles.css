@@ -635,3 +635,57 @@ select:focus-visible{outline:0;border-color:#b58a66;box-shadow:0 0 0 3px rgba(16
   .market-filter-panel .filter-reset{grid-column:auto;justify-self:stretch;width:100%}
 }
 @media(prefers-reduced-motion:reduce){.market-filter-panel *{transition:none!important}}
+
+
+/* Route pages and real destination states */
+.rinna-route{min-height:62vh;padding:clamp(42px,7vw,88px) 0;background:#f7f9f6}
+.rinna-route-intro,.rinna-info-hero{width:min(1120px,calc(100% - 40px));margin:0 auto 34px;text-align:center}
+.rinna-route-intro h1,.rinna-info-hero h1,.rinna-account-card h1,.rinna-not-found h1{margin:14px 0;color:#263d36;font-size:clamp(28px,4vw,46px);line-height:1.45;letter-spacing:-.04em}
+.rinna-route-intro p,.rinna-info-hero p,.rinna-account-card>p,.rinna-not-found p{max-width:660px;margin:0 auto;color:#718076;font-size:14px;line-height:2.1}
+.rinna-marketplace-route{padding-top:34px}
+.rinna-marketplace-route .marketplace{padding-top:24px}
+.rinna-marketplace-route .market-results-note{margin-top:18px}
+.rinna-marketplace-route .product-carousel{overflow:visible}
+.rinna-marketplace-route .product-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.rinna-marketplace-route .product-card{height:100%}
+.rinna-account-route{display:grid;place-items:center;padding:54px 20px}
+.rinna-account-card{width:min(680px,100%);padding:clamp(24px,5vw,48px);border:1px solid #e1e9e0;border-radius:22px;background:#fff;box-shadow:0 18px 55px rgba(38,61,54,.07);text-align:center}
+.rinna-account-card h1{font-size:clamp(27px,4vw,38px)}
+.rinna-account-card>p{margin-bottom:28px}
+.rinna-account-options{display:grid;gap:10px;text-align:right}
+.rinna-account-option{display:flex;align-items:center;gap:14px;min-height:78px;padding:14px 16px;border:1px solid #e5ebe4;border-radius:13px;background:#fbfcfa;color:#263d36;text-decoration:none;transition:border-color .18s,transform .18s,background .18s}
+.rinna-account-option:hover{border-color:#9bb4a0;background:#f4f7f2;transform:translateY(-1px)}
+.rinna-account-option>span{width:42px;height:42px;display:grid;place-items:center;flex:none;border-radius:12px;background:#eaf0e8;color:#527565}
+.rinna-account-option>div{display:grid;gap:4px;flex:1}
+.rinna-account-option b{font-size:13px}
+.rinna-account-option small{color:#839087;font-size:11px}
+.rinna-account-note{display:flex;align-items:flex-start;gap:9px;margin-top:20px;padding:13px 14px;border-radius:10px;background:#f1f5ef;color:#66786a;text-align:right;font-size:11px;line-height:1.9}
+.rinna-account-note svg{flex:none;margin-top:2px;color:#527565}
+.rinna-back-link{display:inline-flex;align-items:center;gap:7px;margin-top:22px;color:#607568;font-size:12px;text-decoration:none}
+.rinna-back-link:hover{color:#263d36}
+.rinna-info-route{padding-top:64px}
+.rinna-info-hero{margin-bottom:42px}
+.rinna-info-content{width:min(850px,calc(100% - 40px));margin:0 auto;padding:clamp(22px,4vw,42px);border:1px solid #e2e9e1;border-radius:18px;background:#fff}
+.rinna-info-section{padding:0 0 22px;margin:0 0 22px;border-bottom:1px solid #edf1ec}
+.rinna-info-section:last-of-type{margin-bottom:0}
+.rinna-info-section h2{margin:0 0 9px;color:#2f493e;font-size:17px}
+.rinna-info-section p{margin:0;color:#6e7c71;font-size:13px;line-height:2.2}
+.rinna-info-actions{display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding-top:22px}
+.rinna-info-actions .rinna-back-link{margin:0}
+.rinna-not-found{display:flex;min-height:55vh;flex-direction:column;align-items:center;justify-content:center;padding:50px 20px;text-align:center}
+.rinna-not-found>div{display:flex;align-items:center;gap:20px;margin-top:24px}
+.manager-approval-link{display:inline-flex;align-items:center;justify-content:center;flex:none;padding:9px 13px;border:0;border-radius:8px;background:#527565;color:#fff;font:inherit;font-size:10px;text-decoration:none;cursor:pointer}
+.manager-approval-link:hover{background:#3f6252}
+.dist-brand-home{display:flex;align-items:center;gap:10px;min-width:0;color:inherit;text-decoration:none}
+.dist-support-link{display:flex;align-items:center;gap:9px;width:100%;padding:11px 14px;border:0;border-radius:10px;background:transparent;color:inherit;font:inherit;text-decoration:none;text-align:right}
+.dist-support-link:hover{background:rgba(255,255,255,.08)}
+@media(max-width:760px){
+  .rinna-marketplace-route .product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .rinna-info-route{padding-top:42px}
+}
+@media(max-width:520px){
+  .rinna-marketplace-route .product-grid{grid-template-columns:1fr}
+  .rinna-route-intro,.rinna-info-hero{width:calc(100% - 30px)}
+  .rinna-info-content{width:calc(100% - 30px);padding:22px 18px}
+  .rinna-not-found>div{flex-direction:column;gap:8px}
+}
