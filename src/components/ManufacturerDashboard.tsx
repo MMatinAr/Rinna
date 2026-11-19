@@ -134,6 +134,7 @@ export default function ManufacturerDashboard() {
     const nextProduct = {
       ...(previous || {}),
       id,
+      sellerId: previous?.sellerId || "SELL-KAL",
       name: draft.name.trim(),
       sku: draft.barcode.trim() || id,
       category: draft.category,
