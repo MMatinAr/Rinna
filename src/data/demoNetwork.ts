@@ -76,19 +76,19 @@ export const initialDemoNetwork: DemoNetwork = {
       serviceCities: ["تهران", "کرج", "مشهد", "اصفهان", "شیراز", "تبریز"],
       areas: ["تمام مناطق تحت پوشش شبکه کاله"], active: true,
       description: "تولیدکننده محصولات لبنی با شبکه توزیع اختصاصی",
-      deliveryMode: "network", distributorIds: ["SUP-1", "SUP-2", "SUP-3"], phone: "۰۲۱۴۲۷۰۱۰۰۰"
+      deliveryMode: "network", distributorIds: ["SUP-1", "SUP-2", "SUP-3"]
     },
     {
       id: "SELL-LOCAL-1", name: "تأمین پروتئین بهار", type: "local", city: "تهران",
       serviceCities: ["تهران"], areas: ["مرکز تهران", "غرب تهران"], active: true,
       description: "تأمین‌کننده محلی محصولات پروتئینی و مواد اولیه",
-      deliveryMode: "courier", phone: "۰۹۱۲۱۲۳۴۵۶۷"
+      deliveryMode: "courier"
     },
     {
       id: "SELL-LOCAL-2", name: "قهوه‌خانه رُست", type: "local", city: "کرج",
       serviceCities: ["کرج"], areas: ["مرکز کرج", "عظیمیه"], active: true,
       description: "رُست و عرضه عمده قهوه برای کافه‌ها",
-      deliveryMode: "self", phone: "۰۹۱۲۲۲۲۲۲۲۲"
+      deliveryMode: "self"
     }
   ],
   products: [
@@ -103,9 +103,9 @@ export const initialDemoNetwork: DemoNetwork = {
     { id: "LOCAL-3", sellerId: "SELL-LOCAL-2", name: "قهوه اسپرسو ترکیبی", sku: "RST-1001", category: "قهوه", pack: "بسته ۱ کیلوگرمی", basePrice: 890000, active: true }
   ],
   distributors: [
-    { id: "SUP-1", sellerId: "SELL-KAL", name: "پخش آریا", city: "تهران", areas: ["شمال تهران", "مرکز تهران"], active: true, phone: "۰۲۱۸۸۷۷۰۰۱۱", estimatedDays: 1 },
-    { id: "SUP-2", sellerId: "SELL-KAL", name: "توزیع سپهر", city: "تهران", areas: ["غرب تهران"], active: true, phone: "۰۲۱۴۴۲۲۰۰۲۲", estimatedDays: 2 },
-    { id: "SUP-3", sellerId: "SELL-KAL", name: "پخش پارس", city: "تهران", areas: ["ونک و میرداماد", "جردن و الهیه", "سعادت‌آباد و شهرک غرب", "یوسف‌آباد و امیرآباد"], active: true, phone: "۰۲۱۲۲۲۳۰۰۳۳", estimatedDays: 1 }
+    { id: "SUP-1", sellerId: "SELL-KAL", name: "پخش آریا", city: "تهران", areas: ["شمال تهران", "مرکز تهران"], active: true, estimatedDays: 1 },
+    { id: "SUP-2", sellerId: "SELL-KAL", name: "توزیع سپهر", city: "تهران", areas: ["غرب تهران"], active: true, estimatedDays: 2 },
+    { id: "SUP-3", sellerId: "SELL-KAL", name: "پخش پارس", city: "تهران", areas: ["ونک و میرداماد", "جردن و الهیه", "سعادت‌آباد و شهرک غرب", "یوسف‌آباد و امیرآباد"], active: true, estimatedDays: 1 }
   ]
 };
 
