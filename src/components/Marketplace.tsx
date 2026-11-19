@@ -177,10 +177,10 @@ export default function Marketplace({ fullPage = false }: { fullPage?: boolean }
   useEffect(() => { if (pageIndex >= pageCount) setPageIndex(0); }, [pageCount, pageIndex]);
 
   useEffect(() => {
-    if (isPaused || userPaused || pageCount <= 1) return;
+    if (fullPage || isPaused || userPaused || pageCount <= 1) return;
     const timer = window.setInterval(() => setPageIndex(current => (current + 1) % pageCount), AUTOPLAY_INTERVAL);
     return () => window.clearInterval(timer);
-  }, [isPaused, userPaused, pageCount]);
+  }, [fullPage, isPaused, userPaused, pageCount]);
 
   const goToPage = (nextPage: number) => setPageIndex((nextPage + pageCount) % pageCount);
   const handleTouchStart = (event: React.TouchEvent<HTMLDivElement>) => { touchStartX.current = event.touches[0]?.clientX ?? null; };
