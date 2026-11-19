@@ -369,7 +369,7 @@ export default function ManufacturerDashboard() {
           </section>}
 
           {section === "regions" && <section className="manufacturer-panel">
-            <div className="panel-heading"><div><h2>پوشش مناطق توزیع</h2><p>هم‌پوشانی پخش‌کنندگان مجاز است؛ یک منطقه می‌تواند چند پخش‌کننده داشته باشد.</p></div><button className="manufacturer-button secondary" onClick={() => announce("مدیریت نقشه در مرحله بعد اضافه می‌شود.")}><MapPinned size={15} /> نمایش نقشه</button></div>
+            <div className="panel-heading"><div><h2>پوشش مناطق توزیع</h2><p>هم‌پوشانی پخش‌کنندگان مجاز است؛ یک منطقه می‌تواند چند پخش‌کننده داشته باشد.</p></div><button className="manufacturer-button secondary" onClick={() => setSection("regions")}><MapPinned size={15} /> مشاهده محدوده‌ها</button></div>
             <div className="region-list">
               {data.regions.map((region) => <div className="region-row" key={region.id}><span className="region-pin"><MapPinned size={17} /></span><div><b>{region.name}</b><small>{region.partners}</small></div><span className={region.distributorCount === 0 ? "region-status empty" : "region-status"}>{region.distributorCount ? `${fa(region.distributorCount)} پخش‌کننده` : "نیازمند پوشش"}</span></div>)}
               {data.regions.length === 0 && <div className="table-empty">منطقه‌ای برای نمایش وجود ندارد.</div>}
