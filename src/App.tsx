@@ -11,17 +11,23 @@ import Footer from "./components/Footer";
 import ManufacturerDashboard from "./components/ManufacturerDashboard";
 import DistributorDashboard from "./components/DistributorDashboard";
 import ProductDetail from "./components/ProductDetail";
+import { AccountPage, ContactPage, InfoPage, MarketplacePage, NotFoundPage } from "./components/SitePages";
 
 export default function App() {
-  if (window.location.pathname.startsWith("/manufacturer")) {
-    return <ManufacturerDashboard />;
-  }
-  if (window.location.pathname.startsWith("/distributor")) {
-    return <DistributorDashboard />;
-  }
-  if (window.location.pathname.startsWith("/products/")) {
-    return <ProductDetail />;
-  }
+  const path = window.location.pathname.replace(/\/+$/, "") || "/";
+
+  if (path === "/manufacturer" || path.startsWith("/manufacturer/")) return <ManufacturerDashboard />;
+  if (path === "/distributor" || path.startsWith("/distributor/")) return <DistributorDashboard />;
+  if (path.startsWith("/products/")) return <ProductDetail />;
+  if (path === "/marketplace") return <MarketplacePage />;
+  if (path === "/login") return <AccountPage mode="login" />;
+  if (path === "/register") return <AccountPage mode="register" />;
+  if (path === "/contact") return <ContactPage />;
+  if (path === "/about") return <InfoPage page="about" />;
+  if (path === "/privacy") return <InfoPage page="privacy" />;
+  if (path === "/terms") return <InfoPage page="terms" />;
+  if (path === "/support") return <InfoPage page="support" />;
+  if (path !== "/") return <NotFoundPage />;
 
   return <>
     <Navbar />
