@@ -11,6 +11,7 @@ import Footer from "./components/Footer";
 import ManufacturerDashboard from "./components/ManufacturerDashboard";
 import DistributorDashboard from "./components/DistributorDashboard";
 import ProductDetail from "./components/ProductDetail";
+import WholesaleMarketplace from "./components/WholesaleMarketplace";
 import { AccountPage, ContactPage, InfoPage, MarketplacePage, NotFoundPage } from "./components/SitePages";
 
 export default function App() {
@@ -19,7 +20,7 @@ export default function App() {
   if (path === "/manufacturer" || path.startsWith("/manufacturer/")) return <ManufacturerDashboard />;
   if (path === "/distributor" || path.startsWith("/distributor/")) return <DistributorDashboard />;
   if (path.startsWith("/products/")) return <ProductDetail />;
-  if (path === "/marketplace") return <MarketplacePage />;
+  if (["/marketplace", "/cart", "/checkout", "/orders"].includes(path) || path.startsWith("/orders/")) return <WholesaleMarketplace />;
   if (path === "/login") return <AccountPage mode="login" />;
   if (path === "/register") return <AccountPage mode="register" />;
   if (path === "/contact") return <ContactPage />;
