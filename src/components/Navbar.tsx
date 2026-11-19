@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { setMobileMenuOpen } from "../store/uiSlice";
+import LocationExperience from "./LocationExperience";
 
 const links = [
   ["بازار تأمین", "marketplace"],
@@ -36,6 +37,7 @@ export default function Navbar() {
           ))}
           <a className="mobile-only" href={sectionHref("contact")} onClick={() => dispatch(setMobileMenuOpen(false))}>شروع همکاری</a>
         </nav>
+        <div className="nav-location"><LocationExperience/></div>
         <div className="nav-actions">
           <a className="login-link" href="/login">ورود</a>
           <a className="btn btn-small" href={sectionHref("contact")}>درخواست همکاری</a>
