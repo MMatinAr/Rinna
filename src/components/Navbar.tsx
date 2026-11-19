@@ -4,11 +4,13 @@ import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { setMobileMenuOpen } from "../store/uiSlice";
 
 const links = [
-  ["بازار تأمین", "#marketplace"],
-  ["راهکارهای کسب‌وکارها", "#management"],
-  ["برای تأمین‌کنندگان", "#suppliers"],
-  ["سؤالات متداول", "#faq"],
-];
+  ["بازار تأمین", "marketplace"],
+  ["راهکارهای کسب‌وکارها", "management"],
+  ["برای تأمین‌کنندگان", "suppliers"],
+  ["سؤالات متداول", "faq"],
+] as const;
+
+const sectionHref = (id: string) => window.location.pathname === "/" ? `#${id}` : `/#${id}`;
 
 export default function Navbar() {
   const dispatch = useAppDispatch();
@@ -29,8 +31,8 @@ export default function Navbar() {
           <img className="brand-logo" src="/logo.png" alt="RINNA" />
         </a>
         <nav className={`nav-links ${open ? "nav-open" : ""}`}>
-          {links.map(([label, href]) => (
-            <a key={href} href={sectionHref(href)} onClick={() => dispatch(setMobileMenuOpen(false))}>{label}</a>
+          {links.map(([label, id]) => (
+            <a key={id} href={sectionHref(id)} onClick={() => dispatch(setMobileMenuOpen(false))}>{label}</a>
           ))}
           <a className="mobile-only" href={sectionHref("contact")} onClick={() => dispatch(setMobileMenuOpen(false))}>شروع همکاری</a>
         </nav>
