@@ -114,9 +114,9 @@ export function readDemoNetwork(): DemoNetwork {
     const raw = localStorage.getItem(DEMO_NETWORK_KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as Partial<DemoNetwork>;
-      const products = Array.isArray(parsed.products) ? parsed.products.map((item) => ({
-        ...item, sellerId: item.sellerId || "SELL-KAL"
-      })) : initialDemoNetwork.products;
+      const savedProducts = Array.isArray(parsed.products) ? parsed.products : [];
+      const legacyNetwork = !Array.isArray(parsed.sellers);
+      const products = Array.isArray(parsed.products) ? [...savedProducts.map((item) => ({ ...item, sellerId: item.sellerId || "SELL-KAL" })), ...(legacyNetwork ? initialDemoNetwork.products.filter(item => !savedProducts.some(saved => saved.id === item.id)) : [])] : initialDemoNetwork.products;
       const distributors = Array.isArray(parsed.distributors) ? parsed.distributors.map((item) => ({
         ...item,
         sellerId: item.sellerId || "SELL-KAL",
