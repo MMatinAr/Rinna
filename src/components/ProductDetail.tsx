@@ -15,13 +15,13 @@ export default function ProductDetail() {
   const [quantity,setQuantity]=useState(1);
   const [toast,setToast]=useState("");
   const [favoriteIds,setFavoriteIds]=useState<string[]>(()=>{try{return JSON.parse(localStorage.getItem(FAVORITES_KEY)||"[]");}catch{return [];}});
-  const city=localStorage.getItem("rinna-selected-city")||"تهران";
-  useEffect(()=>{const sync=(event?:Event)=>setNetwork((event as CustomEvent<DemoNetwork>|undefined)?.detail||readDemoNetwork());window.addEventListener("rinna-demo-network-updated",sync);window.addEventListener("storage",sync);return()=>{window.removeEventListener("rinna-demo-network-updated",sync);window.removeEventListener("storage",sync);};},[]);
+  const [city,setCity]=useState(()=>localStorage.getItem("rinna-selected-city")||"تهران");
+  useEffect(()=>{const sync=(event?:Event)=>setNetwork((event as CustomEvent<DemoNetwork>|undefined)?.detail||readDemoNetwork());const syncCity=(event:Event)=>setCity((event as CustomEvent<string>).detail||localStorage.getItem("rinna-selected-city")||"تهران");window.addEventListener("rinna-demo-network-updated",sync);window.addEventListener("storage",sync);window.addEventListener("rinna-city-updated",syncCity);return()=>{window.removeEventListener("rinna-demo-network-updated",sync);window.removeEventListener("storage",sync);window.removeEventListener("rinna-city-updated",syncCity);};},[]);
   const key=decodeURIComponent(window.location.pathname.split("/").filter(Boolean).pop()||"");
   const product=useMemo(()=>network.products.find(item=>item.active&&(item.slug===key||item.id===key)),[network,key]);
   const seller=network.sellers?.find(item=>item.id===(product?.sellerId||"SELL-KAL"));
   const images=product?.images?.length?product.images:[];
-  const image=images[selectedImage]||images.find(item=>item.id===product?.primaryImageId)||images[0];
+  const image=images.find(item=>item.id===product?.primaryImageId)||images[selectedImage]||images[0];
   const sellerReviews=useMemo(()=>{try{return (JSON.parse(localStorage.getItem(WHOLESALE_KEY)||"{}").reviews||[]).filter((review:{sellerId:string})=>review.sellerId===seller?.id);}catch{return []; }},[seller?.id]);
   const rating=sellerReviews.length?sellerReviews.reduce((sum:number,review:{rating:number})=>sum+review.rating,0)/sellerReviews.length:0;
   const canServe=!!seller&&(city==="تمام شهرها"||seller.serviceCities.includes(city));
