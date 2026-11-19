@@ -569,7 +569,7 @@ select:focus-visible{outline:0;border-color:#b58a66;box-shadow:0 0 0 3px rgba(16
 .market-price-inputs input::-webkit-inner-spin-button,.market-price-inputs input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .market-price-inputs input[type=number]{-moz-appearance:textfield}
 .market-range-wrap{
-  position:relative;display:block;height:24px;margin:0 5px;direction:ltr;
+  position:relative;display:block;height:24px;margin:0 5px;direction:rtl;
   --range-start:0%;--range-end:100%;
 }
 .market-range-wrap:before,.market-range-wrap:after{
@@ -577,9 +577,9 @@ select:focus-visible{outline:0;border-color:#b58a66;box-shadow:0 0 0 3px rgba(16
   pointer-events:none;
 }
 .market-range-wrap:before{left:0;right:0;background:#e5ebe4}
-.market-range-wrap:after{left:var(--range-start);right:calc(100% - var(--range-end));background:#789b83}
+.market-range-wrap:after{right:calc(100% - var(--range-start));left:var(--range-end);background:#789b83}
 .market-range-wrap input[type=range]{
-  position:absolute;top:0;left:0;width:100%;height:24px;margin:0;padding:0;direction:ltr;
+  position:absolute;top:0;left:0;width:100%;height:24px;margin:0;padding:0;direction:rtl;
   appearance:none;-webkit-appearance:none;background:transparent;pointer-events:none;outline:none;
 }
 .market-range-wrap input[type=range]:first-of-type{z-index:3}
