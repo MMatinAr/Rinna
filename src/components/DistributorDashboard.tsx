@@ -280,8 +280,7 @@ export default function DistributorDashboard() {
     <div className="distributor-shell" dir="rtl">
       <aside className={"dist-sidebar " + (mobileNav ? "is-open" : "")}>
         <div className="dist-brand">
-          <span className="dist-brand-mark"><Coffee size={20} /></span>
-          <span><b>RINNA</b><small>PARTNER WORKSPACE</small></span>
+          <a className="dist-brand-home" href="/" aria-label="بازگشت به صفحه اصلی RINNA"><span className="dist-brand-mark"><Coffee size={20} /></span><span><b>RINNA</b><small>PARTNER WORKSPACE</small></span></a>
           <button className="dist-mobile-close" onClick={() => setMobileNav(false)} aria-label="بستن منو"><X size={18} /></button>
         </div>
         <div className="dist-company"><span className="dist-company-avatar">پ</span><div><RinnaSelect ariaLabel="انتخاب شرکت پخش نمایشی" value={activeDistributorId} onChange={setActiveDistributorId} className="rinna-select-dark" options={readDemoNetwork().distributors.filter((d) => d.active).map((d) => ({ value: d.id, label: d.name }))} /><small>شبکه رسمی کارخانه · حساب نمایشی</small></div></div>
@@ -296,7 +295,7 @@ export default function DistributorDashboard() {
         </nav>
         <div className="dist-sidebar-bottom">
           <div className="dist-network-state"><span></span><div><b>کاتالوگ کارخانه متصل است</b><small>همگام‌سازی نمایشی در همین مرورگر</small></div></div>
-          <button onClick={() => { announce("قیمت محصولات فقط توسط کارخانه تعیین می‌شود؛ تغییر قیمت از طریق اعلان به شما اطلاع داده می‌شود."); setMobileNav(false); }}><CircleHelp size={16} /> راهنما و پشتیبانی</button>
+          <a className="dist-support-link" href="/support"><CircleHelp size={16} /> راهنما و پشتیبانی</a>
           <div className="dist-user"><span className="dist-user-avatar">م</span><div><b>مدیر مجموعه</b><small>دسترسی کامل</small></div><Ellipsis size={18} /></div>
         </div>
       </aside>
