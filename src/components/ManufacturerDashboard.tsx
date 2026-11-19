@@ -162,7 +162,7 @@ export default function ManufacturerDashboard() {
   const saveDistributor = () => {
     if (!newDistributor.name.trim()) return announce("نام شرکت پخش را وارد کن.");
     if (network.distributors.some((d) => d.name.trim() === newDistributor.name.trim())) return announce("این پخش‌کننده قبلاً ثبت شده است.");
-    const next = { ...network, distributors: [...network.distributors, { id: "SUP-" + Date.now(), name: newDistributor.name.trim(), city: newDistributor.city, areas: newDistributor.areas.split("،").map((v) => v.trim()).filter(Boolean), active: true }] };
+    const next = { ...network, distributors: [...network.distributors, { id: "SUP-" + Date.now(), sellerId: "SELL-KAL", name: newDistributor.name.trim(), city: newDistributor.city, areas: newDistributor.areas.split("،").map((v) => v.trim()).filter(Boolean), active: true }] };
     setNetwork(next); writeDemoNetwork(next); setNewDistributor({ name: "", city: "تهران", areas: "" }); setShowAddDistributor(false);
     announce("پخش‌کننده به شبکه کارخانه اضافه شد.");
   };
