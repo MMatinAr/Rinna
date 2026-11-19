@@ -10,14 +10,16 @@ import ContactCTA from "./components/ContactCTA";
 import Footer from "./components/Footer";
 import ManufacturerDashboard from "./components/ManufacturerDashboard";
 import DistributorDashboard from "./components/DistributorDashboard";
+import AdminDashboard from "./components/AdminDashboard";
 import ProductDetail from "./components/ProductDetail";
 import WholesaleMarketplace from "./components/WholesaleMarketplace";
 import SellerStore from "./components/SellerStore";
 import { AccountPage, ContactPage, InfoPage, MarketplacePage, NotFoundPage } from "./components/SitePages";
 
 export default function App() {
-  const path = window.location.pathname.replace(/\/+$/, "") || "/";
+  const path = window.location.pathname.replace(/\\/+$/, "") || "/";
 
+  if (path === "/admin" || path.startsWith("/admin/")) return <AdminDashboard />;
   if (path === "/manufacturer" || path.startsWith("/manufacturer/")) return <ManufacturerDashboard />;
   if (path === "/distributor" || path.startsWith("/distributor/")) return <DistributorDashboard />;
   if (path.startsWith("/products/")) return <ProductDetail />;
