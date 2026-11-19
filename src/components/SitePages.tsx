@@ -20,12 +20,12 @@ export function AccountPage({ mode = "login" }: { mode?: "login" | "register" })
       <h1>{isRegister ? "به شبکه RINNA بپیوند." : "به RINNA خوش آمدی."}</h1>
       <p>{isRegister ? "برای ثبت درخواست همکاری، مسیر متناسب با نقش مجموعه‌ات را انتخاب کن." : "برای نسخه نمایشی فعلی، فضای کاری متناسب با نقش خودت را باز کن. ورود با نام کاربری و رمز عبور پس از اتصال سرویس احراز هویت فعال می‌شود."}</p>
       <div className="rinna-account-options">
-        <a href="/manufacturer" className="rinna-account-option"><span><Factory size={21}/></span><div><b>فضای تولیدکننده</b><small>مدیریت کاتالوگ، قیمت‌ها و شبکه توزیع</small></div><ArrowLeft size={17}/></a>
-        <a href="/distributor" className="rinna-account-option"><span><Building2 size={21}/></span><div><b>فضای توزیع‌کننده</b><small>مدیریت سفارش‌ها، موجودی و محدوده ارسال</small></div><ArrowLeft size={17}/></a>
-        <a href="/contact?role=cafe" className="rinna-account-option"><span><Store size={21}/></span><div><b>کسب‌وکار خریدار</b><small>درخواست دسترسی برای کافه، رستوران و فروشگاه</small></div><ArrowLeft size={17}/></a>
+        <a href={isRegister ? "/contact?role=supplier" : "/manufacturer"} className="rinna-account-option"><span><Factory size={21}/></span><div><b>{isRegister ? "درخواست همکاری تولیدکننده" : "فضای تولیدکننده"}</b><small>مدیریت کاتالوگ، قیمت‌ها و شبکه توزیع</small></div><ArrowLeft size={17}/></a>
+        <a href={isRegister ? "/contact?role=supplier" : "/distributor"} className="rinna-account-option"><span><Building2 size={21}/></span><div><b>{isRegister ? "درخواست همکاری توزیع‌کننده" : "فضای توزیع‌کننده"}</b><small>مدیریت سفارش‌ها، موجودی و محدوده ارسال</small></div><ArrowLeft size={17}/></a>
+        <a href="/contact?role=cafe" className="rinna-account-option"><span><Store size={21}/></span><div><b>{isRegister ? "درخواست همکاری کسب‌وکار خریدار" : "کسب‌وکار خریدار"}</b><small>درخواست دسترسی برای کافه، رستوران و فروشگاه</small></div><ArrowLeft size={17}/></a>
       </div>
       <div className="rinna-account-note"><ShieldCheck size={17}/><span>{isRegister ? "ثبت درخواست همکاری به‌معنای ایجاد حساب فعال نیست؛ تیم RINNA برای ادامه مسیر با شما هماهنگ می‌کند." : "محیط‌های تولیدکننده و توزیع‌کننده در حال حاضر با داده‌های نمایشی همین مرورگر اجرا می‌شوند."}</span></div>
-      <a className="rinna-back-link" href="/"><ArrowRight size={16}/> بازگشت به صفحه اصلی</a>
+      <div className="rinna-account-switch">{isRegister ? "قبلاً حساب یا دسترسی دارید؟" : "برای شروع همکاری تازه وارد RINNA می‌شوید؟"} <a href={isRegister ? "/login" : "/register"}>{isRegister ? "ورود به پنل" : "ثبت درخواست همکاری"}</a></div><a className="rinna-back-link" href="/"><ArrowRight size={16}/> بازگشت به صفحه اصلی</a>
     </div>
   </main><Footer /></>;
 }
