@@ -15,7 +15,7 @@ export default function Management() {
           <span className="eyebrow">برای کسب‌وکارهای خریدار</span>
           <h2>از تأمین روزانه<br />تا مدیریت دقیق‌تر.</h2>
           <p>چه کافه داشته باشی، چه رستوران، نانوایی، قنادی یا فروشگاه؛ مواد اولیه و سفارش‌هایت را با دید روشن‌تری مدیریت کن.</p>
-          <a href="/app" className="btn">آشنایی با امکانات <ArrowLeft size={16} /></a>
+          <a href="/#management" className="btn">آشنایی با امکانات <ArrowLeft size={16} /></a>
         </div>
         <div className="management-visual">
           <div className="dashboard-window">
