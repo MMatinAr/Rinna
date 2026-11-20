@@ -189,7 +189,7 @@ export default function DistributorDashboard() {
 
   const update = (key: string, value: any) => setData((d: any) => ({ ...d, [key]: value }));
   const log = (text: string, type = "action") => setData((d: any) => ({ ...d, activity: [{ id: Date.now(), text, time: nowTime(), type }, ...d.activity].slice(0, 12) }));
-  const announce = (message: string) => setToastQueue(queue => [...queue, {id: Date.now()+Math.floor(Math.random()*1000), message}].slice(-4));
+  const announce = (message: string) => { setToastQueue([]); void notifyMessage(message); };
   const visibleOrders = useMemo(() => data.orders.filter((o: Order) => {
     const matches = (o.id + o.customer + o.area).toLowerCase().includes(query.toLowerCase());
     return matches && (orderFilter === "همه" || o.status === orderFilter);
@@ -222,8 +222,10 @@ export default function DistributorDashboard() {
     log("وضعیت سفارش " + id + " به «" + status + "» تغییر کرد");
     announce("وضعیت سفارش به‌روزرسانی شد");
   };
-  const cancelOrder = () => {
+  const cancelOrder = async () => {
     if (!selected || !String(form.reason || "").trim()) return;
+    const confirmed = await confirmAction({title:"لغو سفارش؟",text:"سفارش "+selected.id+" لغو می‌شود و رزرو کالاهای آن آزاد خواهد شد. این عملیات در تاریخچه ثبت می‌شود.",confirmText:"بله، لغو سفارش",danger:true});
+    if (!confirmed) return;
     const id = selected.id;
     const released = selected.reservations || [];
     update("orders", data.orders.map((o: Order) => o.id === id ? { ...o, status: "لغوشده", reservations: [], note: "لغو: " + form.reason, history: [...o.history, { status: "لغوشده", at: nowTime(), by: role + " — " + form.reason }] } : o));
