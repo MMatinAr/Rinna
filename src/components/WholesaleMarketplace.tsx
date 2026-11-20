@@ -4,6 +4,7 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import { readDemoNetwork, type DemoCatalogProduct, type DemoNetwork } from "../data/demoNetwork";
 import { demoProducts } from "../data/demo";
+import { confirmAction, notifyError, notifySuccess } from "../utils/alerts";
 
 type Product = {id:string;name:string;sku:string;category:string;unit:string;image:string;description:string;basePrice:number;validUntil:string|null;priceTiers:{min:number;price:number}[]};
 type Offer = {id:string;productId:string;sellerId:string;sellerName:string;sellerType:"corporate"|"local";deliveryMode:"network"|"self"|"courier";serviceCities:string[];distributorIds:string[];city:string;areas:string[];price:number;moq:number;stock:number;shipping:number;freeAt:number;days:number;tiers:{min:number;price:number}[];validUntil:string|null;updatedAt:string};
