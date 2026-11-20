@@ -12,6 +12,7 @@ import RinnaSelect from "./RinnaSelect";
 import ManufacturerProductForm, { type ManufacturerProductDraft } from "./ManufacturerProductForm";
 import MoneyInput, { parseMoney, formatMoney } from "./MoneyInput";
 import { createInvitationPreview } from "../data/invitations";
+import { confirmAction, notifyMessage } from "../utils/alerts";
 
 type Section = "overview" | "catalog" | "prices" | "distributors" | "regions";
 const navItems: { id: Section; label: string; icon: typeof LayoutDashboard }[] = [
@@ -123,10 +124,7 @@ export default function ManufacturerDashboard() {
     [networkDistributors, query],
   );
 
-  const announce = (message: string) => {
-    setNotice(message);
-    window.setTimeout(() => setNotice(""), 3200);
-  };
+  const announce = (message: string) => { setNotice(""); void notifyMessage(message); };
 
 
   const submitProduct = (draft: ManufacturerProductDraft) => {
@@ -375,7 +373,7 @@ export default function ManufacturerDashboard() {
           {section === "distributors" && <section className="manufacturer-panel">
             <div className="panel-heading"><div><h2>اعضای شبکه توزیع</h2><p>هر پخش‌کننده می‌تواند در چند منطقه و چند شبکه مجاز فعالیت کند.</p></div><label className="manufacturer-search"><Search size={16} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="جست‌وجوی پخش‌کننده..." /></label></div>
 
-            <DistributorTable rows={filteredDistributors} onSelect={(name) => setProfileDistributorId(network.distributors.find((d) => d.name === name)?.id || null)} onInvite={(name) => { const distributor = network.distributors.find((d) => d.name === name); if (distributor) createDistributorInvite(distributor); }} onRemove={(name) => { const next = { ...network, distributors: network.distributors.filter((d) => d.name !== name) }; setNetwork(next); writeDemoNetwork(next); announce("دسترسی پخش‌کننده از شبکه این کارخانه حذف شد."); }} />
+            <DistributorTable rows={filteredDistributors} onSelect={(name) => setProfileDistributorId(network.distributors.find((d) => d.name === name)?.id || null)} onInvite={(name) => { const distributor = network.distributors.find((d) => d.name === name); if (distributor) createDistributorInvite(distributor); }} onRemove={async(name) => { const confirmed=await confirmAction({title:"حذف پخش‌کننده از شبکه؟",text:"«"+name+"» از شبکه پخش این کارخانه حذف می‌شود. سوابق سفارش‌ها و داده‌های قبلی پاک نمی‌شوند. ادامه می‌دهی؟",confirmText:"بله، حذف از شبکه",danger:true}); if(!confirmed)return; const next = { ...network, distributors: network.distributors.filter((d) => d.name !== name) }; setNetwork(next); writeDemoNetwork(next); announce("پخش‌کننده از شبکه حذف شد."); }} />
           </section>}
 
           {section === "regions" && <section className="manufacturer-panel">
