@@ -1264,3 +1264,45 @@ select:focus-visible{outline:0;border-color:#b58a66;box-shadow:0 0 0 3px rgba(16
 
 .manufacturer-invite-link{margin:14px 0;padding:12px;border:1px solid #dfe8dc;border-radius:9px;background:#f5f8f2;direction:ltr;text-align:left;overflow-wrap:anywhere}
 .manufacturer-invite-link code{color:#47654e;font-size:11px}
+ 
+/* Business owner workspace and invitation landing */
+.business-workspace{min-height:100vh;display:grid;grid-template-columns:250px minmax(0,1fr);background:#f1f4ee;color:#2b4434;direction:rtl}
+.business-workspace-sidebar{position:sticky;top:0;height:100vh;padding:22px 15px;background:#1b3025;color:#dce8dc;display:flex;flex-direction:column;gap:22px}
+.business-workspace-brand{display:flex;align-items:center;gap:10px;color:#eef5eb;text-decoration:none;font-size:12px;letter-spacing:1px}
+.business-workspace-brand>span{width:39px;height:39px;display:grid;place-items:center;border-radius:12px;background:#d9e6d1;color:#294535;font-size:23px;font-weight:900}
+.business-workspace-brand b{display:grid;gap:4px}.business-workspace-brand small{font-size:8px;color:#a8bca9;letter-spacing:1.4px}
+.business-workspace-company{display:flex;align-items:center;gap:10px;padding:14px 10px;border:1px solid #ffffff20;border-radius:11px;background:#ffffff09}
+.business-workspace-company>span{width:38px;height:38px;display:grid;place-items:center;border-radius:10px;background:#ffffff14;color:#c9ddc9}
+.business-workspace-company div{display:grid;gap:5px;min-width:0}.business-workspace-company b{font-size:10px}.business-workspace-company small{font-size:9px;color:#9db19f}
+.business-workspace-sidebar nav{display:grid;gap:5px}
+.business-workspace-sidebar nav button{display:flex;align-items:center;gap:10px;padding:11px;border:0;border-radius:8px;background:transparent;color:#b8cbbb;text-align:right;font:inherit;font-size:10px;cursor:pointer}
+.business-workspace-sidebar nav button.active{background:#d9e6d1;color:#24412f;font-weight:800}
+.business-workspace-home{margin-top:auto;padding:11px;color:#9fb4a2;text-decoration:none;font-size:10px}
+.business-workspace-main{min-width:0;padding:30px clamp(16px,4vw,48px)}
+.business-workspace-main>header{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:22px}
+.business-workspace-main>header small{color:#8a998c;font-size:9px;letter-spacing:1.2px;font-weight:800}
+.business-workspace-main>header h1{margin:7px 0 4px;color:#2b4835;font-size:24px}
+.business-workspace-main>header p{margin:0;color:#829084;font-size:10px}
+.business-workspace-status{padding:8px 11px;border:1px solid #e0e7dc;border-radius:8px;background:#fafbf8;color:#7d8e80;font-size:9px}
+.business-workspace-warning{margin-bottom:16px;padding:12px 14px;border:1px solid #efdfc2;border-radius:9px;background:#fcf7ec;color:#96784d;font-size:10px;line-height:1.9}
+.business-workspace-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:15px}
+.business-workspace-stats article{display:grid;gap:8px;padding:17px;border:1px solid #e0e7dc;border-radius:12px;background:#fbfcf8;color:#67816a}
+.business-workspace-stats small{color:#879487;font-size:10px}.business-workspace-stats b{color:#294735;font-size:22px}
+.business-workspace-card{padding:20px;border:1px solid #e0e7dc;border-radius:13px;background:#fbfcf8}
+.business-workspace-card h2{margin:0 0 14px;color:#36553e;font-size:14px}
+.business-workspace-card>p{color:#89968a;font-size:10px}
+.business-workspace-details{display:grid;grid-template-columns:180px minmax(0,1fr);gap:12px;padding:5px 0}
+.business-workspace-details span{color:#8a978b;font-size:10px}.business-workspace-details b{color:#48634d;font-size:10px;overflow-wrap:anywhere}
+.business-workspace-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid #edf0e9}
+.business-workspace-row>span{display:grid;gap:5px}.business-workspace-row b{color:#48634d;font-size:11px}.business-workspace-row small{color:#8b978d;font-size:9px}.business-workspace-row strong{color:#527258;font-size:10px}
+.business-workspace-empty{width:min(460px,calc(100% - 30px));margin:15vh auto;padding:35px;border:1px solid #e0e7dc;border-radius:16px;background:#fbfcf8;text-align:center;color:#69826d}
+.business-workspace-empty h1{color:#34503a;font-size:20px}.business-workspace-empty p{font-size:11px;color:#89968a}.business-workspace-empty a{color:#42694a;font-size:11px}
+.rinna-invitation-page{min-height:100vh;display:grid;place-items:center;padding:20px;background:#f1f4ee;color:#304a37}
+.rinna-invitation-page>section{width:min(510px,100%);padding:34px;border:1px solid #e0e7dc;border-radius:18px;background:#fbfcf8;text-align:center;box-shadow:0 18px 55px #1b302510}
+.rinna-invitation-icon{width:54px;height:54px;display:grid;place-items:center;margin:0 auto 16px;border-radius:16px;background:#e6eee2;color:#55775b}
+.rinna-invitation-page small{color:#91a091;font-size:9px;letter-spacing:1.5px;font-weight:800}
+.rinna-invitation-page h1{margin:10px 0;color:#2e4936;font-size:21px}.rinna-invitation-page p{color:#7f8d81;font-size:11px;line-height:1.9}
+.rinna-invitation-warning{display:flex;align-items:flex-start;gap:10px;margin:20px 0;padding:14px;border:1px solid #efdfc2;border-radius:10px;background:#fcf7ec;color:#94774d;text-align:right;font-size:10px;line-height:1.9}
+.rinna-invitation-warning svg{flex:none;margin-top:2px}
+.rinna-invitation-page a{color:#45694b;font-size:10px;font-weight:800}
+@media(max-width:760px){.business-workspace{grid-template-columns:1fr}.business-workspace-sidebar{position:relative;height:auto;padding:14px}.business-workspace-sidebar nav{display:flex;overflow:auto}.business-workspace-sidebar nav button{white-space:nowrap}.business-workspace-home{display:none}.business-workspace-main{padding:18px 13px}.business-workspace-stats{grid-template-columns:1fr}.business-workspace-details{grid-template-columns:1fr;gap:5px}.business-workspace-details b{margin-bottom:8px}}
