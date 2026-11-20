@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import { readDemoNetwork, type DemoNetwork } from "../data/demoNetwork";
+import { notifySuccess } from "../utils/alerts";
 
 type CartLine={offerId:string;productId:string;quantity:number};
 const money=(value:number)=>Math.round(value).toLocaleString("fa-IR")+" تومان";
