@@ -13,6 +13,7 @@ import RinnaSelect from "./RinnaSelect";
 import DistributorInventory from "./DistributorInventory";
 import MoneyInput, { parseMoney } from "./MoneyInput";
 import { readDemoNetwork, writeDemoNetwork, type DemoNetwork } from "../data/demoNetwork";
+import { confirmAction, notifyMessage } from "../utils/alerts";
 
 type Section = "home" | "orders" | "inventory" | "coverage" | "customers" | "reports" | "settings";
 type OrderStatus = "تأییدشده" | "در حال آماده‌سازی" | "آماده ارسال" | "ارسال‌شده" | "تحویل‌شده" | "لغوشده";
