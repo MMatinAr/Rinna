@@ -11,6 +11,8 @@ import Footer from "./components/Footer";
 import ManufacturerDashboard from "./components/ManufacturerDashboard";
 import DistributorDashboard from "./components/DistributorDashboard";
 import AdminDashboard from "./components/AdminDashboard";
+import BusinessDashboard from "./components/BusinessDashboard";
+import InvitationLanding from "./components/InvitationLanding";
 import ProductDetail from "./components/ProductDetail";
 import WholesaleMarketplace from "./components/WholesaleMarketplace";
 import SellerStore from "./components/SellerStore";
@@ -20,6 +22,8 @@ export default function App() {
   const path = window.location.pathname.replace(/\/+$/, "") || "/";
 
   if (path === "/admin" || path.startsWith("/admin/")) return <AdminDashboard />;
+  if (path.startsWith("/invite/")) return <InvitationLanding />;
+  if (path.startsWith("/business/")) return <BusinessDashboard />;
   if (path === "/manufacturer" || path.startsWith("/manufacturer/")) return <ManufacturerDashboard />;
   if (path === "/distributor" || path.startsWith("/distributor/")) return <DistributorDashboard />;
   if (path.startsWith("/products/")) return <ProductDetail />;
