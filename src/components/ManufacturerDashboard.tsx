@@ -11,6 +11,7 @@ import "../manufacturer.css";
 import RinnaSelect from "./RinnaSelect";
 import ManufacturerProductForm, { type ManufacturerProductDraft } from "./ManufacturerProductForm";
 import MoneyInput, { parseMoney, formatMoney } from "./MoneyInput";
+import { createInvitationPreview } from "../data/invitations";
 
 type Section = "overview" | "catalog" | "prices" | "distributors" | "regions";
 const navItems: { id: Section; label: string; icon: typeof LayoutDashboard }[] = [
@@ -44,6 +45,7 @@ export default function ManufacturerDashboard() {
   const [profileDistributorId, setProfileDistributorId] = useState<string | null>(null);
   const [profileRevision, setProfileRevision] = useState(0);
   const [newDistributor, setNewDistributor] = useState({ name: "", city: "تهران", areas: "" });
+  const [distributorInviteLink, setDistributorInviteLink] = useState("");
   const [priceEdit, setPriceEdit] = useState<{ sku: string; name: string; price: string } | null>(null);
   const [regionalDistributorId, setRegionalDistributorId] = useState("");
   const [regionalProductId, setRegionalProductId] = useState("");
@@ -163,11 +165,18 @@ export default function ManufacturerDashboard() {
   const saveDistributor = () => {
     if (!newDistributor.name.trim()) return announce("نام شرکت پخش را وارد کن.");
     if (network.distributors.some((d) => d.name.trim() === newDistributor.name.trim())) return announce("این پخش‌کننده قبلاً ثبت شده است.");
-    const next = { ...network, distributors: [...network.distributors, { id: "SUP-" + Date.now(), sellerId: "SELL-KAL", name: newDistributor.name.trim(), city: newDistributor.city, areas: newDistributor.areas.split("،").map((v) => v.trim()).filter(Boolean), active: true }] };
+    const id = "SUP-" + Date.now();
+    const next = { ...network, distributors: [...network.distributors, { id, sellerId: "SELL-KAL", name: newDistributor.name.trim(), city: newDistributor.city, areas: newDistributor.areas.split(/[،,]/).map((v) => v.trim()).filter(Boolean), active: true }] };
     setNetwork(next); writeDemoNetwork(next); setNewDistributor({ name: "", city: "تهران", areas: "" }); setShowAddDistributor(false);
-    announce("پخش‌کننده به شبکه کارخانه اضافه شد.");
+    try { const invite = createInvitationPreview("distributor", id, newDistributor.name.trim()); setDistributorInviteLink(invite.url); announce("پخش‌کننده اضافه شد؛ لینک دعوت نمایشی آماده است."); }
+    catch { announce("پخش‌کننده اضافه شد؛ تولید لینک در این مرورگر در دسترس نیست."); }
   };
 
+
+  const createDistributorInvite = (distributor: DemoDistributor) => {
+    try { const invite = createInvitationPreview("distributor", distributor.id, distributor.name); setDistributorInviteLink(invite.url); announce("لینک دعوت نمایشی ساخته شد."); }
+    catch { announce("تولید لینک در این مرورگر در دسترس نیست."); }
+  };
 
   const saveBasePrice = (sku: string, price: number) => {
     const latest = readDemoNetwork();
@@ -366,7 +375,7 @@ export default function ManufacturerDashboard() {
           {section === "distributors" && <section className="manufacturer-panel">
             <div className="panel-heading"><div><h2>اعضای شبکه توزیع</h2><p>هر پخش‌کننده می‌تواند در چند منطقه و چند شبکه مجاز فعالیت کند.</p></div><label className="manufacturer-search"><Search size={16} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="جست‌وجوی پخش‌کننده..." /></label></div>
 
-            <DistributorTable rows={filteredDistributors} onSelect={(name) => setProfileDistributorId(network.distributors.find((d) => d.name === name)?.id || null)} onRemove={(name) => { const next = { ...network, distributors: network.distributors.filter((d) => d.name !== name) }; setNetwork(next); writeDemoNetwork(next); announce("دسترسی پخش‌کننده از شبکه این کارخانه حذف شد."); }} />
+            <DistributorTable rows={filteredDistributors} onSelect={(name) => setProfileDistributorId(network.distributors.find((d) => d.name === name)?.id || null)} onInvite={(name) => { const distributor = network.distributors.find((d) => d.name === name); if (distributor) createDistributorInvite(distributor); }} onRemove={(name) => { const next = { ...network, distributors: network.distributors.filter((d) => d.name !== name) }; setNetwork(next); writeDemoNetwork(next); announce("دسترسی پخش‌کننده از شبکه این کارخانه حذف شد."); }} />
           </section>}
 
           {section === "regions" && <section className="manufacturer-panel">
@@ -397,6 +406,7 @@ export default function ManufacturerDashboard() {
         </section>
       </div>}
       {priceEdit && <div className="manufacturer-modal-backdrop" onClick={() => setPriceEdit(null)}><div className="manufacturer-modal" onClick={(e) => e.stopPropagation()}><button className="modal-close" onClick={() => setPriceEdit(null)}><X size={18}/></button><h2>تغییر قیمت پایه رسمی</h2><p>{priceEdit.name} · این قیمت پس از ذخیره برای تمام پخش‌کننده‌های متصل به‌روزرسانی می‌شود.</p><label>قیمت جدید (تومان)<MoneyInput value={priceEdit.price} onChange={(price) => setPriceEdit((v) => v ? { ...v, price } : v)} /></label><button className="manufacturer-button primary full" onClick={() => { const value = parseMoney(priceEdit.price); if (!Number.isFinite(value) || value <= 0) return announce("قیمت معتبر وارد کن."); saveBasePrice(priceEdit.sku, value); setPriceEdit(null); }}>ذخیره و انتشار قیمت</button></div></div>}
+      {distributorInviteLink && <div className="manufacturer-modal-backdrop" onClick={() => setDistributorInviteLink("")}><section className="manufacturer-modal" onClick={(e) => e.stopPropagation()}><button className="modal-close" onClick={() => setDistributorInviteLink("")}><X size={18}/></button><h2>لینک دعوت پخش‌کننده</h2><p>این لینک در نسخه فعلی پیش‌نمایش فرانت‌اند است. اعتبارسنجی، انقضا و مصرف یک‌باره باید در بک‌اند انجام شود.</p><div className="manufacturer-invite-link"><code>{distributorInviteLink}</code></div><button className="manufacturer-button primary full" onClick={() => { void navigator.clipboard?.writeText(distributorInviteLink); announce("لینک در صورت مجاز بودن مرورگر کپی شد."); }}>کپی لینک</button></section></div>}
       {showAddDistributor && <div className="manufacturer-modal-backdrop" onClick={() => setShowAddDistributor(false)}><div className="manufacturer-modal" onClick={(e) => e.stopPropagation()}><button className="modal-close" onClick={() => setShowAddDistributor(false)}><X size={18} /></button><h2>افزودن پخش‌کننده به شبکه</h2><p>در نسخه نمایشی، نام شرکت و محدوده فعالیت را ثبت کن تا در فضای پخش‌کننده هم قابل مشاهده شود.</p><label>نام شرکت پخش<input value={newDistributor.name} onChange={(e) => setNewDistributor((v) => ({ ...v, name: e.target.value }))} placeholder="مثلاً پخش مرکزی" /></label><label>شهر اصلی فعالیت<input value={newDistributor.city} onChange={(e) => setNewDistributor((v) => ({ ...v, city: e.target.value }))} /></label><label>محدوده‌ها (با ویرگول فارسی جدا کن)<input value={newDistributor.areas} onChange={(e) => setNewDistributor((v) => ({ ...v, areas: e.target.value }))} placeholder="شمال تهران، مرکز تهران" /></label><button className="manufacturer-button primary full" onClick={saveDistributor}>افزودن به شبکه</button></div></div>}
       {notice && <div className="manufacturer-toast"><Check size={17} />{notice}<button onClick={() => setNotice("")} aria-label="بستن"><X size={14} /></button></div>}
       {showAdd && <ManufacturerProductForm initialDraft={editingProductId ? (()=>{const p=network.products.find(x=>x.id===editingProductId);return p?{name:p.name,barcode:p.sku,category:p.category,packaging:p.pack,basePrice:p.basePrice,description:p.description||"",images:p.images||[],primaryImageId:p.primaryImageId||p.images?.[0]?.id||"",active:p.active,slug:p.slug||"",priceTiersEnabled:!!p.priceTiers?.length,priceTiers:p.priceTiers||[],priceValidFrom:p.priceValidFrom||"",priceValidUntil:p.priceValidUntil||"",productionDate:p.productionDate||"",expiryDate:p.expiryDate||""}:undefined;})() : undefined} onClose={() => {setShowAdd(false);setEditingProductId(null);}} onSubmit={submitProduct} />}
@@ -413,7 +423,7 @@ function Attention({ icon, title, desc, onClick }: { icon: ReactNode; title: str
 function ProductTable({ products, onEditPrice, onEditProduct }: { products: ManufacturerProductView[]; onEditPrice: (product: ManufacturerProductView) => void; onEditProduct: (product: ManufacturerProductView) => void }) {
   return <div className="manufacturer-table-wrap"><table className="manufacturer-table"><thead><tr><th>محصول</th><th>شناسه کالا</th><th>بسته‌بندی</th><th>قیمت پایه</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody>{products.map((p) => <tr key={p.id}><td data-label="محصول"><b>{p.name}</b><small>{p.category}</small></td><td data-label="شناسه کالا">{p.sku}</td><td data-label="بسته‌بندی">{p.pack}</td><td data-label="قیمت پایه">{money(p.price)}</td><td data-label="وضعیت"><span className={p.status === "فعال" ? "table-status good" : "table-status warn"}>{p.status}</span></td><td data-label="عملیات"><div className="product-table-actions"><button className="manufacturer-button secondary" onClick={() => onEditPrice(p)}>تغییر قیمت</button><button className="manufacturer-button secondary" onClick={() => onEditProduct(p)}>ویرایش محصول</button></div></td></tr>)}</tbody></table>{products.length === 0 && <div className="table-empty">محصولی پیدا نشد.</div>}</div>;
 }
-function DistributorTable({ rows, compact = false, onRemove, onSelect }: { rows: ManufacturerDistributorView[]; compact?: boolean; onRemove?: (name: string) => void; onSelect?: (name: string) => void }) {
+function DistributorTable({ rows, compact = false, onRemove, onSelect, onInvite }: { rows: ManufacturerDistributorView[]; compact?: boolean; onRemove?: (name: string) => void; onSelect?: (name: string) => void; onInvite?: (name: string) => void }) {
   const visibleRows = compact ? rows.slice(0, 3) : rows;
-  return <div className="manufacturer-table-wrap"><table className="manufacturer-table"><thead><tr><th>پخش‌کننده</th><th>محدوده فعالیت</th><th>سفارش‌های ماه</th><th>تحویل به‌موقع</th><th>وضعیت</th>{(onRemove || onSelect) && <th>عملیات</th>}</tr></thead><tbody>{visibleRows.map((d) => <tr key={d.name}><td data-label="پخش‌کننده"><b>{d.name}</b><small>شبکه رسمی کاله</small></td><td data-label="محدوده فعالیت">{d.area}</td><td data-label="سفارش‌های ماه">{fa(d.orders)}</td><td data-label="تحویل به‌موقع">{d.score}</td><td data-label="وضعیت"><span className={d.status === "فعال" ? "table-status good" : d.status === "غیرفعال" ? "table-status" : "table-status warn"}>{d.status}</span></td>{(onRemove || onSelect) && <td data-label="عملیات">{onSelect && <button className="manufacturer-button secondary" onClick={() => onSelect(d.name)}>پروفایل</button>} {onRemove && <button className="manufacturer-button secondary" onClick={() => onRemove(d.name)}>حذف از شبکه</button>}</td>}</tr>)}</tbody></table>{visibleRows.length === 0 && <div className="table-empty">پخش‌کننده‌ای پیدا نشد.</div>}</div>;
+  return <div className="manufacturer-table-wrap"><table className="manufacturer-table"><thead><tr><th>پخش‌کننده</th><th>محدوده فعالیت</th><th>سفارش‌های ماه</th><th>تحویل به‌موقع</th><th>وضعیت</th>{(onRemove || onSelect || onInvite) && <th>عملیات</th>}</tr></thead><tbody>{visibleRows.map((d) => <tr key={d.name}><td data-label="پخش‌کننده"><b>{d.name}</b><small>شبکه رسمی کاله</small></td><td data-label="محدوده فعالیت">{d.area}</td><td data-label="سفارش‌های ماه">{fa(d.orders)}</td><td data-label="تحویل به‌موقع">{d.score}</td><td data-label="وضعیت"><span className={d.status === "فعال" ? "table-status good" : d.status === "غیرفعال" ? "table-status" : "table-status warn"}>{d.status}</span></td>{(onRemove || onSelect || onInvite) && <td data-label="عملیات">{onSelect && <button className="manufacturer-button secondary" onClick={() => onSelect(d.name)}>پروفایل</button>} {onInvite && <button className="manufacturer-button secondary" onClick={() => onInvite(d.name)}>لینک دعوت</button>} {onRemove && <button className="manufacturer-button secondary" onClick={() => onRemove(d.name)}>حذف از شبکه</button>}</td>}</tr>)}</tbody></table>{visibleRows.length === 0 && <div className="table-empty">پخش‌کننده‌ای پیدا نشد.</div>}</div>;
 }
