@@ -7,7 +7,8 @@ import {
   X, Zap
 } from "lucide-react";
 import { readDemoNetwork, writeDemoNetwork, type DemoNetwork } from "../data/demoNetwork";
-import { createInvitationPreview, readInvitationPreviews } from "../data/invitations";
+import { createInvitationPreview, readInvitationPreviews, revokeInvitationPreview } from "../data/invitations";
+import { confirmAction, notifyMessage, notifySuccess } from "../utils/alerts";
 
 type ModuleItem = { id: string; label: string; group: string; icon: typeof LayoutDashboard; description: string };
 const modules: ModuleItem[] = [
@@ -102,7 +103,7 @@ export default function AdminDashboard(){
   const selected=modules.find(x=>x.id===section)||modules[0];
   const grouped=modules.reduce<Record<string,ModuleItem[]>>((acc,item)=>{(acc[item.group] ||= []).push(item);return acc;},{});
   const visibleModules=modules.filter(item=>item.label.includes(query.trim())||item.description.includes(query.trim())||item.group.includes(query.trim()));
-  const announce=(s:string)=>{setNotice(s);window.setTimeout(()=>setNotice(""),2600);};
+  const announce=(s:string)=>{setNotice("");void notifyMessage(s);};
   const saveBusiness=()=>{
     if(!businessDraft.name.trim()||!businessDraft.phone.trim()||!businessDraft.city.trim()){announce("نام کسب‌وکار، شماره تماس و شهر را وارد کن.");return;}
     const id="SELL-MANUAL-"+Date.now();
@@ -117,6 +118,15 @@ export default function AdminDashboard(){
   const createBusinessInvite=(seller:any)=>{
     try{const invite=createInvitationPreview("business-owner",seller.id,seller.name);setBusinessInviteLink(invite.url);setInvitationRevision(v=>v+1);announce("لینک دعوت نمایشی ساخته شد.");}
     catch{announce("تولید لینک در این مرورگر در دسترس نیست.");}
+  };
+  const revokeBusinessInvite=async(invitation:any)=>{
+    const confirmed=await confirmAction({title:"فسخ لینک دعوت؟",text:"لینک دعوت برای «"+invitation.targetName+"» غیرفعال می‌شود و در پیش‌نمایش دیگر معتبر نخواهد بود. این کار را انجام می‌دهی؟",confirmText:"بله، فسخ کن",danger:true});
+    if(!confirmed)return;
+    const revoked=revokeInvitationPreview(invitation.id);
+    if(!revoked){announce("این دعوت قبلاً استفاده یا فسخ شده است.");return;}
+    setInvitationRevision(v=>v+1);
+    if(businessInviteLink.includes(invitation.token))setBusinessInviteLink("");
+    void notifySuccess("لینک دعوت فسخ شد","این تغییر فعلاً در داده‌های همین مرورگر ثبت شده است.");
   };
   const toggleSeller=(id:string)=>{const next={...network,sellers:network.sellers.map(x=>x.id===id?{...x,active:!x.active}:x)};writeDemoNetwork(next);setNetwork(next);announce("وضعیت فروشنده به‌روزرسانی شد.");};
   const toggleProduct=(id:string)=>{const next={...network,products:network.products.map(x=>x.id===id?{...x,active:!x.active}:x)};writeDemoNetwork(next);setNetwork(next);announce("وضعیت محصول به‌روزرسانی شد.");};
@@ -179,7 +189,7 @@ export default function AdminDashboard(){
               <div className="admin-business-actions"><button className="admin-export-btn" onClick={saveBusiness}>ثبت کسب‌وکار و آماده‌سازی دعوت</button><small>فیلدهای ستاره‌دار الزامی‌اند.</small></div>
             </section>}
             {businessInviteLink&&<section className="admin-panel admin-invite-result"><div><h3>لینک دعوت آماده شد (پیش‌نمایش فرانت‌اند)</h3><p>برای ارسال آزمایشی می‌توانی لینک را کپی کنی. ورود واقعی و محدودیت یک‌بارمصرف پس از اتصال API فعال می‌شود.</p><code>{businessInviteLink}</code></div><button className="admin-export-btn" onClick={()=>{void navigator.clipboard?.writeText(businessInviteLink);announce("لینک در صورت مجاز بودن مرورگر کپی شد.");}}>کپی لینک</button></section>}
-            <section className="admin-panel admin-data-panel"><div className="admin-panel-head"><div><h3>دعوت‌های آماده‌شده</h3><p>{fa(invitationPreviews.filter(x=>x.targetType==="business-owner").length)} دعوت مدیر کسب‌وکار · پیش‌نمایش محلی</p></div></div><div className="admin-table-wrap"><table><thead><tr><th>کسب‌وکار</th><th>شناسه دعوت</th><th>تاریخ ایجاد</th><th>وضعیت</th></tr></thead><tbody>{invitationPreviews.filter(x=>x.targetType==="business-owner").map(x=><tr key={x.id}><td>{x.targetName}</td><td>{x.id}</td><td>{new Date(x.createdAt).toLocaleString("fa-IR")}</td><td><span className="admin-pill-muted">در انتظار اتصال بک‌اند</span></td></tr>)}</tbody></table></div></section>
+            <section className="admin-panel admin-data-panel"><div className="admin-panel-head"><div><h3>دعوت‌های آماده‌شده</h3><p>{fa(invitationPreviews.filter(x=>x.targetType==="business-owner").length)} دعوت مدیر کسب‌وکار · پیش‌نمایش محلی</p></div></div><div className="admin-table-wrap"><table><thead><tr><th>کسب‌وکار</th><th>شناسه دعوت</th><th>تاریخ ایجاد</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody>{invitationPreviews.filter(x=>x.targetType==="business-owner").map(x=><tr key={x.id}><td>{x.targetName}</td><td>{x.id}</td><td>{new Date(x.createdAt).toLocaleString("fa-IR")}</td><td><span className={x.status==="revoked"?"admin-pill-muted":x.status==="used"?"admin-pill-ok":"admin-pill-muted"}>{x.status==="revoked"?"فسخ‌شده":x.status==="used"?"استفاده‌شده":"در انتظار اتصال بک‌اند"}</span></td><td>{x.status==="pending-backend"?<button className="admin-row-action danger" onClick={()=>void revokeBusinessInvite(x)}>فسخ لینک</button>:<span className="admin-muted">—</span>}</td></tr>)}</tbody></table></div></section>
           </div>:contentRows.length>0?<section className="admin-panel admin-data-panel"><div className="admin-panel-head"><div><h3>اطلاعات ثبت‌شده</h3><p>{fa(rows.length)} نتیجه از داده‌های محلی</p></div><button className="admin-export-btn" onClick={()=>exportData("csv")}><Download size={14}/> خروجی CSV</button></div><div className="admin-table-wrap"><table><thead><tr><th>شناسه</th><th>عنوان</th><th>جزئیات</th><th>شهر / مشخصات</th><th>وضعیت</th><th>مبلغ</th><th>عملیات</th></tr></thead><tbody>{rows.map((row:any)=><tr key={row.id}><td>{row.id}</td><td>{row.name}</td><td>{row.type}</td><td>{row.city}</td><td><span className={row.status==="فعال"||row.status==="ثبت‌شده"?"admin-pill-ok":"admin-pill-muted"}>{row.status}</span></td><td>{row.price||"—"}</td><td><button className="admin-row-action" onClick={row.action}>{row.actionLabel}</button></td></tr>)}</tbody></table>{rows.length===0&&<div className="admin-empty"><Database size={25}/><b>داده‌ای برای نمایش وجود ندارد</b><span>با ثبت اطلاعات در بخش مربوطه، اینجا به‌روزرسانی می‌شود.</span></div>}</div></section>:<section className="admin-panel admin-placeholder"><div className="admin-placeholder-icon"><selected.icon size={28}/></div><h3>فضای مدیریت {selected.label}</h3><p>{selected.description}</p><div className="admin-placeholder-note"><AlertTriangle size={16}/> این ماژول در حال حاضر به داده یا API مستقل متصل نیست. ساختار دسترسی و جایگاه آن آماده است، اما برای عملیات واقعی باید سرویس بک‌اند مربوطه پیاده‌سازی شود.</div><button onClick={()=>exportData("json")}><Download size={15}/> دریافت داده‌های موجود</button></section>}
         </>}
         <footer className="admin-footer"><span>RINNA CONTROL CENTER</span><span>نسخه مدیریتی نمایشی · {fa(modules.length)} قابلیت تعریف‌شده</span></footer>
