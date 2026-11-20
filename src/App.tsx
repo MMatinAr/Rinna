@@ -17,7 +17,7 @@ import SellerStore from "./components/SellerStore";
 import { AccountPage, ContactPage, InfoPage, MarketplacePage, NotFoundPage } from "./components/SitePages";
 
 export default function App() {
-  const path = window.location.pathname.replace(/\\/+$/, "") || "/";
+  const path = window.location.pathname.replace(/\/+$/, "") || "/";
 
   if (path === "/admin" || path.startsWith("/admin/")) return <AdminDashboard />;
   if (path === "/manufacturer" || path.startsWith("/manufacturer/")) return <ManufacturerDashboard />;
