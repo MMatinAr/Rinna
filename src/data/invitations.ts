@@ -8,7 +8,7 @@ export type InvitationDraft = {
   createdAt: string;
   expiresAt: string;
   usedAt: null;
-  status: "pending-backend";
+  status: "pending-backend" | "revoked" | "used";
   mode: "frontend-preview";
 };
 
@@ -54,4 +54,14 @@ export function readInvitationPreviews(): InvitationDraft[] {
     const value = JSON.parse(localStorage.getItem(INVITATIONS_KEY) || "[]");
     return Array.isArray(value) ? value : [];
   } catch { return []; }
+}
+
+/** Local preview only. Production must call DELETE /api/v1/invitations/:id. */
+export function revokeInvitationPreview(id: string): InvitationDraft | null {
+  const records = readInvitationPreviews();
+  const target = records.find(item => item.id === id);
+  if (!target || target.status !== "pending-backend") return null;
+  const updated = records.map(item => item.id === id ? { ...item, status: "revoked" as const, revokedAt: new Date().toISOString() } : item);
+  localStorage.setItem(INVITATIONS_KEY, JSON.stringify(updated));
+  return updated.find(item => item.id === id) || null;
 }
