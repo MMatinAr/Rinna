@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { confirmAction, notifySuccess } from "../utils/alerts";
 import { ArrowDownLeft, ArrowUpLeft, ClipboardList, PackagePlus, PencilLine, Search, X } from "lucide-react";
 import RinnaSelect from "./RinnaSelect";
 
@@ -95,7 +96,7 @@ export default function DistributorInventory({ products, movements, onProductsCh
     };
   }, [mode]);
 
-  const saveMovement = () => {
+  const saveMovement = async () => {
     if (!activeProduct || !mode) return;
     const amount = Number(normalizeDigits(quantity).replace(/,/g, ""));
     if (!Number.isInteger(amount) || amount < 0 || (mode === "receipt" && amount < 1)) {
@@ -118,6 +119,8 @@ export default function DistributorInventory({ products, movements, onProductsCh
       setError("موجودی جدید با موجودی فعلی تفاوتی ندارد.");
       return;
     }
+
+    if (!await confirmAction({title:mode==="receipt"?"تأیید ورود کالا؟":"تأیید اصلاح موجودی؟",text:"موجودی «"+activeProduct.name+"» از "+before.toLocaleString("fa-IR")+" به "+after.toLocaleString("fa-IR")+" تغییر می‌کند. دلیل ثبت‌شده: "+reason.trim(),confirmText:"بله، ثبت عملیات"})) return;
 
     const updatedProduct = { ...activeProduct, stock: after, updated: "همین الان" };
     onProductsChange(products.map((product) => product.id === activeProduct.id ? updatedProduct : product));
