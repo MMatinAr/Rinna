@@ -201,10 +201,11 @@ export default function DistributorDashboard() {
   const activeOrders = data.orders.filter((o: Order) => !["تحویل‌شده", "لغوشده"].includes(o.status));
   const todayRevenue = data.orders.filter((o: Order) => o.status !== "لغوشده").reduce((sum: number, o: Order) => sum + o.total, 0);
 
-  const advanceOrder = (id: string) => {
+  const advanceOrder = async (id: string) => {
     const order = data.orders.find((o: Order) => o.id === id);
     if (!order || !nextStatus[order.status]) return;
     const status = nextStatus[order.status] as OrderStatus;
+    if ((status === "ارسال‌شده" || status === "تحویل‌شده") && !await confirmAction({title:status==="ارسال‌شده"?"ثبت ارسال سفارش؟":"ثبت تحویل سفارش؟",text:status==="ارسال‌شده"?"با تأیید ارسال، موجودی رزروشده از موجودی انبار کسر می‌شود.":"وضعیت سفارش به تحویل‌شده تغییر می‌کند.",confirmText:"بله، ثبت کن"})) return;
     const shippedItems = status === "ارسال‌شده" ? (order.reservations || []) : [];
     update("orders", data.orders.map((o: Order) => o.id === id ? { ...o, status, reservations: status === "ارسال‌شده" ? [] : o.reservations, history: [...o.history, { status, at: nowTime(), by: role }] } : o));
     if (shippedItems.length) {
@@ -263,8 +264,10 @@ export default function DistributorDashboard() {
     update("zones", [zone, ...data.zones]); setModal(null); setForm({});
     log("محدوده ارسال «" + zone.name + "» اضافه شد"); announce("محدوده ارسال ثبت شد");
   };
-  const toggleZone = (id: string) => {
+  const toggleZone = async (id: string) => {
     const zone = data.zones.find((z: Zone) => z.id === id);
+    if (!zone) return;
+    if (zone.active && !await confirmAction({title:"غیرفعال‌کردن محدوده ارسال؟",text:"محدوده «"+zone.name+"» دیگر برای سفارش‌های جدید قابل انتخاب نخواهد بود.",confirmText:"بله، غیرفعال کن",danger:true})) return;
     update("zones", data.zones.map((z: Zone) => z.id === id ? { ...z, active: !z.active } : z));
     log("وضعیت پوشش «" + zone.name + "» تغییر کرد"); announce("وضعیت محدوده تغییر کرد");
   };
