@@ -15,6 +15,13 @@ export type DemoSeller = {
   deliveryMode: "network" | "self" | "courier";
   distributorIds?: string[];
   phone?: string;
+  ownerName?: string;
+  contactEmail?: string;
+  registrationNumber?: string;
+  nationalId?: string;
+  address?: string;
+  website?: string;
+  createdAt?: string;
 };
 export type DemoCatalogProduct = {
   id: string;
