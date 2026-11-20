@@ -141,6 +141,7 @@ export default function DistributorInventory({ products, movements, onProductsCh
     onMovementsChange([movement, ...movements].slice(0, 250));
     onLog((mode === "receipt" ? "ورود " : "اصلاح ") + "موجودی «" + activeProduct.name + "»؛ " + (delta > 0 ? "+" : "") + fa(delta) + " " + activeProduct.unit, mode === "receipt" ? "sync" : "warning");
     closeMovement();
+    void notifySuccess("گردش موجودی ثبت شد", "موجودی جدید در دفتر گردش کالا ثبت شد.");
   };
 
 
