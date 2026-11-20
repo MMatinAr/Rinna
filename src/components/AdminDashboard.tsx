@@ -6,8 +6,8 @@ import {
   Megaphone, Package, Search, Settings, ShieldCheck, ShoppingCart, Store, Truck, Users, Wallet,
   X, Zap
 } from "lucide-react";
-import Navbar from "./Navbar";
 import { readDemoNetwork, writeDemoNetwork, type DemoNetwork } from "../data/demoNetwork";
+import { createInvitationPreview, readInvitationPreviews } from "../data/invitations";
 
 type ModuleItem = { id: string; label: string; group: string; icon: typeof LayoutDashboard; description: string };
 const modules: ModuleItem[] = [
@@ -17,6 +17,7 @@ const modules: ModuleItem[] = [
   {id:"sessions",label:"نشست‌ها و ورودها",group:"مدیریت کاربران",icon:ShieldCheck,description:"نشست‌های فعال و رویدادهای ورود"},
   {id:"buyers",label:"خریداران سازمانی",group:"مدیریت کاربران",icon:Building2,description:"کافه‌ها، رستوران‌ها و حساب‌های تجاری"},
   {id:"sellers",label:"فروشندگان",group:"تجارت و تأمین",icon:Store,description:"مدیریت فروشندگان شرکتی و محلی"},
+  {id:"business-onboarding",label:"ثبت کسب‌وکار و دعوت",group:"تجارت و تأمین",icon:Building2,description:"ثبت دستی مشخصات کسب‌وکار و آماده‌سازی دعوت مدیر آن"},
   {id:"seller-verify",label:"احراز هویت فروشندگان",group:"تجارت و تأمین",icon:ShieldCheck,description:"بررسی مدارک و تأیید حساب فروشنده"},
   {id:"seller-rating",label:"اعتبار و امتیاز فروشنده",group:"تجارت و تأمین",icon:Activity,description:"کیفیت، امتیازها، شکایت‌ها و عملکرد فروشندگان"},
   {id:"products",label:"کاتالوگ محصولات",group:"تجارت و تأمین",icon:Package,description:"مدیریت محصولات، دسته‌بندی و وضعیت انتشار"},
@@ -85,11 +86,16 @@ export default function AdminDashboard(){
   const [revision,setRevision]=useState(0);
   const [maintenance,setMaintenance]=useState(()=>localStorage.getItem("rinna-admin-maintenance")==="true");
   const [showAll,setShowAll]=useState(false);
+  const [showBusinessForm,setShowBusinessForm]=useState(false);
+  const [businessDraft,setBusinessDraft]=useState({name:"",type:"corporate" as "corporate"|"local",ownerName:"",phone:"",email:"",registrationNumber:"",nationalId:"",city:"تهران",serviceCities:"تهران",areas:"",address:"",website:"",description:"",deliveryMode:"network" as "network"|"self"|"courier"});
+  const [businessInviteLink,setBusinessInviteLink]=useState("");
+  const [invitationRevision,setInvitationRevision]=useState(0);
   useEffect(()=>{const sync=()=>{setNetwork(readDemoNetwork());setRevision(v=>v+1);};window.addEventListener("storage",sync);window.addEventListener("rinna-demo-network-updated",sync);return()=>{window.removeEventListener("storage",sync);window.removeEventListener("rinna-demo-network-updated",sync);};},[]);
   const commerce=useMemo(()=>readJson("rinna-wholesale-v1",{cart:[],favorites:[],orders:[],reviews:[]}),[revision]);
   const orders=Array.isArray(commerce.orders)?commerce.orders:[];
   const reviews=Array.isArray(commerce.reviews)?commerce.reviews:[];
   const activeSellers=network.sellers.filter(x=>x.active).length;
+  const invitationPreviews=useMemo(()=>readInvitationPreviews(),[invitationRevision]);
   const activeProducts=network.products.filter(x=>x.active).length;
   const activeDistributors=network.distributors.filter(x=>x.active).length;
   const totalSales=orders.filter((x:any)=>x.status!=="cancelled").reduce((sum:number,x:any)=>sum+(Number(x.total)||0),0);
@@ -97,6 +103,21 @@ export default function AdminDashboard(){
   const grouped=modules.reduce<Record<string,ModuleItem[]>>((acc,item)=>{(acc[item.group] ||= []).push(item);return acc;},{});
   const visibleModules=modules.filter(item=>item.label.includes(query.trim())||item.description.includes(query.trim())||item.group.includes(query.trim()));
   const announce=(s:string)=>{setNotice(s);window.setTimeout(()=>setNotice(""),2600);};
+  const saveBusiness=()=>{
+    if(!businessDraft.name.trim()||!businessDraft.phone.trim()||!businessDraft.city.trim()){announce("نام کسب‌وکار، شماره تماس و شهر را وارد کن.");return;}
+    const id="SELL-MANUAL-"+Date.now();
+    const seller={id,name:businessDraft.name.trim(),type:businessDraft.type,city:businessDraft.city.trim(),serviceCities:businessDraft.serviceCities.split(/[،,]/).map(v=>v.trim()).filter(Boolean),areas:businessDraft.areas.split(/[،,]/).map(v=>v.trim()).filter(Boolean),active:true,description:businessDraft.description.trim(),deliveryMode:businessDraft.type==="corporate"?"network":businessDraft.deliveryMode,phone:businessDraft.phone.trim(),ownerName:businessDraft.ownerName.trim(),contactEmail:businessDraft.email.trim(),registrationNumber:businessDraft.registrationNumber.trim(),nationalId:businessDraft.nationalId.trim(),address:businessDraft.address.trim(),website:businessDraft.website.trim(),createdAt:new Date().toISOString()};
+    const next={...network,sellers:[seller,...network.sellers]};
+    writeDemoNetwork(next);setNetwork(next);
+    try{const invite=createInvitationPreview("business-owner",id,seller.name);setBusinessInviteLink(invite.url);setInvitationRevision(v=>v+1);announce("کسب‌وکار ثبت شد؛ لینک دعوت نمایشی آماده است.");}
+    catch{announce("کسب‌وکار ثبت شد؛ تولید لینک در این مرورگر در دسترس نیست.");}
+    setBusinessDraft({name:"",type:"corporate",ownerName:"",phone:"",email:"",registrationNumber:"",nationalId:"",city:"تهران",serviceCities:"تهران",areas:"",address:"",website:"",description:"",deliveryMode:"network"});
+    setShowBusinessForm(false);
+  };
+  const createBusinessInvite=(seller:any)=>{
+    try{const invite=createInvitationPreview("business-owner",seller.id,seller.name);setBusinessInviteLink(invite.url);setInvitationRevision(v=>v+1);announce("لینک دعوت نمایشی ساخته شد.");}
+    catch{announce("تولید لینک در این مرورگر در دسترس نیست.");}
+  };
   const toggleSeller=(id:string)=>{const next={...network,sellers:network.sellers.map(x=>x.id===id?{...x,active:!x.active}:x)};writeDemoNetwork(next);setNetwork(next);announce("وضعیت فروشنده به‌روزرسانی شد.");};
   const toggleProduct=(id:string)=>{const next={...network,products:network.products.map(x=>x.id===id?{...x,active:!x.active}:x)};writeDemoNetwork(next);setNetwork(next);announce("وضعیت محصول به‌روزرسانی شد.");};
   const toggleDistributor=(id:string)=>{const next={...network,distributors:network.distributors.map(x=>x.id===id?{...x,active:!x.active}:x)};writeDemoNetwork(next);setNetwork(next);announce("وضعیت پخش‌کننده به‌روزرسانی شد.");};
@@ -116,7 +137,6 @@ export default function AdminDashboard(){
   const rows=contentRows.filter((x:any)=>[x.id,x.name,x.type,x.city,x.status].join(" ").toLowerCase().includes(query.toLowerCase()));
   const quickStats=[{label:"فروشندگان فعال",value:activeSellers,icon:Store},{label:"محصولات فعال",value:activeProducts,icon:Package},{label:"پخش‌کننده‌های فعال",value:activeDistributors,icon:Truck},{label:"سفارش‌های ثبت‌شده",value:orders.length,icon:ShoppingCart},{label:"مجموع ارزش سفارش‌ها",value:toman(totalSales),icon:Wallet},{label:"نظرات ثبت‌شده",value:reviews.length,icon:Activity}];
   return <div className="rinna-admin" dir="rtl">
-    <Navbar/>
     <div className="admin-shell">
       <aside className="admin-sidebar">
         <div className="admin-brand"><span className="admin-brand-mark">R</span><div><b>RINNA CONTROL</b><small>مرکز فرماندهی پلتفرم</small></div></div>
@@ -133,7 +153,34 @@ export default function AdminDashboard(){
           <section className="admin-panel admin-module-directory"><div className="admin-panel-head"><div><h3>کتابخانه قابلیت‌ها</h3><p>{fa(modules.length)} ابزار و بخش مدیریتی در {fa(Object.keys(grouped).length)} گروه</p></div><span className="admin-count-pill">{fa(modules.length)} MODULES</span></div><div className="admin-module-grid">{modules.filter(x=>x.id!=="overview").map(item=><button key={item.id} onClick={()=>setSection(item.id)}><item.icon size={17}/><span>{item.label}</span><ChevronLeft size={14}/></button>)}</div></section>
         </>:<>
           <div className="admin-module-banner"><div className="admin-module-icon"><selected.icon size={24}/></div><div><h2>{selected.label}</h2><p>{selected.description}</p></div><span>{fa(modules.length)} ابزار فعال در پنل</span></div>
-          {contentRows.length>0?<section className="admin-panel admin-data-panel"><div className="admin-panel-head"><div><h3>اطلاعات ثبت‌شده</h3><p>{fa(rows.length)} نتیجه از داده‌های محلی</p></div><button className="admin-export-btn" onClick={()=>exportData("csv")}><Download size={14}/> خروجی CSV</button></div><div className="admin-table-wrap"><table><thead><tr><th>شناسه</th><th>عنوان</th><th>جزئیات</th><th>شهر / مشخصات</th><th>وضعیت</th><th>مبلغ</th><th>عملیات</th></tr></thead><tbody>{rows.map((row:any)=><tr key={row.id}><td>{row.id}</td><td>{row.name}</td><td>{row.type}</td><td>{row.city}</td><td><span className={row.status==="فعال"||row.status==="ثبت‌شده"?"admin-pill-ok":"admin-pill-muted"}>{row.status}</span></td><td>{row.price||"—"}</td><td><button className="admin-row-action" onClick={row.action}>{row.actionLabel}</button></td></tr>)}</tbody></table>{rows.length===0&&<div className="admin-empty"><Database size={25}/><b>داده‌ای برای نمایش وجود ندارد</b><span>با ثبت اطلاعات در بخش مربوطه، اینجا به‌روزرسانی می‌شود.</span></div>}</div></section>:<section className="admin-panel admin-placeholder"><div className="admin-placeholder-icon"><selected.icon size={28}/></div><h3>فضای مدیریت {selected.label}</h3><p>{selected.description}</p><div className="admin-placeholder-note"><AlertTriangle size={16}/> این ماژول در حال حاضر به داده یا API مستقل متصل نیست. ساختار دسترسی و جایگاه آن آماده است، اما برای عملیات واقعی باید سرویس بک‌اند مربوطه پیاده‌سازی شود.</div><button onClick={()=>exportData("json")}><Download size={15}/> دریافت داده‌های موجود</button></section>}
+          {section==="business-onboarding"?<div className="admin-onboarding-layout">
+            <section className="admin-panel admin-data-panel">
+              <div className="admin-panel-head"><div><h3>کسب‌وکارهای ثبت‌شده</h3><p>{fa(network.sellers.length)} کسب‌وکار در شبکه فعلی</p></div><button className="admin-export-btn" onClick={()=>{setShowBusinessForm(v=>!v);setBusinessInviteLink("");}}><Building2 size={14}/>{showBusinessForm?"بستن فرم":"ثبت کسب‌وکار جدید"}</button></div>
+              <div className="admin-table-wrap"><table><thead><tr><th>نام کسب‌وکار</th><th>نوع</th><th>شهر</th><th>مسئول</th><th>شماره تماس</th><th>وضعیت</th><th>دعوت مدیر</th></tr></thead><tbody>{network.sellers.map((seller:any)=><tr key={seller.id}><td>{seller.name}</td><td>{seller.type==="corporate"?"کارخانه / شرکتی":"فروشنده محلی"}</td><td>{seller.city}</td><td>{seller.ownerName||"—"}</td><td>{seller.phone||"—"}</td><td><span className={seller.active?"admin-pill-ok":"admin-pill-muted"}>{seller.active?"فعال":"غیرفعال"}</span></td><td><button className="admin-row-action" onClick={()=>createBusinessInvite(seller)}>ساخت لینک دعوت</button></td></tr>)}</tbody></table></div>
+            </section>
+            {showBusinessForm&&<section className="admin-panel admin-business-form">
+              <div className="admin-panel-head"><div><h3>ثبت مشخصات کسب‌وکار</h3><p>اطلاعات پایه و اطلاعات تماس مدیر کسب‌وکار</p></div></div>
+              <div className="admin-business-grid">
+                <label>نام کسب‌وکار *<input value={businessDraft.name} onChange={e=>setBusinessDraft(v=>({...v,name:e.target.value}))} placeholder="مثلاً شرکت پخش یا کارخانه..." /></label>
+                <label>نوع کسب‌وکار<select value={businessDraft.type} onChange={e=>setBusinessDraft(v=>({...v,type:e.target.value as "corporate"|"local",deliveryMode:e.target.value==="corporate"?"network":v.deliveryMode}))}><option value="corporate">کارخانه / فروشنده شرکتی</option><option value="local">فروشنده محلی</option></select></label>
+                <label>نام صاحب کسب‌وکار / مدیر<input value={businessDraft.ownerName} onChange={e=>setBusinessDraft(v=>({...v,ownerName:e.target.value}))} placeholder="نام و نام خانوادگی" /></label>
+                <label>شماره تماس مدیر *<input value={businessDraft.phone} onChange={e=>setBusinessDraft(v=>({...v,phone:e.target.value}))} placeholder="09..." /></label>
+                <label>ایمیل<input type="email" value={businessDraft.email} onChange={e=>setBusinessDraft(v=>({...v,email:e.target.value}))} placeholder="name@company.com" /></label>
+                <label>شناسه / شماره ثبت شرکت<input value={businessDraft.registrationNumber} onChange={e=>setBusinessDraft(v=>({...v,registrationNumber:e.target.value}))} /></label>
+                <label>شناسه ملی<input value={businessDraft.nationalId} onChange={e=>setBusinessDraft(v=>({...v,nationalId:e.target.value}))} /></label>
+                <label>شهر اصلی فعالیت<input value={businessDraft.city} onChange={e=>setBusinessDraft(v=>({...v,city:e.target.value}))} /></label>
+                <label>شهرهای تحت پوشش<input value={businessDraft.serviceCities} onChange={e=>setBusinessDraft(v=>({...v,serviceCities:e.target.value}))} placeholder="تهران، کرج، قزوین" /></label>
+                <label>مناطق تحت پوشش<input value={businessDraft.areas} onChange={e=>setBusinessDraft(v=>({...v,areas:e.target.value}))} placeholder="شمال تهران، مرکز تهران" /></label>
+                <label>روش ارسال<select value={businessDraft.deliveryMode} disabled={businessDraft.type==="corporate"} onChange={e=>setBusinessDraft(v=>({...v,deliveryMode:e.target.value as "self"|"courier"|"network"}))}><option value="self">ارسال توسط خود فروشنده</option><option value="courier">پیک / شرکت حمل</option><option value="network">شبکه پخش اختصاصی</option></select></label>
+                <label>وب‌سایت<input value={businessDraft.website} onChange={e=>setBusinessDraft(v=>({...v,website:e.target.value}))} placeholder="https://..." /></label>
+                <label className="wide">نشانی کامل<input value={businessDraft.address} onChange={e=>setBusinessDraft(v=>({...v,address:e.target.value}))} placeholder="استان، شهر، خیابان..." /></label>
+                <label className="wide">توضیحات کسب‌وکار<textarea value={businessDraft.description} onChange={e=>setBusinessDraft(v=>({...v,description:e.target.value}))} rows={3} placeholder="زمینه فعالیت، معرفی و توضیحات..." /></label>
+              </div>
+              <div className="admin-business-actions"><button className="admin-export-btn" onClick={saveBusiness}>ثبت کسب‌وکار و آماده‌سازی دعوت</button><small>فیلدهای ستاره‌دار الزامی‌اند.</small></div>
+            </section>}
+            {businessInviteLink&&<section className="admin-panel admin-invite-result"><div><h3>لینک دعوت آماده شد (پیش‌نمایش فرانت‌اند)</h3><p>برای ارسال آزمایشی می‌توانی لینک را کپی کنی. ورود واقعی و محدودیت یک‌بارمصرف پس از اتصال API فعال می‌شود.</p><code>{businessInviteLink}</code></div><button className="admin-export-btn" onClick={()=>{void navigator.clipboard?.writeText(businessInviteLink);announce("لینک در صورت مجاز بودن مرورگر کپی شد.");}}>کپی لینک</button></section>}
+            <section className="admin-panel admin-data-panel"><div className="admin-panel-head"><div><h3>دعوت‌های آماده‌شده</h3><p>{fa(invitationPreviews.filter(x=>x.targetType==="business-owner").length)} دعوت مدیر کسب‌وکار · پیش‌نمایش محلی</p></div></div><div className="admin-table-wrap"><table><thead><tr><th>کسب‌وکار</th><th>شناسه دعوت</th><th>تاریخ ایجاد</th><th>وضعیت</th></tr></thead><tbody>{invitationPreviews.filter(x=>x.targetType==="business-owner").map(x=><tr key={x.id}><td>{x.targetName}</td><td>{x.id}</td><td>{new Date(x.createdAt).toLocaleString("fa-IR")}</td><td><span className="admin-pill-muted">در انتظار اتصال بک‌اند</span></td></tr>)}</tbody></table></div></section>
+          </div>:          {contentRows.length>0?<section className="admin-panel admin-data-panel"><div className="admin-panel-head"><div><h3>اطلاعات ثبت‌شده</h3><p>{fa(rows.length)} نتیجه از داده‌های محلی</p></div><button className="admin-export-btn" onClick={()=>exportData("csv")}><Download size={14}/> خروجی CSV</button></div><div className="admin-table-wrap"><table><thead><tr><th>شناسه</th><th>عنوان</th><th>جزئیات</th><th>شهر / مشخصات</th><th>وضعیت</th><th>مبلغ</th><th>عملیات</th></tr></thead><tbody>{rows.map((row:any)=><tr key={row.id}><td>{row.id}</td><td>{row.name}</td><td>{row.type}</td><td>{row.city}</td><td><span className={row.status==="فعال"||row.status==="ثبت‌شده"?"admin-pill-ok":"admin-pill-muted"}>{row.status}</span></td><td>{row.price||"—"}</td><td><button className="admin-row-action" onClick={row.action}>{row.actionLabel}</button></td></tr>)}</tbody></table>{rows.length===0&&<div className="admin-empty"><Database size={25}/><b>داده‌ای برای نمایش وجود ندارد</b><span>با ثبت اطلاعات در بخش مربوطه، اینجا به‌روزرسانی می‌شود.</span></div>}</div></section>:<section className="admin-panel admin-placeholder"><div className="admin-placeholder-icon"><selected.icon size={28}/></div><h3>فضای مدیریت {selected.label}</h3><p>{selected.description}</p><div className="admin-placeholder-note"><AlertTriangle size={16}/> این ماژول در حال حاضر به داده یا API مستقل متصل نیست. ساختار دسترسی و جایگاه آن آماده است، اما برای عملیات واقعی باید سرویس بک‌اند مربوطه پیاده‌سازی شود.</div><button onClick={()=>exportData("json")}><Download size={15}/> دریافت داده‌های موجود</button></section>}
         </>}
         <footer className="admin-footer"><span>RINNA CONTROL CENTER</span><span>نسخه مدیریتی نمایشی · {fa(modules.length)} قابلیت تعریف‌شده</span></footer>
       </main>
