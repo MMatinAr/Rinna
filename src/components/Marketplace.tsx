@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, ShoppingCart, RotateCcw, Pause, Play, Search } from "lucide-react";
+import { ArrowLeft, ArrowRight, ShoppingCart, RotateCcw, Search } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { setActiveCategory, setSearch } from "../store/uiSlice";
@@ -6,7 +6,6 @@ import { useGetProductsQuery } from "../services/cafeApi";
 import { demoProducts } from "../data/demo";
 import { readDemoNetwork, type DemoNetwork } from "../data/demoNetwork";
 
-const AUTOPLAY_INTERVAL = 3000;
 type SortMode = "recommended" | "price-asc" | "price-desc" | "name";
 
 const sortOptions: { value: SortMode; label: string }[] = [
@@ -60,7 +59,7 @@ export default function Marketplace({ fullPage = false }: { fullPage?: boolean }
     };
   }, []);
 
-  const { data } = useGetProductsQuery();
+  const { data } = useGetProductsQuery(undefined, { skip: !fullPage });
   const allProducts = useMemo(() => {
     const activeCatalog = catalog.products.filter(product => product.active).map(product => {
       const mainImage = product.images?.find(image => image.id === product.primaryImageId) || product.images?.[0];
@@ -68,14 +67,14 @@ export default function Marketplace({ fullPage = false }: { fullPage?: boolean }
         id: product.id,
         slug: product.slug || product.id,
         name: product.name,
-        supplier_name: "تولیدکننده رسمی RINNA",
+        supplier_name: catalog.sellers.find(seller => seller.id === product.sellerId)?.name || "تأمین‌کننده",
         category: product.category,
         image_url: mainImage?.dataUrl || "",
         price: product.basePrice,
         unit: product.pack,
       };
     });
-    return activeCatalog.length ? activeCatalog : (data?.length ? data : demoProducts);
+    return data?.length ? data : (activeCatalog.length ? activeCatalog : demoProducts);
   }, [catalog, data]);
   const PRICE_MIN = 10_000;
   const PRICE_MAX = 100_000_000;
@@ -160,8 +159,6 @@ export default function Marketplace({ fullPage = false }: { fullPage?: boolean }
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(3);
-  const [isPaused, setIsPaused] = useState(false);
-  const [userPaused, setUserPaused] = useState(false);
   const touchStartX = useRef<number | null>(null);
   const pageCount = Math.max(1, Math.ceil(products.length / pageSize));
   const visibleProducts = fullPage ? products : products.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize);
@@ -175,12 +172,6 @@ export default function Marketplace({ fullPage = false }: { fullPage?: boolean }
 
   useEffect(() => { setPageIndex(0); }, [activeCategory, search, selectedMinPrice, selectedMaxPrice, sortMode]);
   useEffect(() => { if (pageIndex >= pageCount) setPageIndex(0); }, [pageCount, pageIndex]);
-
-  useEffect(() => {
-    if (fullPage || isPaused || userPaused || pageCount <= 1) return;
-    const timer = window.setInterval(() => setPageIndex(current => (current + 1) % pageCount), AUTOPLAY_INTERVAL);
-    return () => window.clearInterval(timer);
-  }, [fullPage, isPaused, userPaused, pageCount]);
 
   const goToPage = (nextPage: number) => setPageIndex((nextPage + pageCount) % pageCount);
   const handleTouchStart = (event: React.TouchEvent<HTMLDivElement>) => { touchStartX.current = event.touches[0]?.clientX ?? null; };
@@ -205,7 +196,7 @@ export default function Marketplace({ fullPage = false }: { fullPage?: boolean }
           </div>
         </div>
 
-        <div className="market-filter-panel" aria-label="فیلتر محصولات">
+        {fullPage && <div className="market-filter-panel" aria-label="فیلتر محصولات">
           <div className="market-filter-top">
             <label className="market-search-control">
               <Search size={17} aria-hidden="true" />
@@ -241,15 +232,14 @@ export default function Marketplace({ fullPage = false }: { fullPage?: boolean }
             </div>
             <button className="filter-reset" type="button" onClick={resetFilters} disabled={!hasFilters} aria-label="حذف فیلترها"><RotateCcw size={15} /> پاک‌کردن فیلترها</button>
           </div>
-        </div>
+        </div>}
 
-        <div className="product-carousel" onMouseEnter={() => setIsPaused(true)} onMouseLeave={() => setIsPaused(false)} onFocusCapture={event => { if (!(event.target as HTMLElement).closest(".carousel-autoplay-toggle")) setIsPaused(true); }} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setIsPaused(false); }} onTouchStart={event => { if (!(event.target as HTMLElement).closest(".carousel-autoplay-toggle")) { setUserPaused(true); handleTouchStart(event); } }} onTouchEnd={handleTouchEnd} aria-roledescription="اسلایدر محصولات">
-          {!fullPage && <button type="button" className="carousel-autoplay-toggle" onClick={() => setUserPaused(paused => !paused)} aria-pressed={userPaused} aria-label={userPaused ? "ادامه پخش خودکار محصولات" : "توقف پخش خودکار محصولات"}>{userPaused ? <Play size={14} /> : <Pause size={14} />}{userPaused ? "ادامه پخش" : "توقف پخش"}</button>}
+        <div className="product-carousel" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} aria-roledescription="اسلایدر محصولات">
           {products.length > 0 ? (
             <div className="product-grid" aria-live="polite">
               {visibleProducts.map(product => (
                 <a className="product-card" key={product.id} href={"/products/"+("slug" in product && product.slug ? product.slug : product.id)} aria-label={"مشاهده محصول "+product.name}>
-                  <div className="product-image"><img src={product.image_url} alt={product.name} loading="lazy" /><span className="product-category">{product.category}</span></div>
+                  <div className="product-image">{product.image_url ? <img src={product.image_url} alt={product.name} loading="lazy" /> : <div className="product-image-placeholder" aria-hidden="true"><ShoppingCart size={28} /></div>}<span className="product-category">{product.category}</span></div>
                   <div className="product-info"><div><h3>{product.name}</h3><small>{product.supplier_name}</small></div><span className="availability"><i /> در کاتالوگ</span></div>
                   <div className="product-bottom"><div><strong>{product.price.toLocaleString("fa-IR")}</strong><small>تومان / {product.unit}</small></div><span className="cart-button" aria-hidden="true"><ShoppingCart size={17} /></span></div>
                 </a>
@@ -267,7 +257,7 @@ export default function Marketplace({ fullPage = false }: { fullPage?: boolean }
             </div>
           )}
         </div>
-        <div className="market-results-note"><span>{products.length.toLocaleString("fa-IR")} محصول</span>{hasFilters && <span>نتایج بر اساس گزینه‌های انتخاب‌شده</span>}{!catalog.products.some(product => product.active) && <span>اطلاعات محصولات این بخش نمونه نمایشی هستند.</span>}</div>
+        <div className="market-results-note"><span>{products.length.toLocaleString("fa-IR")} محصول در ویترین</span>{hasFilters && <span>نتایج بر اساس گزینه‌های انتخاب‌شده</span>}<span>محصولات و قیمت‌های این ویترین نمونه نمایشی‌اند و برای نمایش مدل کارکرد پلتفرم استفاده شده‌اند.</span></div>
       </div>
     </section>
   );
