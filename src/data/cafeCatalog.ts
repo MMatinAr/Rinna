@@ -31,3 +31,43 @@ const recipeBases: Record<string, CafeIngredient[]> = {
   "صبحانه و برانچ": [{name:"تخم‌مرغ",amount:2,unit:"عدد",unitCost:1800},{name:"نان",amount:80,unit:"g",unitCost:120},{name:"پنیر یا کره",amount:30,unit:"g",unitCost:450},{name:"سبزیجات",amount:40,unit:"g",unitCost:180}],
   "غذا و میان‌وعده": [{name:"پروتئین یا ماده اصلی",amount:120,unit:"g",unitCost:520},{name:"نان یا پاستا",amount:1,unit:"عدد",unitCost:900},{name:"سس",amount:30,unit:"g",unitCost:300},{name:"سبزیجات",amount:50,unit:"g",unitCost:180}]
 };
+
+export const cafeCategories = categorySeeds.map((category, index) => ({
+  id: `category-${index + 1}`,
+  name: category.name,
+  items: category.items
+}));
+
+export const cafeAddonLibrary: CafeAddon[] = [
+  { id: "addon-cookie", name: "کوکی", price: 35000, ingredients: [] },
+  { id: "addon-truffle", name: "ترافل", price: 28000, ingredients: [] },
+  { id: "addon-chocolate", name: "شکلات اضافه", price: 18000, ingredients: [] },
+  { id: "addon-caramel", name: "سیروپ کارامل", price: 15000, ingredients: [] },
+  { id: "addon-vanilla", name: "سیروپ وانیل", price: 15000, ingredients: [] },
+  { id: "addon-hazelnut", name: "سیروپ فندق", price: 18000, ingredients: [] },
+  { id: "addon-extra-shot", name: "شات اسپرسو اضافه", price: 25000, ingredients: [] },
+  { id: "addon-oat-milk", name: "شیر جو دوسر", price: 30000, ingredients: [] },
+  { id: "addon-whipped-cream", name: "خامه", price: 20000, ingredients: [] },
+  { id: "addon-ice-cream", name: "اسکوپ بستنی", price: 25000, ingredients: [] },
+  { id: "addon-marshmallow", name: "مارشمالو", price: 16000, ingredients: [] },
+  { id: "addon-cheese", name: "پنیر اضافه", price: 22000, ingredients: [] }
+];
+
+export const cafeStarterCatalog: CafeMenuItem[] = categorySeeds.flatMap((category, categoryIndex) =>
+  category.items.map((name, itemIndex) => {
+    const ingredients = (recipeBases[category.name] ?? []).map((ingredient) => ({ ...ingredient }));
+    const cost = ingredients.reduce((sum, ingredient) => sum + ingredient.amount * ingredient.unitCost, 0);
+    return {
+      id: `starter-${categoryIndex + 1}-${itemIndex + 1}`,
+      name,
+      category: category.name,
+      price: Math.max(25000, Math.round(cost * 2.8 / 1000) * 1000),
+      cost,
+      description: "الگوی اولیه؛ مواد و مقادیر رسپی را متناسب با دستور کافه خود بررسی و اصلاح کنید.",
+      active: false,
+      ingredients,
+      addons: [],
+      source: "template" as const
+    };
+  })
+);
