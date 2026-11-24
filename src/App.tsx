@@ -12,6 +12,7 @@ import ManufacturerDashboard from "./components/ManufacturerDashboard";
 import DistributorDashboard from "./components/DistributorDashboard";
 import AdminDashboard from "./components/AdminDashboard";
 import BusinessDashboard from "./components/BusinessDashboard";
+import CafeWorkspace from "./components/CafeWorkspace";
 import InvitationLanding from "./components/InvitationLanding";
 import ProductDetail from "./components/ProductDetail";
 import WholesaleMarketplace from "./components/WholesaleMarketplace";
@@ -22,6 +23,7 @@ export default function App() {
   const path = window.location.pathname.replace(/\/+$/, "") || "/";
 
   if (path === "/admin" || path.startsWith("/admin/")) return <AdminDashboard />;
+  if (path === "/cafe" || path.startsWith("/cafe/")) return <CafeWorkspace />;
   if (path.startsWith("/invite/")) return <InvitationLanding />;
   if (path.startsWith("/business/")) return <BusinessDashboard />;
   if (path === "/manufacturer" || path.startsWith("/manufacturer/")) return <ManufacturerDashboard />;
