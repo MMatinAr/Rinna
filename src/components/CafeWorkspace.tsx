@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode, type Dispatch, type SetStateAction } from "react";
 import {
   Activity, ArrowDownLeft, ArrowUpLeft, BarChart3, Bell, BookOpen, Check, CheckCheck,
   ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, CircleDollarSign,
@@ -103,6 +103,7 @@ function CafeWorkspace() {
   });
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
+  const [menuStatusFilter, setMenuStatusFilter] = useState("all");
   const [selected, setSelected] = useState<string[]>([]);
   const [editorItem, setEditorItem] = useState<CafeMenuItem | null>(null);
   const [showEditor, setShowEditor] = useState(false);
@@ -135,8 +136,9 @@ function CafeWorkspace() {
   const availableNav = navItems.filter((item) => item.roles.includes(role));
   const filteredItems = useMemo(() => items.filter((item) =>
     (category === "all" || item.category === category) &&
+    (menuStatusFilter === "all" || (menuStatusFilter === "active" ? item.active : !item.active)) &&
     (item.name.toLowerCase().includes(search.trim().toLowerCase()) || item.category.toLowerCase().includes(search.trim().toLowerCase()))
-  ), [items, category, search]);
+  ), [items, category, search, menuStatusFilter]);
 
   const changePage = (next: Page) => { setPage(next); setMobileNav(false); setSelected([]); };
   const updateItem = (updated: CafeMenuItem) => setItems((current) => current.map((item) => item.id === updated.id ? updated : item));
@@ -252,7 +254,7 @@ function CafeWorkspace() {
         {page === "menu" && <section className="cw-page">
           <div className="cw-page-heading"><div><span className="cw-eyebrow">MENU STUDIO</span><h1>مدیریت منو</h1><p>تمام محصولات، رسپی‌ها و افزودنی‌ها در یک فضای ساده و یکپارچه.</p></div><div className="cw-heading-actions"><button className="cw-button cw-button-soft" onClick={() => fileInput.current?.click()}><Camera size={17}/> عکس‌برداری از منو</button><button className="cw-button cw-button-primary" onClick={createItem}><Plus size={18}/> افزودن محصول</button></div></div>
           <div className="cw-menu-stats"><MiniStat icon={<Utensils/>} label="کل محصولات" value={number(items.length)} hint="در منوی کافه"/><MiniStat icon={<CheckCircle2/>} label="محصولات فعال" value={number(items.filter((item) => item.active).length)} hint="قابل سفارش"/><MiniStat icon={<BookOpen/>} label="رسپی تکمیل‌شده" value={number(items.filter((item) => item.ingredients.length).length)} hint="دارای مواد اولیه"/><MiniStat icon={<Sparkles/>} label="کتابخانه آماده" value="۱۰۰+" hint="محصول پیشنهادی"/> </div>
-          <div className="cw-menu-toolbar"><div className="cw-search"><Search size={17}/><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="جست‌وجوی نام محصول یا دسته‌بندی…"/>{search && <button onClick={() => setSearch("")}><X size={15}/></button>}</div><CustomSelect value={category} onChange={setCategory} options={[{label:"همه دسته‌بندی‌ها",value:"all"},...cafeCategories.map((cat) => ({label:cat.name,value:cat.name}))]}/><button className="cw-button cw-button-soft cw-filter-button" onClick={() => setToast("فیلتر پیشرفته در نسخه بعدی اضافه می‌شود.")}><SlidersHorizontal size={16}/> فیلتر</button></div>
+          <div className="cw-menu-toolbar"><div className="cw-search"><Search size={17}/><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="جست‌وجوی نام محصول یا دسته‌بندی…"/>{search && <button onClick={() => setSearch("")}><X size={15}/></button>}</div><CustomSelect value={category} onChange={setCategory} options={[{label:"همه دسته‌بندی‌ها",value:"all"},...cafeCategories.map((cat) => ({label:cat.name,value:cat.name}))]}/><button className="cw-button cw-button-soft cw-filter-button" onClick={() => setMenuStatusFilter(current => current === "all" ? "active" : current === "active" ? "draft" : "all")}><SlidersHorizontal size={16}/> {menuStatusFilter === "all" ? "همه وضعیت‌ها" : menuStatusFilter === "active" ? "فقط فعال‌ها" : "فقط پیش‌نویس‌ها"}</button></div>
           {selected.length > 0 && <div className="cw-bulk-bar"><div><CheckCheck size={18}/><b>{number(selected.length)} محصول انتخاب شده</b></div><button className="cw-button cw-button-soft" onClick={() => setShowBulk(true)}><Plus size={16}/> افزودن گروهی افزودنی</button><button className="cw-button cw-button-ghost" onClick={() => setSelected([])}>لغو انتخاب</button></div>}
           <div className="cw-table-wrap"><div className="cw-table-head"><label className="cw-check"><input type="checkbox" checked={filteredItems.length > 0 && selected.length === filteredItems.length} onChange={toggleAll}/><span/></label><span>محصول</span><span>دسته‌بندی</span><span>قیمت فروش</span><span>قیمت تمام‌شده</span><span>وضعیت</span><span>عملیات</span></div>
             {filteredItems.map((item) => <div className="cw-menu-row" key={item.id}><label className="cw-check"><input type="checkbox" checked={selected.includes(item.id)} onChange={() => toggleSelected(item.id)}/><span/></label><div className="cw-product-cell"><div className="cw-product-thumb"><Coffee size={19}/></div><div><b>{item.name}</b><small>{item.source === "template" ? "الگوی آماده RINNA" : "محصول کافه"}</small></div></div><span className="cw-category-pill">{item.category}</span><b className="cw-price">{item.price ? money(item.price) : "ثبت نشده"}</b><span className="cw-muted">{item.cost ? money(item.cost) : "—"}</span><span className={`cw-status ${item.active ? "active" : "inactive"}`}>{item.active ? "فعال" : "پیش‌نویس"}</span><div className="cw-row-actions"><button title="افزودنی‌ها" onClick={() => setAddonTarget(item)}><Plus size={16}/></button><button title="ویرایش" onClick={() => { setEditorItem(item); setShowEditor(true); }}><Pencil size={16}/></button><button title="حذف" onClick={() => { setItems((current) => current.filter((entry) => entry.id !== item.id)); setToast("محصول حذف شد."); }}><Trash2 size={16}/></button></div></div>)}
@@ -385,7 +387,7 @@ function SettingsPage({cafeName,setCafeName,brandColor,setBrandColor,showColorPi
   </section>;
 }
 
-function PosPage({items,invoiceItems,setInvoiceItems,payment,setPayment,activeInvoice,setActiveInvoice,toast}:{items:CafeMenuItem[];invoiceItems:{id:string;name:string;price:number;qty:number}[];setInvoiceItems:React.Dispatch<React.SetStateAction<{id:string;name:string;price:number;qty:number}[]>>;payment:string;setPayment:(v:string)=>void;activeInvoice:number;setActiveInvoice:(v:number)=>void;toast:(v:string)=>void}) {
+function PosPage({items,invoiceItems,setInvoiceItems,payment,setPayment,activeInvoice,setActiveInvoice,toast}:{items:CafeMenuItem[];invoiceItems:{id:string;name:string;price:number;qty:number}[];setInvoiceItems:Dispatch<SetStateAction<{id:string;name:string;price:number;qty:number}[]>>;payment:string;setPayment:(v:string)=>void;activeInvoice:number;setActiveInvoice:(v:number)=>void;toast:(v:string)=>void}) {
   const [query,setQuery]=useState("");
   const [category,setCategory]=useState("all");
   const total=invoiceItems.reduce((sum,item)=>sum+item.price*item.qty,0);
