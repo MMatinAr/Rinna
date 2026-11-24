@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import {
   Activity, ArrowDownLeft, ArrowUpLeft, BarChart3, Bell, BookOpen, Check, CheckCheck,
   ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, CircleDollarSign,
@@ -206,7 +206,7 @@ function CafeWorkspace() {
   const toggleSelected = (id: string) => setSelected((current) => current.includes(id) ? current.filter((value) => value !== id) : [...current, id]);
   const toggleAll = () => setSelected(selected.length === filteredItems.length ? [] : filteredItems.map((item) => item.id));
 
-  return <div className={`cafe-workspace ${dark ? "cw-dark" : ""}`} style={{ "--cafe-accent": brandColor } as React.CSSProperties}>
+  return <div className={`cafe-workspace ${dark ? "cw-dark" : ""}`} style={{ "--cafe-accent": brandColor } as CSSProperties}>
     <aside className={`cw-sidebar ${collapsed ? "collapsed" : ""} ${mobileNav ? "mobile-open" : ""}`}>
       <div className="cw-brand-row">
         <div className="cw-brand-mark">r</div>
@@ -299,8 +299,8 @@ function HomePage({ cafeName, onNavigate, toast }: { cafeName: string; onNavigat
   </section>;
 }
 
-function MetricCard({label,value,suffix,hint,icon,tone,onClick,live,trend}: {label:string;value:string;suffix?:string;hint:string;icon:React.ReactNode;tone:string;onClick?:()=>void;live?:boolean;trend?:"up"|"down"}) {
-  return <button className={`cw-metric-card tone-${tone}`} onClick={onClick}><div className="cw-metric-top"><span>{label}</span><i>{icon}</i></div><div className="cw-metric-value">{value}<small>{suffix}</small></div><div className="cw-metric-hint">{live && <i/>}{trend === "up" && <TrendingUp size={13}/ >}{hint}</div></button>;
+function MetricCard({label,value,suffix,hint,icon,tone,onClick,live,trend}: {label:string;value:string;suffix?:string;hint:string;icon:ReactNode;tone:string;onClick?:()=>void;live?:boolean;trend?:"up"|"down"}) {
+  return <button className={`cw-metric-card tone-${tone}`} onClick={onClick}><div className="cw-metric-top"><span>{label}</span><i>{icon}</i></div><div className="cw-metric-value">{value}<small>{suffix}</small></div><div className="cw-metric-hint">{live && <i/>}{trend === "up" && <TrendingUp size={13}/>}{hint}</div></button>;
 }
 function MiniStat({icon,label,value,hint}: {icon:React.ReactNode;label:string;value:string;hint:string}) { return <div className="cw-mini-stat"><i>{icon}</i><div><small>{label}</small><b>{value}</b><span>{hint}</span></div></div>; }
 
