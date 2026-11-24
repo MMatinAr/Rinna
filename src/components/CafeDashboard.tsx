@@ -1,3 +1,4 @@
+import "./CafeDashboard.css";
 import { useEffect, useMemo, useState } from "react";
 import {
   Activity, ArrowDownLeft, ArrowUpLeft, BarChart3, Bell, BookOpen, Boxes, Check,
