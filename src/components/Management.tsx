@@ -21,7 +21,7 @@ export default function Management() {
           <div className="dashboard-window">
             <div className="dashboard-sidebar"><span className="dash-logo" /><i /><i /><i /><i /><i /></div>
             <div className="dashboard-content">
-              <div className="dash-top"><b>نمای کلی کسب‌وکار</b><span>امروز</span></div>
+              <div className="dash-top"><b>پیش‌نمایش پنل کسب‌وکار</b><span>DEMO</span></div>
               <div className="dash-stats"><div><small>خرید امروز</small><b>۱۲٫۴ م</b></div><div><small>سفارش‌ها</small><b>۸۶</b></div><div><small>کالاها</small><b>۲۴</b></div></div>
               <div className="chart-box"><div className="chart-label">روند خرید و هزینه</div><svg viewBox="0 0 500 130" role="img" aria-label="نمودار نمونه خرید و هزینه"><path d="M0 100 C60 90 75 110 130 75 S210 92 270 48 S360 65 420 24 S470 32 500 8" fill="none" stroke="#527565" strokeWidth="4" strokeLinecap="round" /><path d="M0 115 C60 105 75 120 130 95 S210 110 270 78 S360 90 420 60 S470 70 500 48" fill="none" stroke="#9ca88c" strokeWidth="3" strokeLinecap="round" /></svg></div>
             </div>
