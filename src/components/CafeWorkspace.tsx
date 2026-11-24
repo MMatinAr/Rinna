@@ -146,8 +146,10 @@ function CafeWorkspace() {
   };
   const saveEditor = () => {
     if (!editorItem?.name.trim()) { setToast("نام محصول را وارد کنید."); return; }
-    if (items.some((item) => item.id === editorItem.id)) updateItem(editorItem);
-    else setItems((current) => [editorItem, ...current]);
+    const calculatedCost = editorItem.ingredients.reduce((sum, ingredient) => sum + ingredient.amount * ingredient.unitCost, 0);
+    const preparedItem = { ...editorItem, cost: calculatedCost };
+    if (items.some((item) => item.id === preparedItem.id)) updateItem(preparedItem);
+    else setItems((current) => [preparedItem, ...current]);
     setShowEditor(false); setEditorItem(null); setToast("محصول ذخیره شد.");
   };
   const bulkApplyAddon = () => {
