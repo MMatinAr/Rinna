@@ -23,7 +23,7 @@ export default function Suppliers() {
             <span><Factory size={16} /> تولیدکننده با شبکه پخش</span>
             <span><Truck size={16} /> پخش‌کننده و تأمین‌کننده محلی</span>
           </div>
-          <a href="/contact?role=supplier" className="btn">درخواست همکاری تأمین‌کنندگان <ArrowLeft size={16} /></a>
+          <a href="/?role=supplier#contact" className="btn">درخواست همکاری تأمین‌کنندگان <ArrowLeft size={16} /></a>
         </div>
       </div>
     </section>
