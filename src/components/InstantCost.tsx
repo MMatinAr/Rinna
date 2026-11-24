@@ -7,12 +7,12 @@ export default function InstantCost() {
         <div className="instant-copy">
           <span className="eyebrow">مزیت کلیدی پلتفرم</span>
           <h2>خرید جدید ثبت شد؛<br /><em>هزینه‌ها به‌روز شدند.</em></h2>
-          <p>با ثبت خرید مواد اولیه، هزینه رسپی‌ها و محصولات وابسته دوباره محاسبه می‌شود؛ تا مدیر هر مجموعه تصویر دقیق‌تری از هزینه واقعی و حاشیه سود داشته باشد.</p>
+          <p>در چشم‌انداز RINNA، ثبت خرید مواد اولیه می‌تواند مبنای محاسبه دوباره بهای تمام‌شده رسپی‌ها باشد؛ مدیر مجموعه تغییرات را بررسی می‌کند و درباره قیمت فروش تصمیم می‌گیرد.</p>
           <a className="text-link" href="#management">بیشتر درباره ابزارهای مدیریت <ArrowLeft size={16} /></a>
           <div className="instant-points">
-            <span><Check size={15} /> ثبت خرید با قیمت واقعی</span>
-            <span><Check size={15} /> محاسبه مجدد هزینه محصولات وابسته</span>
-            <span><Check size={15} /> پیشنهاد تغییر با تأیید مدیر</span>
+            <span><Check size={15} /> ثبت قیمت خرید مواد اولیه</span>
+            <span><Check size={15} /> مشاهده اثر تغییر قیمت بر بهای تمام‌شده</span>
+            <span><Check size={15} /> تصمیم‌گیری نهایی با مدیر مجموعه</span>
           </div>
         </div>
         <div className="cost-demo">
