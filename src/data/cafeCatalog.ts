@@ -20,49 +20,14 @@ const categorySeeds = [
 ];
 
 const recipeBases: Record<string, CafeIngredient[]> = {
-  "بار گرم": [{name:"شیر",amount:180,unit:"ml",unitCost:90},{name:"پودر نوشیدنی",amount:25,unit:"g",unitCost:420}],
-  "بار سرد": [{name:"شیر",amount:160,unit:"ml",unitCost:90},{name:"قهوه",amount:18,unit:"g",unitCost:900},{name:"یخ",amount:100,unit:"g",unitCost:5}],
+  "بار گرم": [{name:"شیر",amount:180,unit:"ml",unitCost:90},{name:"پودر نوشیدنی یا چای",amount:25,unit:"g",unitCost:420},{name:"شکر",amount:8,unit:"g",unitCost:90}],
+  "بار سرد": [{name:"دانه قهوه",amount:18,unit:"g",unitCost:1100},{name:"شیر",amount:150,unit:"ml",unitCost:90},{name:"یخ",amount:100,unit:"g",unitCost:5},{name:"سیروپ",amount:15,unit:"ml",unitCost:450}],
   "اسپرسو بار": [{name:"دانه قهوه",amount:18,unit:"g",unitCost:1100},{name:"شیر",amount:120,unit:"ml",unitCost:90}],
-  "چای و دمنوش": [{name:"چای یا دمنوش",amount:5,unit:"g",unitCost:500},{name:"آب",amount:250,unit:"ml",unitCost:1}],
-  "اسموتی و شیک": [{name:"شیر",amount:180,unit:"ml",unitCost:90},{name:"میوه",amount:100,unit:"g",unitCost:350},{name:"بستنی",amount:80,unit:"g",unitCost:300}],
-  "آبمیوه طبیعی": [{name:"میوه تازه",amount:300,unit:"g",unitCost:260}],
-  "کیک و دسر": [{name:"مواد پایه دسر",amount:140,unit:"g",unitCost:650}],
-  "کوکی و شیرینی": [{name:"مواد پایه شیرینی",amount:90,unit:"g",unitCost:520}],
-  "صبحانه و برانچ": [{name:"تخم‌مرغ",amount:2,unit:"عدد",unitCost:1800},{name:"نان",amount:80,unit:"g",unitCost:120}],
-  "غذا و میان‌وعده": [{name:"مواد اولیه اصلی",amount:180,unit:"g",unitCost:520},{name:"نان یا دورچین",amount:1,unit:"عدد",unitCost:900}]
+  "چای و دمنوش": [{name:"چای یا گیاه خشک",amount:5,unit:"g",unitCost:500},{name:"آب",amount:250,unit:"ml",unitCost:1},{name:"قند یا عسل",amount:10,unit:"g",unitCost:250}],
+  "اسموتی و شیک": [{name:"میوه",amount:150,unit:"g",unitCost:350},{name:"شیر",amount:180,unit:"ml",unitCost:90},{name:"بستنی",amount:80,unit:"g",unitCost:300},{name:"یخ",amount:80,unit:"g",unitCost:5}],
+  "آبمیوه طبیعی": [{name:"میوه تازه",amount:350,unit:"g",unitCost:260},{name:"یخ",amount:50,unit:"g",unitCost:5}],
+  "کیک و دسر": [{name:"برش کیک یا دسر",amount:1,unit:"عدد",unitCost:28000},{name:"خامه یا سس تزئین",amount:25,unit:"g",unitCost:500}],
+  "کوکی و شیرینی": [{name:"آرد",amount:60,unit:"g",unitCost:80},{name:"کره",amount:25,unit:"g",unitCost:650},{name:"شکر",amount:18,unit:"g",unitCost:90},{name:"شکلات",amount:20,unit:"g",unitCost:600}],
+  "صبحانه و برانچ": [{name:"تخم‌مرغ",amount:2,unit:"عدد",unitCost:1800},{name:"نان",amount:80,unit:"g",unitCost:120},{name:"پنیر یا کره",amount:30,unit:"g",unitCost:450},{name:"سبزیجات",amount:40,unit:"g",unitCost:180}],
+  "غذا و میان‌وعده": [{name:"پروتئین یا ماده اصلی",amount:120,unit:"g",unitCost:520},{name:"نان یا پاستا",amount:1,unit:"عدد",unitCost:900},{name:"سس",amount:30,unit:"g",unitCost:300},{name:"سبزیجات",amount:50,unit:"g",unitCost:180}]
 };
-
-const addonSeeds: CafeAddon[] = [
-  { id:"addon-cookie", name:"کوکی", price:35000, ingredients:[{name:"کوکی",amount:1,unit:"عدد",unitCost:12000}] },
-  { id:"addon-truffle", name:"ترافل", price:25000, ingredients:[{name:"ترافل",amount:15,unit:"g",unitCost:700}] },
-  { id:"addon-chocolate", name:"شکلات", price:20000, ingredients:[{name:"شکلات",amount:20,unit:"g",unitCost:600}] },
-  { id:"addon-syrup", name:"سیروپ", price:18000, ingredients:[{name:"سیروپ",amount:20,unit:"ml",unitCost:450}] },
-  { id:"addon-extra-shot", name:"شات اضافه", price:30000, ingredients:[{name:"دانه قهوه",amount:9,unit:"g",unitCost:1100}] },
-  { id:"addon-oat", name:"شیر جو دوسر", price:25000, ingredients:[{name:"شیر جو دوسر",amount:150,unit:"ml",unitCost:220}] }
-];
-
-export const cafeCategories = categorySeeds.map((category, index) => ({
-  id: `cat-${index + 1}`, name: category.name, count: category.items.length, isDefault: true
-}));
-
-export const cafeAddonLibrary = addonSeeds;
-
-export const cafeStarterCatalog: CafeMenuItem[] = categorySeeds.flatMap((category, categoryIndex) =>
-  category.items.map((name, itemIndex) => {
-    const ingredients = recipeBases[category.name].map((ingredient) => ({ ...ingredient }));
-    const cost = ingredients.reduce((sum, ingredient) => sum + ingredient.amount * ingredient.unitCost, 0);
-    const price = Math.round((cost * 2.65 + 18000) / 5000) * 5000;
-    return {
-      id: `starter-${categoryIndex + 1}-${itemIndex + 1}`,
-      name,
-      category: category.name,
-      price,
-      cost,
-      description: `رسپی مرجع پیشنهادی برای ${name}؛ مقادیر و مواد اولیه را مطابق کافه خودتان تنظیم کنید.`,
-      active: true,
-      ingredients,
-      addons: [],
-      source: "template" as const
-    };
-  })
-);
