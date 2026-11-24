@@ -8,6 +8,7 @@ const links = [
   ["بازار تأمین", "marketplace"],
   ["راهکارهای کسب‌وکارها", "management"],
   ["برای تأمین‌کنندگان", "suppliers"],
+  ["نحوه کار", "how-it-works"],
   ["سؤالات متداول", "faq"],
 ] as const;
 
