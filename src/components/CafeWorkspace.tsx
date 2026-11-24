@@ -206,7 +206,7 @@ function CafeWorkspace() {
   const toggleSelected = (id: string) => setSelected((current) => current.includes(id) ? current.filter((value) => value !== id) : [...current, id]);
   const toggleAll = () => setSelected(selected.length === filteredItems.length ? [] : filteredItems.map((item) => item.id));
 
-  return <div className={`cafe-workspace ${dark ? "cw-dark" : ""}`} style={{ "--cafe-accent": brandColor } as CSSProperties}>
+  return <div className={`cafe-workspace ${dark ? "cw-dark" : ""}`} style={{ "--cafe-accent": brandColor } as CSSProperties & { "--cafe-accent": string }}>
     <aside className={`cw-sidebar ${collapsed ? "collapsed" : ""} ${mobileNav ? "mobile-open" : ""}`}>
       <div className="cw-brand-row">
         <div className="cw-brand-mark">r</div>
