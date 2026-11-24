@@ -5,7 +5,7 @@ const CITIES=["تهران","کرج","مشهد","اصفهان","شیراز","تب
 const KEY="rinna-selected-city";
 
 export default function LocationExperience(){
-  const [city,setCity]=useState(()=>localStorage.getItem(KEY)||");
+  const [city,setCity]=useState(()=>localStorage.getItem(KEY)||"");
   const [showPrompt,setShowPrompt]=useState(false);
   const [busy,setBusy]=useState(false);
   const [message,setMessage]=useState("");
