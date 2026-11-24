@@ -217,7 +217,7 @@
 .cw-toggle-row input,.cw-permission-row input,.cw-addon-option input{accent-color:var(--cw-accent);width:16px;height:16px}
 .cw-recipe-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
 .cw-recipe-heading h3{font-size:13px;margin:0}.cw-recipe-heading p{font-size:9px;color:var(--cw-muted);margin:2px 0}
-.cw-ingredient-editor{display:grid;grid-template-columns:1fr 75px 28px;gap:6px;margin-bottom:7px}
+.cw-ingredient-editor{display:grid;grid-template-columns:minmax(90px,1fr) 58px 82px 92px 28px;gap:5px;margin-bottom:7px;align-items:center}
 .cw-ingredient-editor button{border:0;border-radius:8px;background:var(--cw-surface-2);color:var(--cw-muted)}
 .cw-cost-preview{display:flex;justify-content:space-between;padding:12px;background:var(--cw-surface-2);border-radius:9px;margin-top:12px;font-size:10px}
 .cw-modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:22px;padding-top:15px;border-top:1px solid var(--cw-border)}
@@ -403,7 +403,7 @@
  .cw-select-menu{max-height:220px}
  .cw-modal-backdrop{padding:8px;align-items:end}
  .cw-modal{max-height:92dvh;border-radius:18px 18px 12px 12px;padding:17px}
- .cw-editor-grid{grid-template-columns:1fr;gap:18px}
+ .cw-editor-grid{grid-template-columns:1fr;gap:18px}\n .cw-ingredient-editor{grid-template-columns:minmax(75px,1fr) 48px 68px 78px 25px;gap:4px}\n .cw-ingredient-editor .cw-input{padding:6px;font-size:9px;min-width:0}\n .cw-ingredient-editor .cw-select-trigger{padding:0 5px;font-size:8px;height:36px}
  .cw-modal-head h2{font-size:16px}
  .cw-modal-head p{font-size:9px}
  .cw-modal-actions{position:sticky;bottom:-17px;background:var(--cw-surface);padding:12px 0 2px}
