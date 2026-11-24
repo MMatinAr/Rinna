@@ -463,3 +463,15 @@
 .cw-settings-card .cw-field-label{margin-top:16px}
 .cw-pos-cart .cw-setting-row .cw-select{width:145px}
 @media(max-width:600px){.cw-report-row{grid-template-columns:82px minmax(45px,1fr) 95px;gap:7px;padding:12px 0}.cw-report-row>b{font-size:8px}}
+
+.cw-table-head.inventory,.cw-menu-row.inventory{grid-template-columns:minmax(160px,2fr) repeat(4,minmax(95px,1fr))}
+@media(max-width:1180px){.cw-table-head.inventory,.cw-menu-row.inventory{grid-template-columns:minmax(140px,1.8fr) repeat(4,minmax(80px,1fr))}}
+@media(max-width:600px){
+ .cw-table-head.inventory{display:none}
+ .cw-menu-row.inventory{grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:12px}
+ .cw-menu-row.inventory>.cw-product-cell{grid-column:1;grid-row:1}
+ .cw-menu-row.inventory>b{grid-column:2;grid-row:1;text-align:left;font-size:9px}
+ .cw-menu-row.inventory>.cw-muted{display:none}
+ .cw-menu-row.inventory>.cw-status{grid-column:1;grid-row:2}
+ .cw-menu-row.inventory>.cw-row-actions{grid-column:2;grid-row:2;border:0;padding:0}
+}
