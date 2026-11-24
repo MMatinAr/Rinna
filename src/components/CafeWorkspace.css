@@ -444,3 +444,9 @@
  .cw-metric-value{font-size:16px}
  .cw-page-heading h1{font-size:19px}
 }
+
+.cw-digital-preview{display:flex;flex-direction:column;gap:5px;margin-top:16px;padding:14px;border:1px dashed var(--cw-border);border-radius:10px;background:var(--cw-bg)}
+.cw-digital-preview b{font-size:10px}
+.cw-digital-preview span{font-size:15px;font-weight:800}
+.cw-digital-preview small{font-size:8px;color:var(--cw-muted)}
+.cw-setting-row input[type="checkbox"]{accent-color:var(--cw-accent);width:16px;height:16px}
